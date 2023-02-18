@@ -20,12 +20,20 @@ export default class Slider extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get label() {
-		return this.shadowRoot.querySelector('label');
+	static get observedAttributes() {
+		return ['value'];
 	}
 
 	get input() {
 		return this.shadowRoot.querySelector('input');
+	}
+
+	get label() {
+		return this.shadowRoot.querySelector('label');
+	}
+
+	get output() {
+		return this.shadowRoot.querySelector('output');
 	}
 
 	get value() {
@@ -33,25 +41,37 @@ export default class Slider extends HTMLElement {
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
-		console.log('attribute changed: %s\nold: %s\nnew: %s', attr, oldVal, newVal);
+		if (attr === 'value') {
+			this.dispatchEvent(new Event('change', { 'bubbles': true }));
+			this.updateValue(newVal);
+		}
 	}
 
 	connectedCallback() {
 		const label = this.getAttribute('label') || '';
-		const min = this.getAttribute('min') || 0;
 		const max = this.getAttribute('max') || 10;
+		const min = this.getAttribute('min') || 0;
 		const step = this.getAttribute('step') || 1;
-		const value = this.getAttribute('value') || '';
-		// input: name, min, max, step, value
-		// output: for; output.innerText: value
-		console.log({ label, min, max, step, value });
+		const value = this.getAttribute('value') || 0;
 		this.input.addEventListener('change', this.handleChange);
+		this.input.setAttribute('max', max);
+		this.input.setAttribute('min', min);
+		this.input.setAttribute('step', step);
 		this.label.setAttribute('for', label);
 		this.label.innerText = label;
+		this.output.setAttribute('for', label);
+		this.updateValue(value);
 	}
 	
 	handleChange = (e) => {
-		this.dispatchEvent(new Event('change'));
+		this.dispatchEvent(new Event('change', { 'bubbles': true }));
+		this.updateValue(e.target.value);
+	}
+
+	updateValue = (newVal) => {
+		this.input.setAttribute('value', newVal);
+		this.input.value = parseInt(newVal);
+		this.output.innerText = newVal;
 	}
 }
 
