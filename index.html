@@ -92,11 +92,47 @@
 	</head>
 	<body>
 		<ac-slider label='AC Slider Component' min=-100 max=100 step=0.1></ac-slider>
+		<ac-slider label='AC Slider Component' min=0 max=10 value=10 step=1></ac-slider>
+		<br/>
+		<ac-checkbox label='AC Checkbox Component'></ac-checkbox>
+		<ac-checkbox label='AC Checkbox Component' checked=true></ac-checkbox>
+		<br/>
+		<ac-switch label='AC Switch Component'></ac-switch>
+		<ac-switch label='AC Switch Component' checked=true></ac-switch>
+		<br/>
+		<button onclick='randomizeValues()'>Randomize Values</button>
+		<br/>
 		<button onclick='resetValues()'>Reset Values</button>
 		<script>
+			const getRand = (min, max) => {
+				min = Math.ceil(min);
+				max = Math.floor(max);
+				return Math.floor(Math.random() * (max - min) + min);
+			};
+
+			const randomizeValues = () => {
+				[...document.querySelectorAll('ac-slider')].map((el) => {
+					const min = el.getAttribute('min') || 0;
+					const max = el.getAttribute('max') || 10;
+					el.setAttribute('value', getRand(min, max));
+				});
+				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch')].map((el) => {
+					if (el.getAttribute('checked')) {
+						el.removeAttribute('checked');
+					} else {
+						el.setAttribute('checked', true);
+					}
+				});
+			};
+
 			const resetValues = () => {
-				document.querySelector('ac-slider').setAttribute('value', 0);
-			}
+				[...document.querySelectorAll('ac-slider')].map((el) => {
+					el.setAttribute('value', 0);
+				});
+				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch')].map((el) => {
+					el.setAttribute('checked', false);
+				});
+			};
 		</script>
 	</body>
 </html>
