@@ -96,23 +96,21 @@ export default class Switch extends HTMLElement {
 	connectedCallback() {
 		const label = this.getAttribute('label') || '';
 		const checked = this.getAttribute('checked') || false;
-		this.wrapper.addEventListener('change', this.handleChange);
 		this.wrapper.addEventListener('click', this.handleChange);
 		this.label.setAttribute('for', label);
 		this.label.innerText = label;
 		this.updateChecked(checked);
 	}
-	
-	handleChange = (e) => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true }));
-		this.updateChecked(e.target.checked);
+
+	handleChange = () => {
+		this.updateChecked(!this.input.checked);
 	}
 
 	updateChecked = (newVal) => {
-		console.log('checked:', newVal);
-		console.log('input:', this.input.checked);
-		if (!newVal) {
+		if (typeof(newVal) == 'undefined' || newVal == null || newVal === 'false') {
 			newVal = false;
+		} else if (newVal === 'true') {
+			newVal = true;
 		}
 		this.input.setAttribute('checked', newVal);
 		this.input.checked = newVal;
