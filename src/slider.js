@@ -10,6 +10,9 @@ export default class Slider extends HTMLElement {
 					gap: 10px;
 					width: 100%;
 				}
+				input {
+					cursor: pointer;
+				}
 			</style>
 			<div class='ac-slider'>
 				<label></label>
