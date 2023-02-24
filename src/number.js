@@ -1,4 +1,4 @@
-export default class Checkbox extends HTMLElement {
+export default class Number extends HTMLElement {
 	static observedAttributes = ['checked'];
 
 	constructor() {
@@ -6,7 +6,7 @@ export default class Checkbox extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-checkbox {
+				div.ac-number {
 					align-items: center;
 					display: flex;
 					gap: 10px;
@@ -16,15 +16,15 @@ export default class Checkbox extends HTMLElement {
 					cursor: pointer;
 				}
 			</style>
-			<div class='ac-checkbox'>
-				<input type='checkbox'></input>
+			<div class='ac-number'>
+				<input type='number'></input>
 				<label></label>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.hasAttribute('checked'); }
+	get checked() { return this.shadowRoot.querySelector('input').checked; }
 	get container() { return this.shadowRoot.querySelector('div.ac-checkbox'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
@@ -53,4 +53,4 @@ export default class Checkbox extends HTMLElement {
 	}
 }
 
-customElements.define('ac-checkbox', Checkbox);
+customElements.define('ac-number', Number);

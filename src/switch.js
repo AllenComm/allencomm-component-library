@@ -1,4 +1,6 @@
 export default class Switch extends HTMLElement {
+	static observedAttributes = ['checked'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -62,34 +64,21 @@ export default class Switch extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	static get observedAttributes() {
-		return ['checked'];
-	}
+	get checked() { return this.input.hasAttribute('checked'); }
+	get container() { return this.shadowRoot.querySelector('div.ac-switch'); }
+	get input() { return this.shadowRoot.querySelector('input'); }
+	get label() { return this.shadowRoot.querySelector('label'); }
+	get wrapper() { return this.shadowRoot.querySelector('div.ac-switch-wrapper'); }
 
-	get checked() {
-		return this.shadowRoot.querySelector('input').checked;
-	}
-
-	get container() {
-		return this.shadowRoot.querySelector('div.ac-switch');
-	}
-
-	get input() {
-		return this.shadowRoot.querySelector('input');
-	}
-
-	get label() {
-		return this.shadowRoot.querySelector('label');
-	}
-
-	get wrapper() {
-		return this.shadowRoot.querySelector('div.ac-switch-wrapper');
+	set checked(val) {
+		this.input.toggleAttribute('checked', Boolean(val));
+		this.wrapper.dataset.checked = Boolean(val);
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			this.dispatchEvent(new Event('change', { 'bubbles': true }));
-			this.updateChecked(newVal);
+			this.checked = newVal;
 		}
 	}
 
@@ -99,22 +88,12 @@ export default class Switch extends HTMLElement {
 		this.wrapper.addEventListener('click', this.handleChange);
 		this.label.setAttribute('for', label);
 		this.label.innerText = label;
-		this.updateChecked(checked);
+		this.checked = checked;
 	}
 
 	handleChange = () => {
-		this.updateChecked(!this.input.checked);
-	}
-
-	updateChecked = (newVal) => {
-		if (typeof(newVal) == 'undefined' || newVal == null || newVal === 'false') {
-			newVal = false;
-		} else if (newVal === 'true') {
-			newVal = true;
-		}
-		this.input.setAttribute('checked', newVal);
-		this.input.checked = newVal;
-		this.wrapper.dataset.checked = newVal;
+		this.dispatchEvent(new Event('change', { 'bubbles': true }));
+		this.checked = !this.checked;
 	}
 }
 

@@ -1,4 +1,6 @@
 export default class Slider extends HTMLElement {
+	static observedAttributes = ['value'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -23,30 +25,21 @@ export default class Slider extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	static get observedAttributes() {
-		return ['value'];
-	}
+	get input() { return this.shadowRoot.querySelector('input'); }
+	get label() { return this.shadowRoot.querySelector('label'); }
+	get output() { return this.shadowRoot.querySelector('output'); }
+	get value() { return parseInt(this.shadowRoot.querySelector('input').value); }
 
-	get input() {
-		return this.shadowRoot.querySelector('input');
-	}
-
-	get label() {
-		return this.shadowRoot.querySelector('label');
-	}
-
-	get output() {
-		return this.shadowRoot.querySelector('output');
-	}
-
-	get value() {
-		return parseInt(this.shadowRoot.querySelector('input').value);
+	set value(val) {
+		this.input.setAttribute('value', val);
+		this.input.value = parseInt(val);
+		this.output.innerText = val;
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.dispatchEvent(new Event('change', { 'bubbles': true }));
-			this.updateValue(newVal);
+			this.value = newVal;
 		}
 	}
 
@@ -63,18 +56,12 @@ export default class Slider extends HTMLElement {
 		this.label.setAttribute('for', label);
 		this.label.innerText = label;
 		this.output.setAttribute('for', label);
-		this.updateValue(value);
+		this.value = value;
 	}
 	
 	handleChange = (e) => {
 		this.dispatchEvent(new Event('change', { 'bubbles': true }));
-		this.updateValue(e.target.value);
-	}
-
-	updateValue = (newVal) => {
-		this.input.setAttribute('value', newVal);
-		this.input.value = parseInt(newVal);
-		this.output.innerText = newVal;
+		this.value = e.target.value;
 	}
 }
 
