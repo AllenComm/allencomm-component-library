@@ -1,5 +1,4 @@
 export default class Radio extends HTMLElement {
-	static formAssociated = true;
 	static observedAttributes = ['checked'];
 
 	constructor() {
@@ -22,23 +21,33 @@ export default class Radio extends HTMLElement {
 				<label></label>
 			</div>
 		`;
-		this._internals = this.attachInternals();
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get checked() { return this.input.hasAttribute('checked'); }
 	get container() { return this.shadowRoot.querySelector('div.ac-checkbox'); }
-	get form() { return this._internals.form; }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
 	get name() { return this.input.getAttribute('name'); }
 
-	set checked(val) { this.input.toggleAttribute('checked', Boolean(val)); }
+	set checked(val) {
+		console.log('\n---checked---\n\n');
+		console.log(this.name, this.label.innerText);
+		this.input.toggleAttribute('checked', Boolean(val));
+		const radios = window.document.querySelectorAll('ac-radio');
+		[...radios].map((a) => {
+			const name = a.attributes?.name?.nodeValue;
+			const label = a.attributes?.label?.nodeValue;
+			if (name && this.name == name && this.label.innerText !== label) {
+				console.log('name is a part of a group', name, label);
+				if (Boolean(val)) {
+					a.toggleAttribute('checked');
+				}
+			}
+		});
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
-		console.log(attr, newVal);
-		console.log(this._internals);
-		this._internals.setFormValue(this.checked ? 'on' : null);
 		if (attr === 'checked') {
 			this.dispatchEvent(new Event('change', { 'bubbles': true }));
 			this.checked = newVal;
@@ -59,7 +68,7 @@ export default class Radio extends HTMLElement {
 	}
 	
 	handleChange = () => {
-		this.dispatchEvent(new Event('click', { 'bubbles': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true }));
 		this.checked = !this.checked;
 	}
 }
