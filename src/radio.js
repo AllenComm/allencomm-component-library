@@ -25,27 +25,20 @@ export default class Radio extends HTMLElement {
 	}
 
 	get checked() { return this.input.hasAttribute('checked'); }
-	get container() { return this.shadowRoot.querySelector('div.ac-checkbox'); }
+	get container() { return this.shadowRoot.querySelector('div.ac-radio'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
+	get labelValue() { return this.shadowRoot.querySelector('label').innerText; }
 	get name() { return this.input.getAttribute('name'); }
 
 	set checked(val) {
-		console.log('\n---checked---\n\n');
-		console.log(this.name, this.label.innerText);
-		this.input.toggleAttribute('checked', Boolean(val));
-		const radios = window.document.querySelectorAll('ac-radio');
-		[...radios].map((a) => {
-			const name = a.attributes?.name?.nodeValue;
-			const label = a.attributes?.label?.nodeValue;
-			if (name && this.name == name && this.label.innerText !== label) {
-				console.log('name is a part of a group', name, label);
-				if (Boolean(val)) {
-					a.toggleAttribute('checked');
-				}
-			}
-		});
+		if (Boolean(val) && !this.checked) {
+			this.input.checked = true;
+		} else {
+			this.input.checked = false;
+		}
 	}
+	set labelValue(val) { this.label.innerText = val }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
@@ -63,13 +56,20 @@ export default class Radio extends HTMLElement {
 		this.input.setAttribute('id', label);
 		this.input.setAttribute('value', label);
 		this.label.setAttribute('for', label);
-		this.label.innerText = label;
+		this.labelValue = label;
 		this.checked = checked;
 	}
 	
 	handleChange = () => {
 		this.dispatchEvent(new Event('change', { 'bubbles': true }));
 		this.checked = !this.checked;
+		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
+			const name = a.attributes?.name?.nodeValue;
+			const label = a.attributes?.label?.nodeValue;
+			if (name && this.name == name && this.labelValue !== label) {
+				a.checked = false;
+			}
+		});
 	}
 }
 
