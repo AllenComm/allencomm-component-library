@@ -28,11 +28,11 @@ export default class Slider extends HTMLElement {
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
 	get output() { return this.shadowRoot.querySelector('output'); }
-	get value() { return parseInt(this.shadowRoot.querySelector('input').value); }
+	get value() { return parseFloat(this.input.value); }
 
 	set value(val) {
 		this.input.setAttribute('value', val);
-		this.input.value = parseInt(val);
+		this.input.value = parseFloat(val);
 		this.output.innerText = val;
 	}
 

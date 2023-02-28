@@ -25,7 +25,6 @@ export default class Checkbox extends HTMLElement {
 	}
 
 	get checked() { return this.input.hasAttribute('checked'); }
-	get container() { return this.shadowRoot.querySelector('div.ac-checkbox'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
 
