@@ -27,7 +27,6 @@ export default class Radio extends HTMLElement {
 	get checked() { return this.input.hasAttribute('checked'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
-	get labelValue() { return this.shadowRoot.querySelector('label').innerText; }
 	get name() { return this.input.getAttribute('name'); }
 
 	set checked(val) {
@@ -37,7 +36,6 @@ export default class Radio extends HTMLElement {
 			this.input.checked = false;
 		}
 	}
-	set labelValue(val) { this.label.innerText = val }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
@@ -55,7 +53,7 @@ export default class Radio extends HTMLElement {
 		this.input.setAttribute('id', label);
 		this.input.setAttribute('value', label);
 		this.label.setAttribute('for', label);
-		this.labelValue = label;
+		this.label.innerText = label;
 		this.checked = checked;
 	}
 	
@@ -65,7 +63,7 @@ export default class Radio extends HTMLElement {
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
 			const label = a.attributes?.label?.nodeValue;
-			if (name && this.name == name && this.labelValue !== label) {
+			if (name && this.name == name && this.label.innerText !== label) {
 				a.checked = false;
 			}
 		});
