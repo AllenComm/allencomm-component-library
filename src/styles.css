@@ -74,5 +74,19 @@ select {
 }
 
 body {
-	padding: 20px;
+	padding: 10px;
+}
+
+.group {
+	border: 1px solid grey;
+	margin: 5px 0;
+	padding: 0 10px 10px;
+}
+
+.group>h2 {
+	text-align: center;
+}
+
+.group>h3, .group>h4, .group>h5, .group>h6 {
+	margin: 10px 0 0;
 }

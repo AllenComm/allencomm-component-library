@@ -13,37 +13,58 @@
 	</head>
 	<body>
 		<h1>AllenComm Component Library</h1>
-		<h2>Card</h2>
-		<ac-card style="width: 300px"><h5>Testing</h5><p>Lorem ipsum...</p></ac-card>
-		<br>
-		<h2>Checkbox</h2>
-		<ac-checkbox label='AC Checkbox Component 1'></ac-checkbox>
-		<ac-checkbox label='AC Checkbox Component 2' checked=true></ac-checkbox>
-		<br>
-		<h2>Listbox</h2>
-		<ac-listbox label='AC Listbox Component 1'></ac-listbox>
-		<br>
-		<h2>Number</h2>
-		<ac-number label='AC Number 1' min=1 max=10 step=0.5 value=2.5></ac-number>
-		<ac-number label='AC Number 2' min=-5 max=5></ac-number>
-		<br>
-		<h2>Radio</h2>
-		<ac-radio label='AC Radio Component 1'></ac-radio>
-		<ac-radio label='AC Radio Component 2' checked=true></ac-radio>
-		<br>
-		<h3>Radio Group</h3>
-		<ac-radio label='Item 1' name='radio' checked=true></ac-radio>
-		<ac-radio label='Item 2' name='radio'></ac-radio>
-		<ac-radio label='Item 3' name='radio'></ac-radio>
-		<ac-radio label='Item 4' name='radio'></ac-radio>
-		<br>
-		<h2>Slider</h2>
-		<ac-slider label='AC Slider Component 1' min=-100 max=100 step=0.1></ac-slider>
-		<ac-slider label='AC Slider Component 2' min=0 max=10 step=1 value=10></ac-slider>
-		<br>
-		<h2>Switch</h2>
-		<ac-switch label='AC Switch Component 1'></ac-switch>
-		<ac-switch label='AC Switch Component 2' checked=true></ac-switch>
+		<div class='group'>
+			<h2>Tabs</h2>
+			<h3>Without Panels</h3>
+			<ac-tabs>
+				<ac-tab>First</ac-tab>
+				<ac-tab>Second</ac-tab>
+				<ac-tab>Third</ac-tab>
+			</ac-tabs>
+			<h3>With Panels</h3>
+			<ac-tabs>
+				<ac-tab id='one'>First</ac-tab>
+				<ac-tab id='two'>Second</ac-tab>
+				<ac-tab id='three'>Third</ac-tab>
+				<ac-tab-panel for='one'>First</ac-tab-panel>
+				<ac-tab-panel for='two'>Second</ac-tab-panel>
+				<ac-tab-panel for='three'>Third</ac-tab-panel>
+			</ac-tabs>
+		</div>
+		<div class='group'>
+			<h2>Toggles</h2>
+			<h3>Checkbox</h3>
+			<ac-checkbox>AC Checkbox Component 1</ac-checkbox>
+			<ac-checkbox checked=true>AC Checkbox Component 2</ac-checkbox>
+			<h3>Radio</h3>
+			<ac-radio>AC Radio Component 1</ac-radio>
+			<ac-radio checked=true>AC Radio Component 2</ac-radio>
+			<h4>Radio Group</h4>
+			<ac-radio name='radio' value='1' checked=true>Item 1</ac-radio>
+			<ac-radio name='radio' value='2'>Item 2</ac-radio>
+			<ac-radio name='radio' value='3'>Item 3</ac-radio>
+			<ac-radio name='radio' value='4'>Item 4</ac-radio>
+			<h3>Switch</h3>
+			<ac-switch>AC Switch Component 1</ac-switch>
+			<ac-switch checked=true>AC Switch Component 2</ac-switch>
+		</div>
+		<div class='group'>
+			<h2>Input</h2>
+			<h3>Number</h3>
+			<ac-number min=1 max=10 step=0.5 value=2.5>AC Number 1</ac-number>
+			<ac-number min=-5 max=5>AC Number 2</ac-number>
+			<h3>Slider</h3>
+			<ac-slider min=-100 max=100 step=0.1>AC Slider Component 1</ac-slider>
+			<ac-slider min=0 max=10 step=1 value=10>AC Slider Component 2</ac-slider>
+		</div>
+		<div class='group'>
+			<h2>Misc</h2>
+			<h3>Card</h3>
+			<ac-card style="width: 300px"><h5>Testing</h5><p>Lorem ipsum...</p></ac-card>
+			<!--<h3>Listbox</h3>
+			<ac-listbox>AC Listbox Component 1</ac-listbox>
+			<br>-->
+		</div>
 		<br>
 		<button onclick='randomizeValues()'>Randomize Values</button>
 		<br>

@@ -1,16 +1,12 @@
-export default class Card extends HTMLElement {
+export default class TabPanel extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				:host {
-					display: block;
-				}
-				div.ac-card {
+				div.ac-tab-panel {
 					align-items: center;
 					display: flex;
-					flex-direction: column;
 					gap: 10px;
 					width: 100%;
 				}
@@ -18,22 +14,19 @@ export default class Card extends HTMLElement {
 					cursor: pointer;
 				}
 			</style>
-			<div class='ac-card'></div>
+			<div class='ac-tab-panel'>
+			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
+	get container() { return this.shadowRoot.querySelector('div.ac-tab-panel'); }
 
 	connectedCallback() {
-		const style = this.getAttribute('style') || null;
-		if (style) {
-			this.container.setAttribute('style', style);
-		}
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
 		}
 	}
 }
 
-customElements.define('ac-card', Card);
+customElements.define('ac-tab-panel', TabPanel);

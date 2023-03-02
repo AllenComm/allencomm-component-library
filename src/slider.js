@@ -44,7 +44,6 @@ export default class Slider extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const label = this.getAttribute('label') || '';
 		const max = this.getAttribute('max') || 10;
 		const min = this.getAttribute('min') || 0;
 		const step = this.getAttribute('step') || 1;
@@ -53,10 +52,10 @@ export default class Slider extends HTMLElement {
 		this.input.setAttribute('max', max);
 		this.input.setAttribute('min', min);
 		this.input.setAttribute('step', step);
-		this.label.setAttribute('for', label);
-		this.label.innerText = label;
-		this.output.setAttribute('for', label);
 		this.value = value;
+		if (this.childNodes.length > 0) {
+			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+		}
 	}
 	
 	handleChange = (e) => {

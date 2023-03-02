@@ -83,12 +83,12 @@ export default class Switch extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const label = this.getAttribute('label') || '';
 		const checked = this.getAttribute('checked') || false;
 		this.wrapper.addEventListener('click', this.handleChange);
-		this.label.setAttribute('for', label);
-		this.label.innerText = label;
 		this.checked = checked;
+		if (this.childNodes.length > 0) {
+			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+		}
 	}
 
 	handleChange = () => {

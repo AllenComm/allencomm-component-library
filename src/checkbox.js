@@ -38,12 +38,14 @@ export default class Checkbox extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const label = this.getAttribute('label') || '';
 		const checked = this.getAttribute('checked') || false;
+		const value = this.getAttribute('value') || '';
 		this.input.addEventListener('change', this.handleChange);
-		this.label.setAttribute('for', label);
-		this.label.innerText = label;
+		this.input.setAttribute('value', value);
 		this.checked = checked;
+		if (this.childNodes.length > 0) {
+			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+		}
 	}
 	
 	handleChange = (e) => {

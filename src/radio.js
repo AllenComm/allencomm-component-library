@@ -45,16 +45,18 @@ export default class Radio extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const name = this.getAttribute('name') || '';
-		const label = this.getAttribute('label') || '';
 		const checked = this.getAttribute('checked') || false;
+		const name = this.getAttribute('name') || '';
+		const id = this.getAttribute('id') || '';
+		const value = this.getAttribute('value') || '';
 		this.input.addEventListener('change', this.handleChange);
 		this.input.setAttribute('name', name);
-		this.input.setAttribute('id', label);
-		this.input.setAttribute('value', label);
-		this.label.setAttribute('for', label);
-		this.label.innerText = label;
+		this.input.setAttribute('id', id);
+		this.input.setAttribute('value', value || id);
 		this.checked = checked;
+		if (this.childNodes.length > 0) {
+			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+		}
 	}
 	
 	handleChange = () => {
