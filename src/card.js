@@ -27,24 +27,12 @@ export default class Card extends HTMLElement {
 
 	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
 
-	attributeChangedCallback(attr, oldVal, newVal) {
-		if (attr === 'checked') {
-			this.dispatchEvent(new Event('change', { 'bubbles': true }));
-		}
-	}
-
 	connectedCallback() {
 		const style = this.getAttribute('style') || null;
 		if (style) {
 			this.container.setAttribute('style', style);
 		}
-		console.log(this);
-		console.dir(this);
 		this.childNodes.forEach((a) => a.setAttribute('slot', 'default'));
-	}
-	
-	handleChange = () => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true }));
 	}
 }
 
