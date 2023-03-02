@@ -10,9 +10,6 @@ export default class Tabs extends HTMLElement {
 					gap: 10px;
 					width: 100%;
 				}
-				input, label {
-					cursor: pointer;
-				}
 			</style>
 			<div class='ac-tabs'>
 				<slot name='tabs'></slot>

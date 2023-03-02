@@ -17,8 +17,7 @@ export default class Radio extends HTMLElement {
 				}
 			</style>
 			<div class='ac-radio'>
-				<input type='radio'></input>
-				<label></label>
+				<label><input type='radio'></input></label>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -48,11 +47,12 @@ export default class Radio extends HTMLElement {
 		const checked = this.getAttribute('checked') || false;
 		const name = this.getAttribute('name') || '';
 		const id = this.getAttribute('id') || '';
-		const value = this.getAttribute('value') || '';
+		const value = this.getAttribute('value') || id;
 		this.input.addEventListener('change', this.handleChange);
 		this.input.setAttribute('name', name);
 		this.input.setAttribute('id', id);
-		this.input.setAttribute('value', value || id);
+		this.input.setAttribute('value', value);
+		this.label.setAttribute('for', id);
 		this.checked = checked;
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.label.appendChild(a));

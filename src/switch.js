@@ -15,10 +15,14 @@ export default class Switch extends HTMLElement {
 				input {
 					display: none;
 				}
+				label, label>* {
+					vertical-align: middle;
+				}
 				div.ac-switch-wrapper {
 					background: transparent;
 					border: 1px solid #b2b2b2;
 					border-radius: 5px;
+					display: inline-block;
 					height: 20px;
 					position: relative;
 					width: 40px;
@@ -54,11 +58,12 @@ export default class Switch extends HTMLElement {
 				}
 			</style>
 			<div class='ac-switch'>
-				<input type='checkbox'></input>
-				<div class='ac-switch-wrapper'>
-					<div class='ac-switch-indicator'></div>
-				</div>
-				<label></label>
+				<label>
+					<input type='checkbox'></input>
+					<div class='ac-switch-wrapper'>
+						<div class='ac-switch-indicator'></div>
+					</div>
+				</label>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());

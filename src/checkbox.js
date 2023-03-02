@@ -12,13 +12,12 @@ export default class Checkbox extends HTMLElement {
 					gap: 10px;
 					width: 100%;
 				}
-				input {
+				input, label {
 					cursor: pointer;
 				}
 			</style>
 			<div class='ac-checkbox'>
-				<input type='checkbox'></input>
-				<label></label>
+				<label><input type='checkbox'></input></label>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());

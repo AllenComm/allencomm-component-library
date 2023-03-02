@@ -4,14 +4,14 @@ export default class TabPanel extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				:host {
+					display: inline-block;
+				}
 				div.ac-tab-panel {
 					align-items: center;
 					display: flex;
 					gap: 10px;
 					width: 100%;
-				}
-				input, label {
-					cursor: pointer;
 				}
 			</style>
 			<div class='ac-tab-panel'>
