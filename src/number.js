@@ -13,7 +13,6 @@ export default class Number extends HTMLElement {
 					align-items: center;
 					display: flex;
 					gap: 10px;
-					user-select: none;
 					width: 100%;
 				}
 			</style>

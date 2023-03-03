@@ -19,7 +19,6 @@ export default class Radio extends HTMLElement {
 					align-items: center;
 					display: flex;
 					gap: 10px;
-					user-select: none;
 				}
 			</style>
 			<label><input type='radio'></input></label>

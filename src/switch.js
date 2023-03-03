@@ -17,7 +17,6 @@ export default class Switch extends HTMLElement {
 					cursor: pointer;
 					display: flex;
 					gap: 10px;
-					user-select: none;
 				}
 				div.ac-switch-wrapper {
 					background: transparent;
