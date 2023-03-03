@@ -73,8 +73,10 @@ export default class Radio extends HTMLElement {
 		this.checked = !this.checked;
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
-			const label = a.attributes?.label?.nodeValue;
-			if (name && this.name == name && this.label.innerText !== label) {
+			const label = a.label.innerText;
+			const id = a.id || null;
+			const isSame = this.label.innerText === label || id === this.id;
+			if (name && this.name == name && !isSame) {
 				a.checked = false;
 			}
 		});
