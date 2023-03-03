@@ -7,13 +7,18 @@ export default class Radio extends HTMLElement {
 		this.shadowRoot.innerHTML = `
 			<style>
 				div.ac-radio {
-					align-items: center;
-					display: flex;
-					gap: 10px;
 					width: 100%;
+				}
+				input {
+					margin: 0;
 				}
 				input, label {
 					cursor: pointer;
+				}
+				label {
+					align-items: center;
+					display: flex;
+					gap: 10px;
 				}
 			</style>
 			<div class='ac-radio'>
@@ -46,13 +51,17 @@ export default class Radio extends HTMLElement {
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
 		const name = this.getAttribute('name') || '';
-		const id = this.getAttribute('id') || '';
-		const value = this.getAttribute('value') || id;
+		const id = this.getAttribute('id') || null;
+		const value = this.getAttribute('value') || id || '';
 		this.input.addEventListener('change', this.handleChange);
 		this.input.setAttribute('name', name);
-		this.input.setAttribute('id', id);
 		this.input.setAttribute('value', value);
-		this.label.setAttribute('for', id);
+
+		if (id) {
+			this.input.setAttribute('id', id);
+			this.label.setAttribute('for', id);
+		}
+
 		this.checked = checked;
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.label.appendChild(a));

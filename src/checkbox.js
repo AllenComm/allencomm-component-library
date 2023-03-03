@@ -7,13 +7,18 @@ export default class Checkbox extends HTMLElement {
 		this.shadowRoot.innerHTML = `
 			<style>
 				div.ac-checkbox {
-					align-items: center;
-					display: flex;
-					gap: 10px;
 					width: 100%;
+				}
+				input {
+					margin: 0;
 				}
 				input, label {
 					cursor: pointer;
+				}
+				label {
+					align-items: center;
+					display: flex;
+					gap: 10px;
 				}
 			</style>
 			<div class='ac-checkbox'>

@@ -7,13 +7,16 @@ export default class Switch extends HTMLElement {
 		this.shadowRoot.innerHTML = `
 			<style>
 				div.ac-switch {
-					align-items: center;
-					display: flex;
-					gap: 10px;
 					width: 100%;
 				}
 				input {
 					display: none;
+					margin: 0;
+				}
+				label {
+					align-items: center;
+					display: flex;
+					gap: 10px;
 				}
 				label, label>* {
 					vertical-align: middle;
