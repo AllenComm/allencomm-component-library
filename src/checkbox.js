@@ -6,7 +6,7 @@ export default class Checkbox extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-checkbox {
+				:host {
 					width: 100%;
 				}
 				input {
@@ -19,11 +19,10 @@ export default class Checkbox extends HTMLElement {
 					align-items: center;
 					display: flex;
 					gap: 10px;
+					user-select: none;
 				}
 			</style>
-			<div class='ac-checkbox'>
-				<label><input type='checkbox'></input></label>
-			</div>
+			<label><input type='checkbox'></input></label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}

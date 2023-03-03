@@ -6,21 +6,18 @@ export default class Slider extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-slider {
-					align-items: center;
-					display: flex;
-					gap: 10px;
-					width: 100%;
-				}
 				input {
 					cursor: pointer;
 				}
+				label {
+					align-items: center;
+					display: flex;
+					gap: 10px;
+					user-select: none;
+					width: 100%;
+				}
 			</style>
-			<div class='ac-slider'>
-				<label></label>
-				<input type='range'></input>
-				<output></output>
-			</div>
+			<label><input type='range'></input><output></output></label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
@@ -54,7 +51,7 @@ export default class Slider extends HTMLElement {
 		this.input.setAttribute('step', step);
 		this.value = value;
 		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+			Array.from(this.childNodes).map((a) => this.label.insertBefore(a, this.label.children[0]));
 		}
 	}
 	

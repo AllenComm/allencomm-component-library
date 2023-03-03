@@ -6,20 +6,18 @@ export default class Switch extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-switch {
+				:host {
 					width: 100%;
 				}
 				input {
 					display: none;
-					margin: 0;
 				}
 				label {
 					align-items: center;
+					cursor: pointer;
 					display: flex;
 					gap: 10px;
-				}
-				label, label>* {
-					vertical-align: middle;
+					user-select: none;
 				}
 				div.ac-switch-wrapper {
 					background: transparent;
@@ -60,27 +58,31 @@ export default class Switch extends HTMLElement {
 					background: #efefef;
 				}
 			</style>
-			<div class='ac-switch'>
-				<label>
-					<input type='checkbox'></input>
-					<div class='ac-switch-wrapper'>
-						<div class='ac-switch-indicator'></div>
-					</div>
-				</label>
-			</div>
+			<label>
+				<input type='checkbox'></input>
+				<div class='ac-switch-wrapper'>
+					<div class='ac-switch-indicator'></div>
+				</div>
+			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get checked() { return this.input.hasAttribute('checked'); }
-	get container() { return this.shadowRoot.querySelector('div.ac-switch'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
 	get wrapper() { return this.shadowRoot.querySelector('div.ac-switch-wrapper'); }
 
 	set checked(val) {
-		this.input.toggleAttribute('checked', Boolean(val));
-		this.wrapper.dataset.checked = Boolean(val);
+		if (Boolean(val)) {
+			this.input.checked = true;
+			this.input.setAttribute('checked', true);
+			this.wrapper.dataset.checked = true;
+		} else {
+			this.input.checked = false;
+			this.input.removeAttribute('checked');
+			this.wrapper.dataset.checked = false;
+		}
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -92,7 +94,7 @@ export default class Switch extends HTMLElement {
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
-		this.wrapper.addEventListener('click', this.handleChange);
+		this.input.addEventListener('change', this.handleChange);
 		this.checked = checked;
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.label.appendChild(a));

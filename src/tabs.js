@@ -4,17 +4,15 @@ export default class Tabs extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-tab {
+				:host {
 					align-items: center;
 					display: flex;
 					gap: 10px;
 					width: 100%;
 				}
 			</style>
-			<div class='ac-tabs'>
-				<slot name='tabs'></slot>
-				<slot name='panels'></slot>
-			</div>
+			<slot name='tabs'></slot>
+			<slot name='panels'></slot>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}

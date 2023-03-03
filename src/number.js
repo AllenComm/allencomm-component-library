@@ -6,20 +6,18 @@ export default class Number extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-number {
-					align-items: center;
-					display: flex;
-					gap: 10px;
-					width: 100%;
-				}
 				input {
 					cursor: pointer;
 				}
+				label {
+					align-items: center;
+					display: flex;
+					gap: 10px;
+					user-select: none;
+					width: 100%;
+				}
 			</style>
-			<div class='ac-number'>
-				<label></label>
-				<input type='number'></input>
-			</div>
+			<label><input type='number'></input></label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
@@ -51,7 +49,7 @@ export default class Number extends HTMLElement {
 		this.input.setAttribute('step', step);
 		this.value = value;
 		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
+			Array.from(this.childNodes).map((a) => this.label.insertBefore(a, this.label.children[0]));
 		}
 	}
 	

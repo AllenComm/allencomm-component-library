@@ -6,7 +6,7 @@ export default class Listbox extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-listbox {
+				:host {
 					align-items: center;
 					display: flex;
 					gap: 10px;
@@ -16,12 +16,10 @@ export default class Listbox extends HTMLElement {
 					cursor: pointer;
 				}
 			</style>
-			<div class='ac-listbox'>
-				<select>
-					<option>option</option>
-				</select>
-				<label></label>
-			</div>
+			<select>
+				<option>option</option>
+			</select>
+			<label></label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}

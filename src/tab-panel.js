@@ -13,8 +13,7 @@ export default class TabPanel extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<div class='ac-tab-panel'>
-			</div>
+			<div class='ac-tab-panel'></div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}

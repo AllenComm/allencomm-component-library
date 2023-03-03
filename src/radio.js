@@ -6,7 +6,7 @@ export default class Radio extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
-				div.ac-radio {
+				:host {
 					width: 100%;
 				}
 				input {
@@ -19,11 +19,10 @@ export default class Radio extends HTMLElement {
 					align-items: center;
 					display: flex;
 					gap: 10px;
+					user-select: none;
 				}
 			</style>
-			<div class='ac-radio'>
-				<label><input type='radio'></input></label>
-			</div>
+			<label><input type='radio'></input></label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
@@ -34,10 +33,12 @@ export default class Radio extends HTMLElement {
 	get name() { return this.input.getAttribute('name'); }
 
 	set checked(val) {
-		if (Boolean(val) && !this.checked) {
+		if (Boolean(val)) {
 			this.input.checked = true;
+			this.input.setAttribute('checked', true);
 		} else {
 			this.input.checked = false;
+			this.input.removeAttribute('checked');
 		}
 	}
 
