@@ -8,9 +8,8 @@ export default class TabPanel extends HTMLElement {
 					display: inline-block;
 				}
 				div.ac-tab-panel {
-					align-items: center;
 					display: flex;
-					gap: 10px;
+					flex-direction: column;
 					width: 100%;
 				}
 			</style>

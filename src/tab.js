@@ -8,10 +8,8 @@ export default class Tab extends HTMLElement {
 					display: inline-block;
 				}
 				div.ac-tab {
-					align-items: center;
 					cursor: pointer;
-					display: flex;
-					gap: 10px;
+					display: block;
 					width: 100%;
 				}
 			</style>
@@ -23,9 +21,14 @@ export default class Tab extends HTMLElement {
 	get container() { return this.shadowRoot.querySelector('div.ac-tab'); }
 
 	connectedCallback() {
+		this.container.addEventListener('click', this.handleClick);
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
 		}
+	}
+
+	handleClick() {
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
 

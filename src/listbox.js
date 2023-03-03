@@ -32,7 +32,7 @@ export default class Listbox extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
-			this.dispatchEvent(new Event('change', { 'bubbles': true }));
+			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
@@ -43,7 +43,7 @@ export default class Listbox extends HTMLElement {
 	}
 	
 	handleChange = () => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
 

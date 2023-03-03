@@ -35,7 +35,7 @@ export default class Number extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.dispatchEvent(new Event('change', { 'bubbles': true }));
+			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 			this.value = newVal;
 		}
 	}
@@ -56,7 +56,7 @@ export default class Number extends HTMLElement {
 	}
 	
 	handleChange = (e) => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		this.value = e.target.value;
 	}
 }

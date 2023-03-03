@@ -22,6 +22,7 @@ export default class Tabs extends HTMLElement {
 	get container() { return this.shadowRoot.querySelector('div.ac-tab'); }
 
 	connectedCallback() {
+		this.addEventListener('change', this.handleChange);
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
