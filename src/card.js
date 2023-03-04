@@ -14,13 +14,16 @@ export default class Card extends HTMLElement {
 					cursor: pointer;
 				}
 			</style>
+			<div class='ac-card'></div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
+
 	connectedCallback() {
 		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.shadowRoot.appendChild(a));
+			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
 		}
 	}
 }
