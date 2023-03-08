@@ -75,7 +75,8 @@ export default class Switch extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
-			this.input.checked = newVal;
+			const bool = newVal === 'true';
+			this.input.checked = bool;
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
@@ -86,7 +87,7 @@ export default class Switch extends HTMLElement {
 		this.input.addEventListener('change', this.handleChange);
 	}
 
-	handleChange = (e) => {
+	handleChange = () => {
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
