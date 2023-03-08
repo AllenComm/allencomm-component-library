@@ -34,8 +34,8 @@ export default class Slider extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 			this.value = newVal;
+			this.dispatchEvent(new Event('input', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
@@ -44,7 +44,7 @@ export default class Slider extends HTMLElement {
 		const min = this.getAttribute('min') || 0;
 		const step = this.getAttribute('step') || 1;
 		const value = this.getAttribute('value') || 0;
-		this.input.addEventListener('change', this.handleChange);
+		this.input.addEventListener('input', this.handleChange);
 		this.input.setAttribute('max', max);
 		this.input.setAttribute('min', min);
 		this.input.setAttribute('step', step);
@@ -55,8 +55,8 @@ export default class Slider extends HTMLElement {
 	}
 	
 	handleChange = (e) => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		this.value = e.target.value;
+		this.dispatchEvent(new Event('input', { 'bubbles': true, 'composed': true }));
 	}
 }
 

@@ -22,6 +22,9 @@ export default class Card extends HTMLElement {
 	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
 
 	connectedCallback() {
+		if (this.hasAttribute('style')) {
+			this.container.setAttribute('style', this.getAttribute('style'));
+		}
 		if (this.childNodes.length > 0) {
 			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
 		}

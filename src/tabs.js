@@ -38,7 +38,7 @@ export default class Tabs extends HTMLElement {
 		this.addEventListener('change', this.handleChange);
 		const tabs = [];
 		if (this.childNodes.length > 0) {
-			console.log(this.childNodes);
+			//console.log(this.childNodes);
 			this.childNodes.forEach((a, i) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					tabs.push(a);
@@ -47,7 +47,7 @@ export default class Tabs extends HTMLElement {
 				}
 			});
 		}
-		console.log(tabs);
+		//console.log(tabs);
 		tabs.map((a, i) => {
 			a.setAttribute('slot', 'tabs');
 			a.setAttribute('style', `grid-column: ${i + 1} / auto;`);
