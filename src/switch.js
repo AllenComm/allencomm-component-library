@@ -17,8 +17,9 @@ export default class Switch extends HTMLElement {
 					cursor: pointer;
 					display: flex;
 					gap: 10px;
+					user-select: none;
 				}
-				div.ac-switch-wrapper {
+				.ac-switch-wrapper {
 					background: transparent;
 					border: 1px solid #b2b2b2;
 					border-radius: 5px;
@@ -27,14 +28,7 @@ export default class Switch extends HTMLElement {
 					position: relative;
 					width: 40px;
 				}
-				div.ac-switch-wrapper[data-checked="true"] {
-					background: #0075ff;
-				}
-				div.ac-switch-wrapper:hover {
-					cursor: pointer;
-					border-color: #9a9a9a;
-				}
-				div.ac-switch-indicator {
+				.ac-switch-indicator {
 					background: #b2b2b2;
 					border-radius: 5px;
 					height: 16px;
@@ -43,18 +37,25 @@ export default class Switch extends HTMLElement {
 					top: 2px;
 					width: 16px;
 				}
-				div.ac-switch-wrapper:hover div.ac-switch-indicator {
+				label:hover .ac-switch-wrapper {
+					cursor: pointer;
+					border-color: #9a9a9a;
+				}
+				label:hover .ac-switch-indicator {
 					background: #9a9a9a;
 				}
-				div.ac-switch-wrapper[data-checked="true"] div.ac-switch-indicator {
-					background: white;
+				label:has(input:checked) .ac-switch-wrapper {
+					background-color: #0075ff;
+				}
+				label:has(input:checked):hover .ac-switch-wrapper {
+					background-color: #005cc8;
+				}
+				label:has(input:checked) .ac-switch-indicator {
+					background-color: white;
 					left: calc(100% - 2px - 16px);
 				}
-				div.ac-switch-wrapper:hover[data-checked="true"] {
-					background: #005cc8;
-				}
-				div.ac-switch-wrapper:hover[data-checked="true"] div.ac-switch-indicator {
-					background: #efefef;
+				label:has(input:checked):hover .ac-switch-indicator {
+					background-color: #efefef;
 				}
 			</style>
 			<label>
@@ -62,26 +63,18 @@ export default class Switch extends HTMLElement {
 				<div class='ac-switch-wrapper'>
 					<div class='ac-switch-indicator'></div>
 				</div>
+				<slot></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.hasAttribute('checked'); }
+	get checked() { return this.input.checked; }
 	get input() { return this.shadowRoot.querySelector('input'); }
-	get label() { return this.shadowRoot.querySelector('label'); }
 	get wrapper() { return this.shadowRoot.querySelector('div.ac-switch-wrapper'); }
 
 	set checked(val) {
-		if (Boolean(val)) {
-			this.input.checked = true;
-			this.input.setAttribute('checked', true);
-			this.wrapper.dataset.checked = true;
-		} else {
-			this.input.checked = false;
-			this.input.removeAttribute('checked');
-			this.wrapper.dataset.checked = false;
-		}
+		this.wrapper.setAttribute('data-checked', Boolean(val));
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -92,16 +85,15 @@ export default class Switch extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const checked = this.getAttribute('checked') || false;
+		const value = this.getAttribute('checked') || false;
+		this.checked = value;
+		this.input.checked = value;
 		this.input.addEventListener('change', this.handleChange);
-		this.checked = checked;
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
-		}
 	}
 
-	handleChange = () => {
-		this.checked = !this.checked;
+	handleChange = (e) => {
+		console.log('handleChange',e.currentTarget.checked);
+		this.checked = e.currentTarget.checked;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
