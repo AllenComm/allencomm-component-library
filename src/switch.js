@@ -73,26 +73,20 @@ export default class Switch extends HTMLElement {
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get wrapper() { return this.shadowRoot.querySelector('div.ac-switch-wrapper'); }
 
-	set checked(val) {
-		this.wrapper.setAttribute('data-checked', Boolean(val));
-	}
-
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
-			this.checked = newVal;
+			this.input.checked = newVal;
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
 	connectedCallback() {
 		const value = this.getAttribute('checked') || false;
-		this.checked = value;
 		this.input.checked = value;
 		this.input.addEventListener('change', this.handleChange);
 	}
 
 	handleChange = (e) => {
-		this.checked = e.currentTarget.checked;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
