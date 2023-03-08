@@ -92,7 +92,6 @@ export default class Switch extends HTMLElement {
 	}
 
 	handleChange = (e) => {
-		console.log('handleChange',e.currentTarget.checked);
 		this.checked = e.currentTarget.checked;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
