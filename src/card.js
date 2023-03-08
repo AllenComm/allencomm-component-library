@@ -4,6 +4,9 @@ export default class Card extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				* {
+					box-sizing: border-box;
+				}
 				div.ac-card {
 					display: flex;
 					flex-direction: column;
