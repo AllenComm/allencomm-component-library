@@ -17,7 +17,6 @@ export default class Card extends HTMLElement {
 			</style>
 			<div class='ac-card'></div>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
