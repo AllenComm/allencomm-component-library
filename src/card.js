@@ -8,6 +8,7 @@ export default class Card extends HTMLElement {
 					display: flex;
 					flex-direction: column;
 					gap: 10px;
+					padding: 16px;
 					width: 100%;
 				}
 				input, label {
