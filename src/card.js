@@ -7,30 +7,18 @@ export default class Card extends HTMLElement {
 				* {
 					box-sizing: border-box;
 				}
-				div.ac-card {
+				div {
 					display: flex;
 					flex-direction: column;
 					gap: 10px;
 					padding: 16px;
 					width: 100%;
 				}
-				input, label {
-					cursor: pointer;
-				}
 			</style>
-			<div class='ac-card'></div>
+			<div>
+				<slot></slot>
+			</div>
 		`;
-	}
-
-	get container() { return this.shadowRoot.querySelector('div.ac-card'); }
-
-	connectedCallback() {
-		if (this.hasAttribute('style')) {
-			this.container.setAttribute('style', this.getAttribute('style'));
-		}
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
-		}
 	}
 }
 
