@@ -6,6 +6,9 @@ export default class Checkbox extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				* {
+					box-sizing: border-box;
+				}
 				:host {
 					width: 100%;
 				}

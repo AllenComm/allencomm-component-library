@@ -4,6 +4,9 @@ export default class Tabs extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				* {
+					box-sizing: border-box;
+				}
 				:host {
 					display: flex;
 					flex-direction: column;

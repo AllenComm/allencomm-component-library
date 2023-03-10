@@ -6,6 +6,9 @@ export default class Radio extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				* {
+					box-sizing: border-box;
+				}
 				:host {
 					width: 100%;
 				}
@@ -69,6 +72,7 @@ export default class Radio extends HTMLElement {
 			const sameName = name && this.name === name;
 			if (sameName && !sameItem) {
 				a.input.checked = false;
+				a.setAttribute('checked', false);
 			}
 		});
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
