@@ -43,36 +43,32 @@ export default class Radio extends HTMLElement {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
 			this.input.checked = bool;
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
-		const name = this.getAttribute('name') || '';
 		const id = this.getAttribute('id') || null;
+		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
+		this.label.setAttribute('for', id);
+		this.input.setAttribute('id', id);
 		this.input.setAttribute('name', name);
 		this.input.setAttribute('value', value);
-
-		if (id) {
-			this.input.setAttribute('id', id);
-			this.label.setAttribute('for', id);
-		}
-
 		this.input.checked = checked;
 		this.input.addEventListener('change', this.handleChange);
+		this.setAttribute('aria-checked', checked);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('checked', this.checked);
+		this.setAttribute('aria-checked', this.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
 			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0] === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0];
 			const sameName = name && this.name === name;
 			if (sameName && !sameItem) {
 				a.input.checked = false;
-				a.setAttribute('checked', false);
+				a.setAttribute('aria-checked', false);
 			}
 		});
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));

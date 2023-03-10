@@ -12,6 +12,15 @@ export default class Slider extends HTMLElement {
 				:host {
 					width: 100%;
 				}
+				:host(:focus-visible) {
+					outline: none;
+				}
+				:host(:focus-visible) input {
+					border-radius: 3px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+					z-index: 1;
+				}
 				input {
 					cursor: pointer;
 				}
@@ -22,9 +31,9 @@ export default class Slider extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<label>
+			<label tabindex='-1'>
 				<slot></slot>
-				<input type='range'></input>
+				<input tabindex='-1' type='range'></input>
 				<output></output>
 			</label>
 		`;
@@ -53,11 +62,16 @@ export default class Slider extends HTMLElement {
 		this.input.setAttribute('step', step);
 		this.input.value = parseFloat(value);
 		this.output.innerText = this.value;
+		this.setAttribute('aria-orientation', 'horizontal');
+		this.setAttribute('aria-valuemax', max);
+		this.setAttribute('aria-valuemin', min);
+		this.setAttribute('aria-valuenow', value);
+		this.setAttribute('tabindex', 0);
 	}
 	
 	handleChange = () => {
 		this.output.innerText = this.value;
-		this.setAttribute('value', this.value);
+		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }

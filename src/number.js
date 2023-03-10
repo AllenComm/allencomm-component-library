@@ -12,6 +12,15 @@ export default class Number extends HTMLElement {
 				:host {
 					width: 100%;
 				}
+				:host(:focus-visible) {
+					outline: none;
+				}
+				:host(:focus-visible) input {
+					border-radius: 3px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+					z-index: 1;
+				}
 				input {
 					cursor: pointer;
 				}
@@ -22,8 +31,8 @@ export default class Number extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<label>
-				<input type='number'></input>
+			<label tabindex='-1'>
+				<input type='number' tabindex='-1'></input>
 				<slot></slot>
 			</label>
 		`;
@@ -35,8 +44,8 @@ export default class Number extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.input.value = newVal;
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+			this.input.value = parseFloat(newVal);
+			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
 
@@ -50,10 +59,14 @@ export default class Number extends HTMLElement {
 		this.input.setAttribute('min', min);
 		this.input.setAttribute('step', step);
 		this.input.value = parseFloat(value);
+		this.setAttribute('aria-valuemax', max);
+		this.setAttribute('aria-valuemin', min);
+		this.setAttribute('aria-valuenow', value);
+		this.setAttribute('tabindex', 0);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('value', this.value);
+		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
