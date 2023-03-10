@@ -10,10 +10,8 @@ export default class Slider extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					width: 100%;
-				}
-				:host(:focus-visible) {
 					outline: none;
+					width: 100%;
 				}
 				:host(:focus-visible) input {
 					border-radius: 3px;
@@ -47,7 +45,7 @@ export default class Slider extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.input.value = parseFloat(newVal);
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
 
@@ -67,12 +65,39 @@ export default class Slider extends HTMLElement {
 		this.setAttribute('aria-valuemin', min);
 		this.setAttribute('aria-valuenow', value);
 		this.setAttribute('tabindex', 0);
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
 		this.output.innerText = this.value;
 		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		const key = e.key;
+		const val = parseFloat(this.input.value);
+		const step = parseFloat(this.input.getAttribute('step'));
+		switch (key) {
+			case 'ArrowUp':
+			case 'ArrowRight':
+				e.preventDefault();
+				e.stopPropagation();
+				if ((val + step) <= parseFloat(this.input.getAttribute('max'))) {
+					this.input.value = val + step;
+					this.handleChange();
+				}
+				break;
+			case 'ArrowDown':
+			case 'ArrowLeft':
+				e.preventDefault();
+				e.stopPropagation();
+				if ((val - step) >= parseFloat(this.input.getAttribute('min'))) {
+					this.input.value = val - step;
+					this.handleChange();
+				}
+				break;
+		}
 	}
 }
 

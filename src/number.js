@@ -10,10 +10,8 @@ export default class Number extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					width: 100%;
-				}
-				:host(:focus-visible) {
 					outline: none;
+					width: 100%;
 				}
 				:host(:focus-visible) input {
 					border-radius: 3px;
@@ -32,7 +30,7 @@ export default class Number extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
-				<input type='number' tabindex='-1'></input>
+				<input tabindex='-1' type='number'></input>
 				<slot></slot>
 			</label>
 		`;
@@ -50,8 +48,8 @@ export default class Number extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const max = this.getAttribute('max') || 10;
-		const min = this.getAttribute('min') || 0;
+		const max = this.getAttribute('max') || '';
+		const min = this.getAttribute('min') || '';
 		const step = this.getAttribute('step') || 1;
 		const value = this.getAttribute('value') || 0;
 		this.input.addEventListener('change', this.handleChange);
@@ -63,11 +61,38 @@ export default class Number extends HTMLElement {
 		this.setAttribute('aria-valuemin', min);
 		this.setAttribute('aria-valuenow', value);
 		this.setAttribute('tabindex', 0);
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
 		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		const key = e.key;
+		const val = parseFloat(this.input.value);
+		const step = parseFloat(this.input.getAttribute('step'));
+		switch (key) {
+			case 'ArrowUp':
+			case 'ArrowRight':
+				e.preventDefault();
+				e.stopPropagation();
+				if ((val + step) <= parseFloat(this.input.getAttribute('max'))) {
+					this.input.value = val + step;
+					this.handleChange();
+				}
+				break;
+			case 'ArrowDown':
+			case 'ArrowLeft':
+				e.preventDefault();
+				e.stopPropagation();
+				if ((val - step) >= parseFloat(this.input.getAttribute('min'))) {
+					this.input.value = val - step;
+					this.handleChange();
+				}
+				break;
+		}
 	}
 }
 
