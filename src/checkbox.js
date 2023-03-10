@@ -21,37 +21,33 @@ export default class Checkbox extends HTMLElement {
 					gap: 10px;
 				}
 			</style>
-			<label><input type='checkbox'></input></label>
+			<label>
+				<input type='checkbox'></input>
+				<slot></slot>
+			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.hasAttribute('checked'); }
+	get checked() { return this.input.checked; }
 	get input() { return this.shadowRoot.querySelector('input'); }
-	get label() { return this.shadowRoot.querySelector('label'); }
-
-	set checked(val) { this.input.toggleAttribute('checked', Boolean(val)); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
-			this.checked = newVal;
+			const bool = newVal === 'true';
+			this.input.checked = bool;
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
 	connectedCallback() {
-		const checked = this.getAttribute('checked') || false;
-		const value = this.getAttribute('value') || '';
+		const value = this.getAttribute('checked') || false;
+		this.input.checked = value;
 		this.input.addEventListener('change', this.handleChange);
-		this.input.setAttribute('value', value);
-		this.checked = checked;
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
-		}
 	}
 	
-	handleChange = (e) => {
-		this.checked = e.target.checked;
+	handleChange = () => {
+		this.setAttribute('checked', this.checked);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }

@@ -21,30 +21,26 @@ export default class Radio extends HTMLElement {
 					gap: 10px;
 				}
 			</style>
-			<label><input type='radio'></input></label>
+			<label>
+				<input type='radio'></input>
+				<slot></slot>
+			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.hasAttribute('checked'); }
+	get checked() { return this.input.checked; }
+	get id() { return this.input.getAttribute('id'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
 	get name() { return this.input.getAttribute('name'); }
-
-	set checked(val) {
-		if (Boolean(val)) {
-			this.input.checked = true;
-			this.input.setAttribute('checked', true);
-		} else {
-			this.input.checked = false;
-			this.input.removeAttribute('checked');
-		}
-	}
+	get slot() { return this.shadowRoot.querySelector('slot'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
+			const bool = newVal === 'true';
+			this.input.checked = bool;
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
-			this.checked = newVal;
 		}
 	}
 
@@ -53,7 +49,6 @@ export default class Radio extends HTMLElement {
 		const name = this.getAttribute('name') || '';
 		const id = this.getAttribute('id') || null;
 		const value = this.getAttribute('value') || id || '';
-		this.input.addEventListener('change', this.handleChange);
 		this.input.setAttribute('name', name);
 		this.input.setAttribute('value', value);
 
@@ -62,24 +57,21 @@ export default class Radio extends HTMLElement {
 			this.label.setAttribute('for', id);
 		}
 
-		this.checked = checked;
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.appendChild(a));
-		}
+		this.input.checked = checked;
+		this.input.addEventListener('change', this.handleChange);
 	}
 	
 	handleChange = () => {
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
-		this.checked = !this.checked;
+		this.setAttribute('checked', this.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
-			const label = a.label.innerText;
-			const id = a.id || null;
-			const isSame = this.label.innerText === label || id === this.id;
-			if (name && this.name == name && !isSame) {
-				a.checked = false;
+			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0] === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0];
+			const sameName = name && this.name === name;
+			if (sameName && !sameItem) {
+				a.input.checked = false;
 			}
 		});
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
 

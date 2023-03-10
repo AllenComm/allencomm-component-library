@@ -6,6 +6,9 @@ export default class Slider extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				:host {
+					width: 100%;
+				}
 				input {
 					cursor: pointer;
 				}
@@ -16,25 +19,22 @@ export default class Slider extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<label><input type='range'></input><output></output></label>
+			<label>
+				<slot></slot>
+				<input type='range'></input>
+				<output></output>
+			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get input() { return this.shadowRoot.querySelector('input'); }
-	get label() { return this.shadowRoot.querySelector('label'); }
 	get output() { return this.shadowRoot.querySelector('output'); }
 	get value() { return parseFloat(this.input.value); }
 
-	set value(val) {
-		this.input.setAttribute('value', val);
-		this.input.value = parseFloat(val);
-		this.output.innerText = val;
-	}
-
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.value = newVal;
+			this.input.value = parseFloat(newVal);
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
@@ -48,14 +48,13 @@ export default class Slider extends HTMLElement {
 		this.input.setAttribute('max', max);
 		this.input.setAttribute('min', min);
 		this.input.setAttribute('step', step);
-		this.value = value;
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.label.insertBefore(a, this.label.children[0]));
-		}
+		this.input.value = parseFloat(value);
+		this.output.innerText = this.value;
 	}
 	
-	handleChange = (e) => {
-		this.value = e.target.value;
+	handleChange = () => {
+		this.output.innerText = this.value;
+		this.setAttribute('value', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
