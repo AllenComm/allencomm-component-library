@@ -76,7 +76,6 @@ export default class Switch extends HTMLElement {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
 			this.input.checked = bool;
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 		}
 	}
 
