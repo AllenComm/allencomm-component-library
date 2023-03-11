@@ -68,8 +68,8 @@ export default class Switch extends HTMLElement {
 					background-color: #efefef;
 				}
 			</style>
-			<label>
-				<input type='checkbox'></input>
+			<label tabindex='-1'>
+				<input tabindex='-1' type='checkbox'></input>
 				<div class='wrapper'>
 					<div class='indicator'></div>
 				</div>
