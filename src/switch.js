@@ -85,7 +85,7 @@ export default class Switch extends HTMLElement {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
 			this.input.checked = bool;
-			this.setAttribute('aria-checked', bool);
+			this.handleChange();
 		}
 	}
 
@@ -98,9 +98,11 @@ export default class Switch extends HTMLElement {
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 
-	handleChange = () => {
+	handleChange = (e) => {
 		this.setAttribute('aria-checked', this.input.checked);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+		if (e) {
+			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));			
+		}
 	}
 
 	handleKeydown = (e) => {
