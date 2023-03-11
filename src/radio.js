@@ -10,7 +10,18 @@ export default class Radio extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					outline: none;
 					width: 100%;
+				}
+				:host(:focus-visible) input:after {
+					border-radius: 3px;
+					content: '';
+					display: block;
+					height: 13px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+					width: 13px;
+					z-index: 1;
 				}
 				input {
 					margin: 0;
@@ -24,15 +35,14 @@ export default class Radio extends HTMLElement {
 					gap: 10px;
 				}
 			</style>
-			<label>
-				<input type='radio'></input>
+			<label tabindex='-1'>
+				<input tabindex='-1' type='radio'></input>
 				<slot></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.checked; }
 	get id() { return this.input.getAttribute('id'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 	get label() { return this.shadowRoot.querySelector('label'); }
@@ -58,10 +68,12 @@ export default class Radio extends HTMLElement {
 		this.input.checked = checked;
 		this.input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
+		this.setAttribute('tabindex', 0);
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('aria-checked', this.checked);
+		this.setAttribute('aria-checked', this.input.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
 			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0] === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0];
@@ -72,6 +84,19 @@ export default class Radio extends HTMLElement {
 			}
 		});
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		const code = e.code;
+		switch (code) {
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				this.input.checked = !this.input.checked;
+				this.handleChange();
+				break;
+		}
 	}
 }
 

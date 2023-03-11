@@ -70,10 +70,10 @@ export default class Number extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		const key = e.key;
+		const code = e.code;
 		const val = parseFloat(this.input.value);
 		const step = parseFloat(this.input.getAttribute('step'));
-		switch (key) {
+		switch (code) {
 			case 'ArrowUp':
 			case 'ArrowRight':
 				e.preventDefault();

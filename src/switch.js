@@ -6,8 +6,18 @@ export default class Switch extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
+				* {
+					box-sizing: border-box;
+				}
 				:host {
+					outline: none;
 					width: 100%;
+				}
+				:host(:focus-visible) .wrapper {
+					border-radius: 3px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+					z-index: 1;
 				}
 				input {
 					display: none;
@@ -24,7 +34,7 @@ export default class Switch extends HTMLElement {
 					border: 1px solid #b2b2b2;
 					border-radius: 5px;
 					display: inline-block;
-					height: 20px;
+					height: 22px;
 					position: relative;
 					width: 40px;
 				}
@@ -69,7 +79,6 @@ export default class Switch extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.checked; }
 	get input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -85,11 +94,26 @@ export default class Switch extends HTMLElement {
 		this.input.checked = checked;
 		this.input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
+		this.setAttribute('tabindex', 0);
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {
-		this.setAttribute('aria-checked', this.checked);
+		this.setAttribute('aria-checked', this.input.checked);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		const code = e.code;
+		switch (code) {
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				this.input.checked = !this.input.checked;
+				this.handleChange();
+				break;
+		}
 	}
 }
 

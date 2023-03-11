@@ -10,7 +10,18 @@ export default class Checkbox extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					outline: none;
 					width: 100%;
+				}
+				:host(:focus-visible) input:after {
+					border-radius: 3px;
+					content: '';
+					display: block;
+					height: 13px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+					width: 13px;
+					z-index: 1;
 				}
 				input {
 					margin: 0;
@@ -24,15 +35,14 @@ export default class Checkbox extends HTMLElement {
 					gap: 10px;
 				}
 			</style>
-			<label>
-				<input type='checkbox'></input>
+			<label tabindex='-1'>
+				<input tabindex='-1' type='checkbox'></input>
 				<slot></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.checked; }
 	get input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -48,11 +58,26 @@ export default class Checkbox extends HTMLElement {
 		this.input.checked = checked;
 		this.input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
+		this.setAttribute('tabindex', 0);
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('aria-checked', this.checked);
+		this.setAttribute('aria-checked', this.input.checked);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		const code = e.code;
+		switch (code) {
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				this.input.checked = !this.input.checked;
+				this.handleChange();
+				break;
+		}
 	}
 }
 
