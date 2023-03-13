@@ -115,7 +115,7 @@ export default class Switch extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				this.input.checked = !this.input.checked;
-				this.handleChange();
+				this.handleChange(e);
 				break;
 		}
 	}
