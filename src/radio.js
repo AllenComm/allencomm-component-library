@@ -76,7 +76,7 @@ export default class Radio extends HTMLElement {
 		this.setAttribute('aria-checked', this.input.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
-			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0] === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0];
+			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0].nodeValue === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0].nodeValue;
 			const sameName = name && this.name === name;
 			if (sameName && !sameItem) {
 				a.input.checked = false;

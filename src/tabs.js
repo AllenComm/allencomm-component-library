@@ -33,36 +33,54 @@ export default class Tabs extends HTMLElement {
 			<slot name='panels'></slot>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+
+		this._selected = null;
+		this._tabs = [];
 	}
 
 	get container() { return this.shadowRoot.querySelector('div.ac-tab'); }
+	get selected() { return this._selected; }
+	get slot() { return this.shadowRoot.querySelector('slot'); }
+	get tabs() { return this._tabs; }
+
+	set selected(id) { this._selected = id; }
+	set tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
 		this.addEventListener('change', this.handleChange);
 		const selected = this.getAttribute('selected') || null;
-		const tabs = [];
+		let i = 0;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
-					tabs.push(a);
+					this.tabs.push(a);
+					a.setAttribute('slot', 'tabs');
+					a.setAttribute('style', `grid-column: ${i + 1} / auto;`);
+					if (!a.id) {
+						a.id = a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0].nodeValue;
+					}
+					if (selected === a.id || (!selected && i === 0)) {
+						this.selected = a.id;
+						a.setAttribute('aria-selected', true);
+					} else {
+						a.setAttribute('aria-selected', false);
+					}
+					i = i + 1;
 				} else if (a.nodeName.toLowerCase() === 'ac-tab-panel') {
 					a.setAttribute('slot', 'panels');
 				}
 			});
 		}
-		tabs.map((a, i) => {
-			a.setAttribute('slot', 'tabs');
-			a.setAttribute('style', `grid-column: ${i + 1} / auto;`);
-			if (selected === a.id || (!selected && i === 0)) {
-				a.setAttribute('aria-selected', true);
-			} else {
-				a.setAttribute('aria-selected', false);
-			}
-		});
 	}
 
 	handleChange = (e) => {
-		console.log('e', e);
+		this.selected = e.target.id;
+		e.target.setAttribute('aria-selected', true);
+		this.tabs.map((a) => {
+			if (a.id !== e.target.id && a.getAttribute('aria-selected')) {
+				a.setAttribute('aria-selected', false);
+			}
+		});
 	}
 }
 
