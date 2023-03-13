@@ -10,23 +10,20 @@ export default class TabPanel extends HTMLElement {
 				:host {
 					display: inline-block;
 				}
-				div.ac-tab-panel {
+				.panel {
 					display: flex;
 					flex-direction: column;
 					width: 100%;
 				}
 			</style>
-			<div class='ac-tab-panel'></div>
+			<div class='panel'><slot></slot></div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get container() { return this.shadowRoot.querySelector('div.ac-tab-panel'); }
+	get container() { return this.shadowRoot.querySelector('.panel'); }
 
 	connectedCallback() {
-		if (this.childNodes.length > 0) {
-			Array.from(this.childNodes).map((a) => this.container.appendChild(a));
-		}
 	}
 }
 

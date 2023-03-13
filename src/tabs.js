@@ -39,10 +39,10 @@ export default class Tabs extends HTMLElement {
 
 	connectedCallback() {
 		this.addEventListener('change', this.handleChange);
+		const selected = this.getAttribute('selected') || null;
 		const tabs = [];
 		if (this.childNodes.length > 0) {
-			//console.log(this.childNodes);
-			this.childNodes.forEach((a, i) => {
+			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					tabs.push(a);
 				} else if (a.nodeName.toLowerCase() === 'ac-tab-panel') {
@@ -50,12 +50,19 @@ export default class Tabs extends HTMLElement {
 				}
 			});
 		}
-		//console.log(tabs);
 		tabs.map((a, i) => {
 			a.setAttribute('slot', 'tabs');
 			a.setAttribute('style', `grid-column: ${i + 1} / auto;`);
+			if (selected === a.id || (!selected && i === 0)) {
+				a.setAttribute('aria-selected', true);
+			} else {
+				a.setAttribute('aria-selected', false);
+			}
 		});
-		//this.shadowRoot.querySelector('div.ac-tab-list').setAttribute('style', `grid-template-columns: repeat(${tabs.length}, auto);`);
+	}
+
+	handleChange = (e) => {
+		console.log('e', e);
 	}
 }
 

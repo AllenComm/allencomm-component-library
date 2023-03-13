@@ -16,11 +16,14 @@
 		<div class='group'>
 			<h2>Tabs</h2>
 			<h3>Without Panels</h3>
-			<ac-tabs>
-				<ac-tab>First</ac-tab>
-				<ac-tab>Second</ac-tab>
-				<ac-tab>Third</ac-tab>
-			</ac-tabs>
+			<ac-card>
+				<ac-tabs selected='fourth'>
+					<ac-tab id='first'>First</ac-tab>
+					<ac-tab id='second'>Second</ac-tab>
+					<ac-tab id='third'>Third</ac-tab>
+					<ac-tab id='fourth'>Fourth</ac-tab>
+				</ac-tabs>
+			</ac-card>
 			<h3>With Panels</h3>
 			<ac-tabs>
 				<ac-tab id='one'>First</ac-tab>
@@ -114,8 +117,7 @@
 				const els = [...document.querySelectorAll('*')].filter((b) => customElements.get(b.nodeName.toLowerCase()));
 				els.map((a) => {
 					a.addEventListener('change', (e) => {
-						console.dir(a);
-						console.log(e);
+						console.log('CHANGE:', { a, e });
 					});
 				});
 			};

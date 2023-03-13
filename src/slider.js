@@ -75,10 +75,9 @@ export default class Slider extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		const code = e.code;
 		const val = parseFloat(this.input.value);
 		const step = parseFloat(this.input.getAttribute('step'));
-		switch (code) {
+		switch (e.code) {
 			case 'ArrowUp':
 			case 'ArrowRight':
 				e.preventDefault();

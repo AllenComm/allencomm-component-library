@@ -107,8 +107,7 @@ export default class Switch extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		const code = e.code;
-		switch (code) {
+		switch (e.code) {
 			case 'NumpadEnter':
 			case 'Enter':
 			case 'Space':

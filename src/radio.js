@@ -87,14 +87,17 @@ export default class Radio extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		const code = e.code;
-		switch (code) {
+		// Add arrow key navigation/toggling within same group, like default
+		// html
+		switch (e.code) {
 			case 'Enter':
 			case 'Space':
 				e.preventDefault();
 				e.stopPropagation();
-				this.input.checked = !this.input.checked;
-				this.handleChange();
+				if (!this.input.checked) {
+					this.input.checked = true;
+					this.handleChange(e);
+				}
 				break;
 		}
 	}

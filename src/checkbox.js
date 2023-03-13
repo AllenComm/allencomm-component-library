@@ -68,8 +68,7 @@ export default class Checkbox extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		const code = e.code;
-		switch (code) {
+		switch (e.code) {
 			case 'Enter':
 			case 'Space':
 				e.preventDefault();
