@@ -10,6 +10,12 @@ export default class TabPanel extends HTMLElement {
 				:host {
 					display: inline-block;
 				}
+				:host([hidden="false"]) {
+					opacity: 1;
+				}
+				:host([hidden="true"]) {
+					opacity: 0;
+				}
 				.panel {
 					display: flex;
 					flex-direction: column;
