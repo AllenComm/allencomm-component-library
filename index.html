@@ -109,6 +109,16 @@
 					el.removeAttribute('checked');
 				});
 			};
+
+			window.onload = () => {
+				const els = [...document.querySelectorAll('*')].filter((b) => customElements.get(b.nodeName.toLowerCase()));
+				els.map((a) => {
+					a.addEventListener('change', (e) => {
+						console.dir(a);
+						console.log(e);
+					});
+				});
+			};
 		</script>
 	</body>
 </html>
