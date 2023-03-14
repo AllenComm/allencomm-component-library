@@ -1,4 +1,6 @@
 export default class TabPanel extends HTMLElement {
+	static observedAttributes = ['hidden'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -28,7 +30,18 @@ export default class TabPanel extends HTMLElement {
 			</style>
 			<div class='panel'><slot></slot></div>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this.setAttribute('tabindex', -1);
+	}
+
+	attributeChangedCallback(attr, oldVal, newVal) {
+		if (attr === 'hidden') {
+			const bool = newVal === 'true';
+			if (bool) {
+				this.setAttribute('tabindex', -1);
+			} else {
+				this.removeAttribute('tabindex');
+			}
+		}
 	}
 }
 

@@ -16,19 +16,17 @@
 		<div class='group'>
 			<h2>Tabs</h2>
 			<h3>Without Panels</h3>
-			<ac-card>
-				<ac-tabs selected='tab-3'>
-					<ac-tab>First</ac-tab>
-					<ac-tab>Second</ac-tab>
-					<ac-tab>Third</ac-tab>
-					<ac-tab>Fourth</ac-tab>
-				</ac-tabs>
-			</ac-card>
+			<ac-tabs selected='tab-3'>
+				<ac-tab>First</ac-tab>
+				<ac-tab>Second</ac-tab>
+				<ac-tab>Third</ac-tab>
+				<ac-tab>Fourth</ac-tab>
+			</ac-tabs>
 			<h3>With Panels</h3>
 			<ac-tabs>
-				<ac-tab id='one'>First</ac-tab>
-				<ac-tab id='two'>Second</ac-tab>
-				<ac-tab id='three'>Third</ac-tab>
+				<ac-tab>First</ac-tab>
+				<ac-tab>Second</ac-tab>
+				<ac-tab>Third</ac-tab>
 				<ac-tab-panel>
 					<p><strong>First</strong></p>
 					<ac-tabs>
@@ -123,9 +121,6 @@
 					if (a.nodeName.toLowerCase() !== 'ac-tab' && a.nodeName.toLowerCase() !== 'ac-tab-panel') {
 						a.addEventListener('change', (e) => {
 							console.log('CHANGE:', { a, e });
-							if (a.nodeName.toLowerCase() === 'ac-tabs') {
-								console.dir(a.selected);
-							}
 						});
 					}
 				});

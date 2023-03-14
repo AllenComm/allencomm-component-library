@@ -16,12 +16,11 @@ export default class Tabs extends HTMLElement {
 				.list {
 					display: grid;
 					grid-auto-flow: row;
-					grid-template-rows: auto 5px;
+					grid-template-rows: auto 2px;
 					justify-items: center;
 				}
 				.indicator {
 					background-color: #0075ff;
-					border-radius: 5px 5px 0 0;
 					transform: translateX(0);
 					width: 90%;
 				}
@@ -35,8 +34,6 @@ export default class Tabs extends HTMLElement {
 			</div>
 			<slot name='panels'></slot>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
-
 		this._panels = [];
 		this._selected = 0;
 		this._tabs = [];
@@ -53,20 +50,33 @@ export default class Tabs extends HTMLElement {
 	set #tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
-		this.addEventListener('click', this.handleChange);
 		const initialSelected = this.getAttribute('selected') || null;
+		const tabs = [...document.querySelectorAll('ac-tabs')];
+		const tabCounts = tabs.map((a) => {
+			return [...[...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-tab')].length;
+		});
+		const currentTabsIndex = tabs.findIndex((a) => a === this);
+		const offset = tabCounts.map((a, i) => {
+			if (i < currentTabsIndex) {
+				return a;
+			}
+			return 0;
+		}).reduce((a, b) => a + b, 0);
 		let tabIndex = 0;
 		let panelIndex = 0;
+		let tabId = tabIndex + offset;
+		let panelId = panelIndex + offset;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					const tabSelected = a.getAttribute('selected') || false;
 					this.#tabs.push(a);
+					a.addEventListener('click', this.handleChange);
 					a.setAttribute('slot', 'tabs');
 					a.setAttribute('style', `grid-column: ${tabIndex + 1} / auto;`);
 					a.setAttribute('aria-selected', false);
 					if (!a.id) {
-						a.id = `tab-${tabIndex + 1}`;
+						a.id = `tab-${tabId + 1}`;
 					}
 					if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
 						this.#selected = tabIndex;
@@ -74,12 +84,13 @@ export default class Tabs extends HTMLElement {
 						this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 					}
 					tabIndex = tabIndex + 1;
+					tabId = tabId + 1;
 				} else if (a.nodeName.toLowerCase() === 'ac-tab-panel') {
 					this.#panels.push(a);
 					a.setAttribute('slot', 'panels');
 					a.setAttribute('hidden', true);
 					if (!a.id) {
-						a.id = `panel-${panelIndex + 1}`;
+						a.id = `panel-${panelId + 1}`;
 					}
 					if (this.#tabs[panelIndex]) {
 						this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
@@ -89,9 +100,11 @@ export default class Tabs extends HTMLElement {
 						a.setAttribute('hidden', false);
 					}
 					panelIndex = panelIndex + 1;
+					panelId = panelId + 1;
 				}
 			});
 		}
+		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = (e) => {
@@ -109,6 +122,18 @@ export default class Tabs extends HTMLElement {
 		});
 		this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'composed': true }));
+	}
+
+	handleKeydown = (e) => {
+		switch (e.code) {
+			case 'NumpadEnter':
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				this.handleChange(e);
+				break;
+		}
 	}
 }
 

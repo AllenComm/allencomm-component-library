@@ -22,9 +22,9 @@ export default class Tab extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<button><slot></slot></button>
+			<button tabindex='-1'><slot></slot></button>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this.setAttribute('tabindex', 1);
 	}
 }
 
