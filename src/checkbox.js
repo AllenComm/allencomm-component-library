@@ -43,6 +43,8 @@ export default class Checkbox extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get checked() { return this.#input.checked; }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -74,7 +76,7 @@ export default class Checkbox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				this.#input.checked = !this.#input.checked;
-				this.handleChange();
+				this.handleChange(e);
 				break;
 		}
 	}

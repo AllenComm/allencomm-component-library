@@ -37,8 +37,9 @@ export default class Number extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get value() { return parseFloat(this.#input.value); }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
-	get #value() { return parseFloat(this.#input.value); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
@@ -65,12 +66,12 @@ export default class Number extends HTMLElement {
 	}
 	
 	handleChange = () => {
-		this.setAttribute('aria-valuenow', this.#value);
+		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {
-		const val = parseFloat(this.#input.value);
+		const val = this.value;
 		const step = parseFloat(this.#input.getAttribute('step'));
 		switch (e.code) {
 			case 'ArrowUp':

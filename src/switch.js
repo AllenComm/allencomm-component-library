@@ -79,6 +79,8 @@ export default class Switch extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get checked() { return this.#input.checked; }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {

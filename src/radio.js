@@ -43,6 +43,7 @@ export default class Radio extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get checked() { return this.input.checked; }
 	get id() { return this.input.getAttribute('id'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
 
