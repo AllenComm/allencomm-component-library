@@ -38,6 +38,8 @@ export default class Slider extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get value() { return this.#input.value; }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #output() { return this.shadowRoot.querySelector('output'); }
 
