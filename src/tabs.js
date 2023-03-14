@@ -50,24 +50,18 @@ export default class Tabs extends HTMLElement {
 	set #tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
-		console.log('start');
 		const initialSelected = this.getAttribute('selected') || null;
-		console.log('1');
 		const tabs = [...document.querySelectorAll('ac-tabs')];
-		console.log('2');
 		const tabCounts = tabs.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-tab').length;
 		});
-		console.log('3');
 		const currentTabsIndex = tabs.findIndex((a) => a === this);
-		console.log('4');
 		const offset = tabCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
 			}
 			return 0;
 		}).reduce((a, b) => a + b, 0);
-		console.log('5');
 		let tabIndex = 0;
 		let panelIndex = 0;
 		let tabId = tabIndex + offset;
@@ -110,9 +104,7 @@ export default class Tabs extends HTMLElement {
 				}
 			});
 		}
-		console.log('6');
 		this.addEventListener('keydown', this.handleKeydown);
-		console.log('end');
 	}
 
 	handleChange = (e) => {
