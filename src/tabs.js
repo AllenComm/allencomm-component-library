@@ -50,6 +50,7 @@ export default class Tabs extends HTMLElement {
 	set #tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
+		console.log('start');
 		const initialSelected = this.getAttribute('selected') || null;
 		console.log('1');
 		const tabs = [...document.querySelectorAll('ac-tabs')];
@@ -111,6 +112,7 @@ export default class Tabs extends HTMLElement {
 		}
 		console.log('6');
 		this.addEventListener('keydown', this.handleKeydown);
+		console.log('end');
 	}
 
 	handleChange = (e) => {

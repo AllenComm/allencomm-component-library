@@ -30,7 +30,6 @@ export default class TabPanel extends HTMLElement {
 			</style>
 			<div class='panel'><slot></slot></div>
 		`;
-		this.setAttribute('tabindex', -1);
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -42,6 +41,10 @@ export default class TabPanel extends HTMLElement {
 				this.removeAttribute('tabindex');
 			}
 		}
+	}
+
+	connectedCallback() {
+		this.setAttribute('tabindex', -1);
 	}
 }
 

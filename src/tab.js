@@ -24,6 +24,9 @@ export default class Tab extends HTMLElement {
 			</style>
 			<button tabindex='-1'><slot></slot></button>
 		`;
+	}
+
+	connectedCallback() {
 		this.setAttribute('tabindex', 1);
 	}
 }
