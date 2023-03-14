@@ -8,27 +8,23 @@ export default class Tab extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					display: inline-block;
-				}
-				.tab {
-					cursor: pointer;
 					display: block;
 					width: 100%;
 				}
+				button {
+					background: none;
+					border: none;
+					cursor: pointer;
+					display: flex;
+					padding: 10px;
+					place-content: center;
+					text-align: center;
+					width: 100%;
+				}
 			</style>
-			<div class='tab'><slot></slot></div>
+			<button><slot></slot></button>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
-	}
-
-	get container() { return this.shadowRoot.querySelector('.tab'); }
-
-	connectedCallback() {
-		this.container.addEventListener('click', this.handleClick);
-	}
-
-	handleClick() {
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 }
 

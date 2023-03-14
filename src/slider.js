@@ -38,13 +38,12 @@ export default class Slider extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get input() { return this.shadowRoot.querySelector('input'); }
-	get output() { return this.shadowRoot.querySelector('output'); }
-	get value() { return parseFloat(this.input.value); }
+	get #input() { return this.shadowRoot.querySelector('input'); }
+	get #output() { return this.shadowRoot.querySelector('output'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.input.value = parseFloat(newVal);
+			this.#input.value = parseFloat(newVal);
 			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
@@ -54,12 +53,12 @@ export default class Slider extends HTMLElement {
 		const min = this.getAttribute('min') || 0;
 		const step = this.getAttribute('step') || 1;
 		const value = this.getAttribute('value') || 0;
-		this.input.addEventListener('input', this.handleChange);
-		this.input.setAttribute('max', max);
-		this.input.setAttribute('min', min);
-		this.input.setAttribute('step', step);
-		this.input.value = parseFloat(value);
-		this.output.innerText = this.value;
+		this.#input.addEventListener('input', this.handleChange);
+		this.#input.setAttribute('max', max);
+		this.#input.setAttribute('min', min);
+		this.#input.setAttribute('step', step);
+		this.#input.value = parseFloat(value);
+		this.#output.innerText = parseFloat(this.#input.value);
 		this.setAttribute('aria-orientation', 'horizontal');
 		this.setAttribute('aria-valuemax', max);
 		this.setAttribute('aria-valuemin', min);
@@ -69,21 +68,21 @@ export default class Slider extends HTMLElement {
 	}
 	
 	handleChange = () => {
-		this.output.innerText = this.value;
-		this.setAttribute('aria-valuenow', this.value);
+		this.#output.innerText = parseFloat(this.#input.value);
+		this.setAttribute('aria-valuenow', parseFloat(this.#input.value));
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {
-		const val = parseFloat(this.input.value);
-		const step = parseFloat(this.input.getAttribute('step'));
+		const val = parseFloat(this.#input.value);
+		const step = parseFloat(this.#input.getAttribute('step'));
 		switch (e.code) {
 			case 'ArrowUp':
 			case 'ArrowRight':
 				e.preventDefault();
 				e.stopPropagation();
-				if ((val + step) <= parseFloat(this.input.getAttribute('max'))) {
-					this.input.value = val + step;
+				if ((val + step) <= parseFloat(this.#input.getAttribute('max'))) {
+					this.#input.value = val + step;
 					this.handleChange();
 				}
 				break;
@@ -91,8 +90,8 @@ export default class Slider extends HTMLElement {
 			case 'ArrowLeft':
 				e.preventDefault();
 				e.stopPropagation();
-				if ((val - step) >= parseFloat(this.input.getAttribute('min'))) {
-					this.input.value = val - step;
+				if ((val - step) >= parseFloat(this.#input.getAttribute('min'))) {
+					this.#input.value = val - step;
 					this.handleChange();
 				}
 				break;

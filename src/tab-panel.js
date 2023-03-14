@@ -9,12 +9,16 @@ export default class TabPanel extends HTMLElement {
 				}
 				:host {
 					display: inline-block;
+					grid-column: 1;
+					grid-row: 1;
 				}
 				:host([hidden="false"]) {
 					opacity: 1;
+					z-index: 1;
 				}
 				:host([hidden="true"]) {
 					opacity: 0;
+					z-index: -1;
 				}
 				.panel {
 					display: flex;
@@ -25,11 +29,6 @@ export default class TabPanel extends HTMLElement {
 			<div class='panel'><slot></slot></div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
-	}
-
-	get container() { return this.shadowRoot.querySelector('.panel'); }
-
-	connectedCallback() {
 	}
 }
 

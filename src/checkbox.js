@@ -43,27 +43,27 @@ export default class Checkbox extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get input() { return this.shadowRoot.querySelector('input'); }
+	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
-			this.input.checked = bool;
+			this.#input.checked = bool;
 			this.setAttribute('aria-checked', bool);
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
-		this.input.checked = checked;
-		this.input.addEventListener('change', this.handleChange);
+		this.#input.checked = checked;
+		this.#input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
 		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('aria-checked', this.input.checked);
+		this.setAttribute('aria-checked', this.#input.checked);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
 	}
 
@@ -73,7 +73,7 @@ export default class Checkbox extends HTMLElement {
 			case 'Space':
 				e.preventDefault();
 				e.stopPropagation();
-				this.input.checked = !this.input.checked;
+				this.#input.checked = !this.#input.checked;
 				this.handleChange();
 				break;
 		}

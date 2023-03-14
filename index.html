@@ -29,16 +29,20 @@
 				<ac-tab id='one'>First</ac-tab>
 				<ac-tab id='two'>Second</ac-tab>
 				<ac-tab id='three'>Third</ac-tab>
-				<ac-tab-panel for='one'>
+				<ac-tab-panel>
 					<p><strong>First</strong></p>
-					<p>This is content that will appear in the first panel...</p>
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum cursus neque a odio venenatis molestie a vel ante. Vivamus mollis mi nisl, nec vehicula dui fermentum sed. Morbi maximus mauris id ligula tempus dapibus. Donec euismod fringilla ligula et hendrerit. Suspendisse sodales, neque vel pharetra pulvinar, nunc purus lacinia eros, et elementum est erat ac erat. Vestibulum ut malesuada tortor. Phasellus non interdum quam. Vestibulum egestas neque sed dictum blandit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur dignissim aliquet sem, in aliquam ligula accumsan non. Praesent lobortis tempus semper. Vestibulum vulputate tempus tellus eget condimentum. Vestibulum justo leo, faucibus vel luctus eget, blandit ac magna. Suspendisse potenti. Proin vehicula viverra urna at eleifend.</p>
+					<ac-tabs>
+						<ac-tab>Hey</ac-tab>
+						<ac-tab selected='true'>Now</ac-tab>
+						<ac-tab-panel>You're a rock star</ac-tab-panel>
+						<ac-tab-panel>Get your game on...</ac-tab-panel>
+					</ac-tabs>
 				</ac-tab-panel>
-				<ac-tab-panel for='two'>
+				<ac-tab-panel>
 					<p><strong>Second</strong></p>
 					<p>Integer vitae urna nec mi laoreet volutpat at rhoncus est. Etiam consectetur porttitor sem, in elementum eros vulputate in. Sed tellus orci, feugiat faucibus bibendum quis, laoreet id ipsum. Vivamus a nisi neque. Suspendisse eget viverra nisl. Pellentesque cursus, justo ac aliquet faucibus, elit urna hendrerit risus, pharetra dictum augue nunc id ex. Proin faucibus pharetra tortor, a volutpat libero blandit quis. Nullam at euismod ligula. Aliquam a tortor nisl. Proin imperdiet quis nisi sit amet interdum. Cras consectetur dui quis tortor viverra pulvinar. Quisque leo eros, mattis at justo a, consequat ultrices velit.</p>
 				</ac-tab-panel>
-				<ac-tab-panel for='three'>
+				<ac-tab-panel>
 					<p><strong>Third</strong></p>
 					<p>Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In volutpat hendrerit metus, et posuere nibh accumsan ut. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi non nulla vehicula, pellentesque libero nec, consectetur ante. Quisque eu erat vel purus egestas vulputate in eget eros. Suspendisse sit amet nulla tellus. Nullam ultricies metus vel leo molestie aliquet. Sed vel semper ante.</p>
 				</ac-tab-panel>
@@ -116,9 +120,14 @@
 			window.onload = () => {
 				const els = [...document.querySelectorAll('*')].filter((b) => customElements.get(b.nodeName.toLowerCase()));
 				els.map((a) => {
-					a.addEventListener('change', (e) => {
-						console.log('CHANGE:', { a, e });
-					});
+					if (a.nodeName.toLowerCase() !== 'ac-tab' && a.nodeName.toLowerCase() !== 'ac-tab-panel') {
+						a.addEventListener('change', (e) => {
+							console.log('CHANGE:', { a, e });
+							if (a.nodeName.toLowerCase() === 'ac-tabs') {
+								console.dir(a.selected);
+							}
+						});
+					}
 				});
 			};
 		</script>

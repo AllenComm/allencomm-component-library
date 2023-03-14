@@ -45,9 +45,10 @@ export default class Radio extends HTMLElement {
 
 	get id() { return this.input.getAttribute('id'); }
 	get input() { return this.shadowRoot.querySelector('input'); }
-	get label() { return this.shadowRoot.querySelector('label'); }
-	get name() { return this.input.getAttribute('name'); }
-	get slot() { return this.shadowRoot.querySelector('slot'); }
+
+	get #label() { return this.shadowRoot.querySelector('label'); }
+	get #name() { return this.input.getAttribute('name'); }
+	get #slot() { return this.shadowRoot.querySelector('slot'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
@@ -61,7 +62,7 @@ export default class Radio extends HTMLElement {
 		const id = this.getAttribute('id') || null;
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
-		this.label.setAttribute('for', id);
+		this.#label.setAttribute('for', id);
 		this.input.setAttribute('id', id);
 		this.input.setAttribute('name', name);
 		this.input.setAttribute('value', value);
@@ -76,8 +77,8 @@ export default class Radio extends HTMLElement {
 		this.setAttribute('aria-checked', this.input.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
-			const sameItem = this.id && a.id ? this.id === a.id : this.slot.assignedNodes()?.[0].nodeValue === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0].nodeValue;
-			const sameName = name && this.name === name;
+			const sameItem = this.id && a.id ? this.id === a.id : this.#slot.assignedNodes()?.[0].nodeValue === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0].nodeValue;
+			const sameName = name && this.#name === name;
 			if (sameName && !sameItem) {
 				a.input.checked = false;
 				a.setAttribute('aria-checked', false);
