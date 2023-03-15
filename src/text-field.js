@@ -52,13 +52,28 @@ export default class TextField extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const maxlength = this.getAttribute('maxlength') || null;
+		const minlength = this.getAttribute('minlength') || null;
 		const placeholder = this.getAttribute('placeholder') || null;
+		const size = this.getAttribute('size') || null;
+		if (maxlength) {
+			this.#input.setAttribute('maxlength', maxlength);
+		}
+
+		if (minlength) {
+			this.#input.setAttribute('minlength', minlength);
+		}
+
 		if (placeholder) {
 			this.#input.setAttribute('placeholder', placeholder);
 		}
+
+		if (size) {
+			this.#input.setAttribute('size', size);
+		}
+
 		this.#input.addEventListener('input', this.handleChange);
 		this.setAttribute('aria-valuenow', this.value);
-		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {
