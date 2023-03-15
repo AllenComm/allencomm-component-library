@@ -38,6 +38,7 @@ export default class TextArea extends HTMLElement {
 				<textarea></textarea>
 			</label>
 		`;
+		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get value() { return this.#textarea.value; }

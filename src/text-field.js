@@ -38,6 +38,7 @@ export default class TextField extends HTMLElement {
 				<input type='text'/>
 			</label>
 		`;
+		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	get value() { return this.#input.value; }
