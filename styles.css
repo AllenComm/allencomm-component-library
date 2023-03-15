@@ -95,9 +95,9 @@ main {
 nav {
 	align-self: flex-start;
 	grid-area: 2/1/2/1;
-	position: fixed;
+	margin-right: 30px;
+	position: sticky;
 	top: 50px;
-	width: 270px;
 }
 
 nav section {
