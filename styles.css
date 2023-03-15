@@ -76,23 +76,28 @@ select {
 body {
 	align-items: center;
 	background-color: #eee;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+	display: grid;
+	grid-template-columns: 300px 1fr;
+	grid-template-rows: 50px 1fr;
 	width: 100%;
 }
 
+header {
+	grid-area: 1/2/1/2;
+}
+
 main {
-	margin: 0 auto;
+	grid-area: 2/2/2/2;
 	max-width: 1200px;
 	width: 100%;
 }
 
 nav {
-	left: 16px;
+	align-self: flex-start;
+	grid-area: 2/1/2/1;
 	position: fixed;
-	top: 48px;
-	width: 300px;
+	top: 50px;
+	width: 270px;
 }
 
 nav section {
