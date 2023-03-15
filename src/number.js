@@ -67,7 +67,7 @@ export default class Number extends HTMLElement {
 	
 	handleChange = () => {
 		this.setAttribute('aria-valuenow', this.value);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 	}
 
 	handleKeydown = (e) => {

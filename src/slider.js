@@ -72,7 +72,7 @@ export default class Slider extends HTMLElement {
 	handleChange = () => {
 		this.#output.innerText = parseFloat(this.#input.value);
 		this.setAttribute('aria-valuenow', parseFloat(this.#input.value));
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 	}
 
 	handleKeydown = (e) => {

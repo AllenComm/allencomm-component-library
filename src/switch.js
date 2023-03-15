@@ -103,7 +103,7 @@ export default class Switch extends HTMLElement {
 	handleChange = (e) => {
 		this.setAttribute('aria-checked', this.#input.checked);
 		if (e) {
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));			
+			this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 		}
 	}
 

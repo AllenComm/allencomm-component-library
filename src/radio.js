@@ -85,7 +85,7 @@ export default class Radio extends HTMLElement {
 				a.setAttribute('aria-checked', false);
 			}
 		});
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 	}
 
 	handleKeydown = (e) => {

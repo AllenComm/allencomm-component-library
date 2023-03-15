@@ -66,7 +66,7 @@ export default class Checkbox extends HTMLElement {
 	
 	handleChange = () => {
 		this.setAttribute('aria-checked', this.#input.checked);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'composed': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 	}
 
 	handleKeydown = (e) => {
