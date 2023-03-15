@@ -10,7 +10,6 @@ export default class Tabs extends HTMLElement {
 				:host {
 					display: flex;
 					flex-direction: column;
-					gap: 10px;
 					width: 100%;
 				}
 				.list {
@@ -21,8 +20,9 @@ export default class Tabs extends HTMLElement {
 				}
 				.indicator {
 					background-color: #0075ff;
+					height: 2px;
 					transform: translateX(0);
-					width: 90%;
+					width: 98%;
 				}
 				slot[name="panels"] {
 					display: grid;
