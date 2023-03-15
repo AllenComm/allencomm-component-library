@@ -1,3 +1,4 @@
+import Button from './src/button.js';
 import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Listbox from './src/listbox.js';
@@ -12,6 +13,7 @@ import TextArea from './src/text-area.js';
 import TextField from './src/text-field.js';
 
 export {
+	Button,
 	Card,
 	Checkbox,
 	Listbox,
