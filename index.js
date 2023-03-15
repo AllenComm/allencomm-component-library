@@ -8,6 +8,8 @@ import Switch from './src/switch.js';
 import Tab from './src/tab.js';
 import Tabs from './src/tabs.js';
 import TabPanel from './src/tab-panel.js';
+import TextField from './src/text-field.js';
+
 export {
 	Card,
 	Checkbox,
@@ -18,5 +20,6 @@ export {
 	Switch,
 	Tab,
 	Tabs,
-	TabPanel
+	TabPanel,
+	TextField
 };
