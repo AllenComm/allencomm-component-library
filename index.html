@@ -13,7 +13,7 @@
 	</head>
 	<body>
 		<h1>AllenComm Component Library</h1>
-		<div class='group'>
+		<ac-card>
 			<h2>Input</h2>
 			<h3>Number</h3>
 			<ac-number min=1 max=10 step=0.5 value=2.5>AC Number 1</ac-number>
@@ -23,17 +23,18 @@
 			<ac-slider min=0 max=10 step=1 value=10>AC Slider Component 2</ac-slider>
 			<h3>Text-Field</h3>
 			<ac-text-field>AC Text-Field</ac-text-field>
-		</div>
-		<div class='group'>
+		</ac-card>
+		<ac-card>
 			<h2>Tabs</h2>
 			<h3>Without Panels</h3>
 			<h4>In a Card</h4>
 			<ac-card>
-				<ac-tabs selected='hey'>
+				<ac-tabs>
 					<ac-tab>First</ac-tab>
 					<ac-tab>Second</ac-tab>
-					<ac-tab id='hey'>Third</ac-tab>
+					<ac-tab>Third</ac-tab>
 					<ac-tab>Fourth</ac-tab>
+					<ac-tab>Fifth</ac-tab>
 				</ac-tabs>
 			</ac-card>
 			<h4>Outside a Card</h4>
@@ -66,8 +67,8 @@
 					<p>Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In volutpat hendrerit metus, et posuere nibh accumsan ut. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi non nulla vehicula, pellentesque libero nec, consectetur ante. Quisque eu erat vel purus egestas vulputate in eget eros. Suspendisse sit amet nulla tellus. Nullam ultricies metus vel leo molestie aliquet. Sed vel semper ante.</p>
 				</ac-tab-panel>
 			</ac-tabs>
-		</div>
-		<div class='group'>
+		</ac-card>
+		<ac-card>
 			<h2>Toggles</h2>
 			<h3>Checkbox</h3>
 			<ac-checkbox>AC Checkbox Component 1</ac-checkbox>
@@ -83,15 +84,15 @@
 			<h3>Switch</h3>
 			<ac-switch>AC Switch Component 1</ac-switch>
 			<ac-switch checked=true>AC Switch Component 2</ac-switch>
-		</div>
-		<div class='group'>
+		</ac-card>
+		<ac-card>
 			<h2>Misc</h2>
 			<h3>Card</h3>
 			<ac-card style="width: 300px"><h5>Testing</h5><p>Lorem ipsum...</p></ac-card>
 			<!--<h3>Listbox</h3>
 			<ac-listbox>AC Listbox Component 1</ac-listbox>
 			<br>-->
-		</div>
+		</ac-card>
 		<br>
 		<button onclick='randomizeValues()'>Randomize Values</button>
 		<br>

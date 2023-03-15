@@ -77,16 +77,15 @@ body {
 	padding: 10px;
 }
 
-.group {
-	border: 1px solid grey;
+body>ac-card {
 	margin: 5px 0;
-	padding: 0 10px 10px;
+	padding: 20px;
 }
 
-.group>h2 {
+body>ac-card>h2 {
 	text-align: center;
 }
 
-.group>h3, .group>h4, .group>h5, .group>h6 {
+body>ac-card>h3, body>ac-card>h4, body>ac-card>h5, body>ac-card>h6 {
 	margin: 10px 0 0;
 }
