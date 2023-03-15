@@ -13,10 +13,15 @@ export default class TextField extends HTMLElement {
 					outline: none;
 					width: 100%;
 				}
-				:host(:focus-visible) input {
+				input {
 					border-radius: 3px;
-					outline: 2px solid #000;
-					outline-offset: 2px;
+					border-width: 1px;
+					padding: 5px;
+				}
+				input:focus-visible {
+					border-color: #000;
+					border-style: solid;
+					outline: 1px solid #000;
 					z-index: 1;
 				}
 				label {
@@ -27,13 +32,10 @@ export default class TextField extends HTMLElement {
 					flex-wrap: wrap;
 					width: 100%;
 				}
-				input {
-					padding: 5px;
-				}
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
-				<input tabindex='-1' type='text'/>
+				<input type='text'/>
 			</label>
 		`;
 	}
@@ -56,18 +58,12 @@ export default class TextField extends HTMLElement {
 		}
 		this.#input.addEventListener('input', this.handleChange);
 		this.setAttribute('aria-valuenow', this.value);
-		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {
 		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
-	}
-
-	handleKeydown = (e) => {
-		const val = this.value;
-		console.log(e);
 	}
 }
 

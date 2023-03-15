@@ -13,14 +13,16 @@ export default class Number extends HTMLElement {
 					outline: none;
 					width: 100%;
 				}
-				:host(:focus-visible) input {
-					border-radius: 3px;
-					outline: 2px solid #000;
-					outline-offset: 2px;
-					z-index: 1;
-				}
 				input {
-					cursor: pointer;
+					border-radius: 3px;
+					border-width: 1px;
+					padding: 5px;
+				}
+				input:focus-visible {
+					border-color: #000;
+					border-style: solid;
+					outline: 1px solid #000;
+					z-index: 1;
 				}
 				label {
 					align-items: center;
@@ -31,7 +33,7 @@ export default class Number extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
-				<input tabindex='-1' type='number'></input>
+				<input type='number'></input>
 				<slot></slot>
 			</label>
 		`;
@@ -62,7 +64,6 @@ export default class Number extends HTMLElement {
 		this.setAttribute('aria-valuemax', max);
 		this.setAttribute('aria-valuemin', min);
 		this.setAttribute('aria-valuenow', value);
-		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 	

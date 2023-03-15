@@ -74,18 +74,34 @@ select {
 }
 
 body {
-	padding: 10px;
+	align-items: center;
+	background-color: #eee;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 100%;
 }
 
-body>ac-card {
-	margin: 5px 0;
-	padding: 20px;
+main {
+	margin: 0 auto;
+	max-width: 1200px;
+	width: 100%;
 }
 
-body>ac-card>h2 {
-	text-align: center;
+nav {
+	left: 16px;
+	position: fixed;
+	top: 48px;
+	width: 300px;
 }
 
-body>ac-card>h3, body>ac-card>h4, body>ac-card>h5, body>ac-card>h6 {
-	margin: 10px 0 0;
+nav section {
+	display: flex;
+	flex-direction: column;
+}
+
+section {
+	border: 1px dashed black;
+	margin-bottom: 30px;
+	padding: 16px;
 }

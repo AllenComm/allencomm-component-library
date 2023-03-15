@@ -12,12 +12,18 @@
 		<script src="./index.js" type="module" defer></script>
 	</head>
 	<body>
-		<ac-text-field placeholder='name'>Text-Field</ac-text-field>
-		<ac-number min='0' max='10'>Number</ac-number>
-		<br>
-		<button onclick='randomizeValues()'>Randomize Values</button>
-		<br>
-		<button onclick='resetValues()'>Reset Values</button>
+		<main>
+			<section>
+				<ac-text-field placeholder='name'>Text-Field</ac-text-field>
+			</section>
+			<section>
+				<ac-number min='0' max='10'>Number</ac-number>
+			</section>
+			<section>
+				<button onclick='randomizeValues()'>Randomize Values</button>
+				<button onclick='resetValues()'>Reset Values</button>
+			</section>
+		</main>
 		<script>
 			const getRand = (min, max) => {
 				min = Math.ceil(min);
