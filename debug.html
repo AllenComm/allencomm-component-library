@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Library of AllenComm made UI components.">
+		<title>Debug</title>
+		<base href="/">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="./styles.css" rel="stylesheet">
+		<script src="./index.js" type="module" defer></script>
+	</head>
+	<body>
+		<ac-text-field placeholder='name'>Text-Field</ac-text-field>
+		<ac-number min='0' max='10'>Number</ac-number>
+		<br>
+		<button onclick='randomizeValues()'>Randomize Values</button>
+		<br>
+		<button onclick='resetValues()'>Reset Values</button>
+		<script>
+			const getRand = (min, max) => {
+				min = Math.ceil(min);
+				max = Math.floor(max);
+				return Math.floor(Math.random() * (max - min) + min);
+			};
+
+			const randomizeValues = () => {
+				[...document.querySelectorAll('ac-slider'), ...document.querySelectorAll('ac-number')].map((el) => {
+					const min = el.getAttribute('min') || 0;
+					const max = el.getAttribute('max') || 10;
+					el.setAttribute('value', getRand(min, max));
+				});
+				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch'), ...document.querySelectorAll('ac-radio')].map((el) => {
+					if (el.getAttribute('checked')) {
+						el.removeAttribute('checked');
+					} else {
+						el.setAttribute('checked', true);
+					}
+				});
+			};
+
+			const resetValues = () => {
+				[...document.querySelectorAll('ac-slider'), ...document.querySelectorAll('ac-number')].map((el) => {
+					el.setAttribute('value', 0);
+				});
+				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch'), ...document.querySelectorAll('ac-radio')].map((el) => {
+					el.removeAttribute('checked');
+				});
+			};
+
+			window.onload = () => {
+				const els = [...document.querySelectorAll('*')].filter((b) => customElements.get(b.nodeName.toLowerCase()));
+				els.map((a) => {
+					if (a.nodeName.toLowerCase() !== 'ac-tab' && a.nodeName.toLowerCase() !== 'ac-tab-panel') {
+						a.addEventListener('change', (e) => {
+							console.log('CHANGE:', { a, e });
+						});
+					}
+				});
+			};
+		</script>
+	</body>
+</html>

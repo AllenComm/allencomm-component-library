@@ -25,7 +25,8 @@ export default class Number extends HTMLElement {
 				label {
 					align-items: center;
 					display: flex;
-					gap: 10px;
+					flex-wrap: wrap;
+					gap: 0 10px;
 					width: 100%;
 				}
 			</style>
@@ -67,7 +68,7 @@ export default class Number extends HTMLElement {
 	
 	handleChange = () => {
 		this.setAttribute('aria-valuenow', this.value);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {

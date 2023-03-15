@@ -26,8 +26,9 @@ export default class Switch extends HTMLElement {
 					align-items: center;
 					cursor: pointer;
 					display: flex;
-					gap: 10px;
-					user-select: none;
+					flex-wrap: wrap;
+					gap: 0 10px;
+					width: 100%;
 				}
 				.wrapper {
 					background: transparent;
