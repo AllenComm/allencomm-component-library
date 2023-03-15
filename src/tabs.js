@@ -121,7 +121,7 @@ export default class Tabs extends HTMLElement {
 			}
 		});
 		this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'composed': true }));
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {
