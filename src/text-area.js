@@ -17,7 +17,6 @@ export default class TextArea extends HTMLElement {
 					border-radius: 3px;
 					border-width: 1px;
 					padding: 5px;
-					resize: none;
 				}
 				textarea:focus-visible {
 					border-color: #000;
@@ -53,17 +52,19 @@ export default class TextArea extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const columns = this.getAttribute('cols') || null;
+		const cols = this.getAttribute('cols') || null;
 		const maxlength = this.getAttribute('maxlength') || null;
 		const minlength = this.getAttribute('minlength') || null;
 		const placeholder = this.getAttribute('placeholder') || '';
 		const rows = this.getAttribute('rows') || null;
+		const resize = this.getAttribute('resize') || 'none';
 		const value = this.getAttribute('value') || null;
-		this.#textarea.setAttribute('cols', columns);
+		this.#textarea.setAttribute('cols', cols);
 		this.#textarea.setAttribute('maxlength', maxlength);
 		this.#textarea.setAttribute('minlength', minlength);
 		this.#textarea.setAttribute('placeholder', placeholder);
 		this.#textarea.setAttribute('rows', rows);
+		this.#textarea.style.setProperty('resize', resize);
 		this.#textarea.value = value;
 		this.#textarea.addEventListener('input', this.handleChange);
 		this.setAttribute('aria-valuenow', value);
