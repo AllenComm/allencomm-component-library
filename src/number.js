@@ -52,13 +52,21 @@ export default class Number extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const max = this.getAttribute('max') || '';
-		const min = this.getAttribute('min') || '';
+		const max = this.getAttribute('max') || null;
+		const maxlength = this.getAttribute('maxlength') || null;
+		const min = this.getAttribute('min') || null;
+		const minlength = this.getAttribute('minlength') || null;
+		const placeholder = this.getAttribute('placeholder') || '';
+		const size = this.getAttribute('size') || null;
 		const step = this.getAttribute('step') || 1;
-		const value = this.getAttribute('value') || 0;
+		const value = this.getAttribute('value') || null;
 		this.#input.addEventListener('change', this.handleChange);
 		this.#input.setAttribute('max', max);
+		this.#input.setAttribute('maxlength', maxlength);
 		this.#input.setAttribute('min', min);
+		this.#input.setAttribute('minlength', minlength);
+		this.#input.setAttribute('placeholder', placeholder);
+		this.#input.setAttribute('size', size);
 		this.#input.setAttribute('step', step);
 		this.#input.value = parseFloat(value);
 		this.setAttribute('aria-valuemax', max);
