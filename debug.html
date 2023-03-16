@@ -14,20 +14,28 @@
 	<body>
 		<main>
 			<section>
+				<ac-radio name='radio'>Radio</ac-radio>
+				<ac-radio name='radio'>Radio</ac-radio>
+				<ac-radio name='radio'>Radio</ac-radio>
+				<ac-radio name='radio'>Radio</ac-radio>
+				<ac-radio name='radio'>Radio</ac-radio>
+			</section>
+			<section>
 				<ac-button>Click</ac-button>
 			</section>
 			<section>
-				<ac-text-area placeholder='name' resize='both' rows='5' cols='2' maxlength='50' minlength='3'>Text-Area</ac-text-area>
+				<ac-text-area resize='both' rows='5' maxlength='50' minlength='3'>Text-Area</ac-text-area>
 			</section>
 			<section>
 				<ac-text-field placeholder='name' size='5' maxlength='5' minlength='3'>Text-Field</ac-text-field>
 			</section>
 			<section>
 				<ac-number min='0' max='10'>Number</ac-number>
+				<ac-number max='10'>Number</ac-number>
 			</section>
 			<section>
-				<button onclick='randomizeValues()'>Randomize Values</button>
-				<button onclick='resetValues()'>Reset Values</button>
+				<ac-button onclick='randomizeValues()'>Randomize Values</ac-button>
+				<ac-button onclick='resetValues()'>Reset Values</ac-button>
 			</section>
 		</main>
 		<script>

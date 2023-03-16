@@ -45,46 +45,59 @@ export default class Radio extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get checked() { return this.input.checked; }
-	get id() { return this.input.getAttribute('id'); }
-	get input() { return this.shadowRoot.querySelector('input'); }
+	get checked() { return this.#input.checked; }
+	get id() { return this.#input.id; }
+	get name() { return this.#input.name; }
 
+	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #label() { return this.shadowRoot.querySelector('label'); }
-	get #name() { return this.input.getAttribute('name'); }
 	get #slot() { return this.shadowRoot.querySelector('slot'); }
+
+	set checked(newVal) {
+		const bool = newVal === 'true';
+		this.#input.checked = bool;
+		this.ariaChecked = bool;
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
-			this.input.checked = bool;
+			this.#input.checked = bool;
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
-		const id = this.getAttribute('id') || null;
+		const id = this.getAttribute('id');
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
-		this.#label.setAttribute('for', id);
-		this.input.setAttribute('id', id);
-		this.input.setAttribute('name', name);
-		this.input.setAttribute('value', value);
-		this.input.checked = checked;
-		this.input.addEventListener('change', this.handleChange);
-		this.setAttribute('aria-checked', checked);
-		this.setAttribute('tabindex', 0);
+		this.#input.ariaHidden = true;
+		if (id != null) {
+			this.#input.id = id;
+			this.#label.for = id;
+		} else {
+			const newId = `radio-${[...document.querySelectorAll('ac-radio')].findIndex((a) => a === this)}`;
+			this.#input.id = newId;
+			this.#label.for = newId;
+			this.setAttribute('id', newId);
+		}
+		this.#input.name = name;
+		this.#input.value = value;
+		this.#input.checked = checked;
+		this.#input.addEventListener('change', this.handleChange);
+		this.ariaChecked = checked;
+		this.tabIndex = 0;
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
-	handleChange = () => {
-		this.setAttribute('aria-checked', this.input.checked);
+	handleChange = (e) => {
+		this.setAttribute('aria-checked', this.#input.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
 			const sameItem = this.id && a.id ? this.id === a.id : this.#slot.assignedNodes()?.[0].nodeValue === a.shadowRoot.querySelector('slot')?.assignedNodes()?.[0].nodeValue;
-			const sameName = name && this.#name === name;
+			const sameName = name && this.name === name;
 			if (sameName && !sameItem) {
-				a.input.checked = false;
-				a.setAttribute('aria-checked', false);
+				a.checked = false;
 			}
 		});
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
@@ -98,8 +111,8 @@ export default class Radio extends HTMLElement {
 			case 'Space':
 				e.preventDefault();
 				e.stopPropagation();
-				if (!this.input.checked) {
-					this.input.checked = true;
+				if (!this.#input.checked) {
+					this.#input.checked = true;
 					this.handleChange(e);
 				}
 				break;

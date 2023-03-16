@@ -8,19 +8,13 @@ export default class Button extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: inline-block;
 					outline: none;
-					width: 100%;
 				}
 				button {
-					cursor: pointer;
-				}
-				label {
 					align-items: flex-start;
 					cursor: pointer;
 					display: flex;
-					flex-direction: column;
-					flex-wrap: wrap;
-					width: 100%;
 				}
 			</style>
 			<button>
@@ -42,15 +36,15 @@ export default class Button extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const value = this.getAttribute('value') || null;
-		this.#button.value = value;
+		const value = this.getAttribute('value');
+		if (value != null) this.#button.value = value;
 		this.#button.addEventListener('click', this.handleChange);
 		this.setAttribute('aria-valuenow', value);
 	}
 
 	handleChange = () => {
 		this.setAttribute('aria-valuenow', this.value);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
+		this.dispatchEvent(new Event('click', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
 
