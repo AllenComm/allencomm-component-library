@@ -9,7 +9,6 @@ export default class Button extends HTMLElement {
 				}
 				:host {
 					display: inline-block;
-					outline: none;
 				}
 				button {
 					align-items: flex-start;
@@ -17,33 +16,21 @@ export default class Button extends HTMLElement {
 					display: flex;
 				}
 			</style>
-			<button>
+			<button tabindex='-1'>
 				<slot></slot>
 			</button>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get value() { return this.#button.value; }
-
 	get #button() { return this.shadowRoot.querySelector('button'); }
 
-	attributeChangedCallback(attr, oldVal, newVal) {
-		if (attr === 'value') {
-			this.#button.value = newVal;
-			this.setAttribute('aria-valuenow', newVal);
-		}
-	}
-
 	connectedCallback() {
-		const value = this.getAttribute('value');
-		if (value != null) this.#button.value = value;
 		this.#button.addEventListener('click', this.handleChange);
-		this.setAttribute('aria-valuenow', value);
+		this.tabIndex = 0;
 	}
 
 	handleChange = () => {
-		this.setAttribute('aria-valuenow', this.value);
 		this.dispatchEvent(new Event('click', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
