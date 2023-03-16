@@ -30,7 +30,7 @@ export default class Button extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.#button.value = parseFloat(newVal);
+			this.#button.value = newVal;
 			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
