@@ -122,22 +122,17 @@ export default class Listbox extends HTMLElement {
 		if (!multiple) {
 			this.#options.forEach((a, i) => {
 				if (a.id !== target.id && a.getAttribute('aria-selected')) {
-					if (!multiple) {
-						a.setAttribute('aria-selected', false);
-					}
+					a.setAttribute('aria-selected', false);
 				} else {
-					target.setAttribute('aria-selected', !cur);
-					this.#selected = cur ? -1 : i;
+					target.setAttribute('aria-selected', true);
+					this.#selected = i;
 				}
 			});
 		} else {
 			const i = this.#options.findIndex((a) => a === target);
 			target.setAttribute('aria-selected', !cur);
 			if (cur) {
-				const temp = this.selected.slice();
-				const index = temp.indexOf(i);
-				const newArr = temp.splice(index, 1);
-				this.#selected = newArr;
+				this.#selected = this.selected.slice().splice(this.selected.indexOf(i), 1);
 			} else {
 				this.#selected = this.selected.push(i);
 			}

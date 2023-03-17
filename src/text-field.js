@@ -48,7 +48,7 @@ export default class TextField extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = newVal;
-			this.setAttribute('aria-valuenow', newVal);
+			this.setAttribute('aria-valueNow', newVal);
 		}
 	}
 
@@ -64,13 +64,13 @@ export default class TextField extends HTMLElement {
 		if (size) this.#input.setAttribute('size', size);
 		if (value != null) {
 			this.#input.value = value;
-			this.setAttribute('aria-valuenow', value);
+			this.setAttribute('aria-valueNow', value);
 		}
 		this.#input.addEventListener('input', this.handleChange);
 	}
 
 	handleChange = () => {
-		this.setAttribute('aria-valuenow', this.value);
+		this.setAttribute('aria-valueNow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }

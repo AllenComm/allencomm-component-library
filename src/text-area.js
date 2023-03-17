@@ -48,7 +48,7 @@ export default class TextArea extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#textarea.value = newVal;
-			this.setAttribute('aria-valuenow', newVal);
+			this.setAttribute('aria-valueNow', newVal);
 		}
 	}
 
@@ -74,7 +74,7 @@ export default class TextArea extends HTMLElement {
 	}
 
 	handleChange = () => {
-		this.setAttribute('aria-valuenow', this.value);
+		this.setAttribute('aria-valueNow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
