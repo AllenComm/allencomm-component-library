@@ -1,6 +1,7 @@
 import Button from './src/button.js';
 import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
+import Combobox from './src/combobox.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
 import Option from './src/option.js';
@@ -17,6 +18,7 @@ export {
 	Button,
 	Card,
 	Checkbox,
+	Combobox,
 	Listbox,
 	Number,
 	Option,

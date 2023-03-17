@@ -14,7 +14,7 @@ export default class Listbox extends HTMLElement {
 					justify-items: center;
 					padding: 1px;
 				}
-				:host([aria-activedescendant='true']) .list {
+				:host([aria-activedescendant]:not([aria-activedescendant=''])) .list {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
@@ -142,13 +142,13 @@ export default class Listbox extends HTMLElement {
 
 	handleChildBlur = (e) => {
 		if (this.contains(e.target) && !this.contains(e.relatedTarget) && this.getAttribute('aria-activedescendant')) {
-			this.setAttribute('aria-activedescendant', false)
+			this.removeAttribute('aria-activedescendant');
 		}
 	}
 
 	handleChildFocus = (e) => {
 		if (this.contains(e.target) && this.getAttribute('aria-activedescendant') !== 'true') {
-			this.setAttribute('aria-activedescendant', true);
+			this.setAttribute('aria-activedescendant', e.target.id);
 		}
 	}
 
