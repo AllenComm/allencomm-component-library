@@ -12,6 +12,23 @@ export default class Tabs extends HTMLElement {
 					flex-direction: column;
 					width: 100%;
 				}
+				:host([variant='alternate']) .list {
+					background-color: #d3d3d3;
+					border-color: #d3d3d3;
+					border-radius: 3px;
+					border-style: solid;
+					border-width: 1px;
+					grid-gap: 2px;
+					grid-template-rows: auto;
+				}
+				:host([variant='alternate']) .indicator {
+					background-color: #fff;
+					border-radius: 3px;
+					grid-row: 1;
+					height: calc(100% - 2px);
+					margin: 1px;
+					width: calc(100% - 2px);
+				}
 				.list {
 					display: grid;
 					grid-auto-flow: row;
@@ -51,6 +68,7 @@ export default class Tabs extends HTMLElement {
 
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
+		const isAlternate = this.getAttribute('variant') === 'alternate';
 		const tabs = [...document.querySelectorAll('ac-tabs')];
 		const tabCounts = tabs.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-tab').length;
@@ -66,6 +84,7 @@ export default class Tabs extends HTMLElement {
 		let panelIndex = 0;
 		let tabId = tabIndex + offset;
 		let panelId = panelIndex + offset;
+
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
@@ -73,11 +92,11 @@ export default class Tabs extends HTMLElement {
 					this.#tabs.push(a);
 					a.addEventListener('click', this.handleChange);
 					a.setAttribute('slot', 'tabs');
-					a.setAttribute('style', `grid-column: ${tabIndex + 1} / auto;`);
 					a.setAttribute('aria-selected', false);
-					if (!a.id) {
-						a.id = `tab-${tabId + 1}`;
-					}
+					a.style.setProperty('grid-column', `${tabIndex + 1} / auto`);
+					a.style.setProperty('grid-row', '1');
+					if (isAlternate) a.style.setProperty('z-index', '2');
+					if (!a.id) a.id = `tab-${tabId + 1}`;
 					if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
 						this.#selected = tabIndex;
 						a.setAttribute('aria-selected', true);
@@ -89,9 +108,7 @@ export default class Tabs extends HTMLElement {
 					this.#panels.push(a);
 					a.setAttribute('slot', 'panels');
 					a.setAttribute('hidden', true);
-					if (!a.id) {
-						a.id = `panel-${panelId + 1}`;
-					}
+					if (!a.id) a.id = `panel-${panelId + 1}`;
 					if (this.#tabs[panelIndex]) {
 						this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
 						a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);

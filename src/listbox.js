@@ -8,13 +8,21 @@ export default class Listbox extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					align-items: flex-start;
 					display: flex;
-					width: 100%;
+					flex-direction: column;
+					justify-items: center;
+					padding: 1px;
 				}
 				:host([aria-activedescendant='true']) .list {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
+				}
+				:host([orientation='horizontal']) {
+					align-items: center;
+					flex-direction: row;
+					justify-content: space-between;
 				}
 				:host([orientation='horizontal']) .list {
 					flex-direction: row;
@@ -22,8 +30,10 @@ export default class Listbox extends HTMLElement {
 				.list {
 					display: flex;
 					flex-direction: column;
+					gap: 1px;
 				}
 			</style>
+			<slot></slot>
 			<div class='list'>
 				<slot name='options'></slot>
 			</div>
@@ -66,14 +76,14 @@ export default class Listbox extends HTMLElement {
 			}
 			return 0;
 		}).reduce((a, b) => a + b, 0);
+		let optionIndex = 0;
+		let optionId = optionIndex + offset;
 
 		if (multiple != null && multiple) {
 			this.setAttribute('aria-multiselectable', true);
 			this.#selected = [];
 		}
 
-		let optionIndex = 0;
-		let optionId = optionIndex + offset;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
@@ -102,12 +112,6 @@ export default class Listbox extends HTMLElement {
 			});
 		}
 		this.setAttribute('role', 'listbox');
-		this.addEventListener('focus', this.handleFocus);
-		this.addEventListener('keydown', this.handleKeydown);
-	}
-
-	focus() {
-		this.#options[0].focus();
 	}
 
 	handleChange = (e) => {
@@ -161,8 +165,6 @@ export default class Listbox extends HTMLElement {
 				e.stopPropagation();
 				if (e.target.nextElementSibling) {
 					e.target.nextElementSibling.focus();
-				} else if (this.nextElementSibling) {
-					this.nextElementSibling.focus();
 				}
 				break;
 			case 'ArrowLeft':
@@ -171,8 +173,6 @@ export default class Listbox extends HTMLElement {
 				e.stopPropagation();
 				if (e.target.previousElementSibling) {
 					e.target.previousElementSibling.focus();
-				} else if (this.previousElementSibling) {
-					this.previousElementSibling.focus();
 				}
 				break;
 			case 'NumpadEnter':
@@ -181,19 +181,6 @@ export default class Listbox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				this.handleChange(e);
-				break;
-		}
-	}
-
-	handleKeydown = (e) => {
-		switch (e.code) {
-			case 'Shift':
-			case 'Tab':
-				break;
-			case 'Tab':
-				e.preventDefault();
-				e.stopPropagation();
-				console.dir(this);
 				break;
 		}
 	}
