@@ -47,24 +47,26 @@ export default class TextField extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.#input.value = parseFloat(newVal);
+			this.#input.value = newVal;
 			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
 
 	connectedCallback() {
-		const maxlength = this.getAttribute('maxlength') || null;
-		const minlength = this.getAttribute('minlength') || null;
-		const placeholder = this.getAttribute('placeholder') || '';
-		const size = this.getAttribute('size') || null;
-		const value = this.getAttribute('value') || null;
-		this.#input.setAttribute('maxlength', maxlength);
-		this.#input.setAttribute('minlength', minlength);
-		this.#input.setAttribute('placeholder', placeholder);
-		this.#input.setAttribute('size', size);
-		this.#input.value = value;
+		const maxlength = this.getAttribute('maxlength');
+		const minlength = this.getAttribute('minlength');
+		const placeholder = this.getAttribute('placeholder');
+		const size = this.getAttribute('size');
+		const value = this.getAttribute('value');
+		if (maxlength) this.#input.setAttribute('maxlength', maxlength);
+		if (minlength) this.#input.setAttribute('minlength', minlength);
+		if (placeholder) this.#input.setAttribute('placeholder', placeholder);
+		if (size) this.#input.setAttribute('size', size);
+		if (value != null) {
+			this.#input.value = value;
+			this.setAttribute('aria-valuenow', value);
+		}
 		this.#input.addEventListener('input', this.handleChange);
-		this.setAttribute('aria-valuenow', value);
 	}
 
 	handleChange = () => {

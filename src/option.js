@@ -23,7 +23,7 @@ export default class Option extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.tabIndex = 0;
+		this.setAttribute('tabindex', 0);
 	}
 }
 

@@ -47,28 +47,30 @@ export default class TextArea extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.#textarea.value = parseFloat(newVal);
+			this.#textarea.value = newVal;
 			this.setAttribute('aria-valuenow', newVal);
 		}
 	}
 
 	connectedCallback() {
-		const cols = this.getAttribute('cols') || null;
-		const maxlength = this.getAttribute('maxlength') || null;
-		const minlength = this.getAttribute('minlength') || null;
-		const placeholder = this.getAttribute('placeholder') || '';
-		const rows = this.getAttribute('rows') || null;
+		const cols = this.getAttribute('cols');
+		const maxlength = this.getAttribute('maxlength');
+		const minlength = this.getAttribute('minlength');
+		const placeholder = this.getAttribute('placeholder');
+		const rows = this.getAttribute('rows');
 		const resize = this.getAttribute('resize') || 'none';
-		const value = this.getAttribute('value') || null;
-		this.#textarea.setAttribute('cols', cols);
-		this.#textarea.setAttribute('maxlength', maxlength);
-		this.#textarea.setAttribute('minlength', minlength);
-		this.#textarea.setAttribute('placeholder', placeholder);
-		this.#textarea.setAttribute('rows', rows);
+		const value = this.getAttribute('value');
+		if (cols) this.#textarea.setAttribute('cols', cols);
+		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
+		if (minlength) this.#textarea.setAttribute('minlength', minlength);
+		if (placeholder) this.#textarea.setAttribute('placeholder', placeholder);
+		if (rows) this.#textarea.setAttribute('rows', rows);
 		this.#textarea.style.setProperty('resize', resize);
-		this.#textarea.value = value;
+		if (value != null) {
+			this.#textarea.value = value;
+			this.setAttribute('aria-valueNow', value);
+		}
 		this.#textarea.addEventListener('input', this.handleChange);
-		this.setAttribute('aria-valuenow', value);
 	}
 
 	handleChange = () => {

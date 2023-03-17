@@ -27,7 +27,7 @@ export default class Button extends HTMLElement {
 
 	connectedCallback() {
 		this.#button.addEventListener('click', this.handleChange);
-		this.tabIndex = 0;
+		this.setAttribute('tabindex', 0);
 	}
 
 	handleChange = () => {

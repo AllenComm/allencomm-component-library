@@ -56,7 +56,7 @@ export default class Radio extends HTMLElement {
 	set checked(newVal) {
 		const bool = newVal === 'true';
 		this.#input.checked = bool;
-		this.ariaChecked = bool;
+		this.setAttribute('aria-checked', bool);
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -71,22 +71,22 @@ export default class Radio extends HTMLElement {
 		const id = this.getAttribute('id');
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
-		this.#input.ariaHidden = true;
+		this.#input.setAttribute('aria-hidden', true);
 		this.#input.checked = checked;
 		if (id != null) {
-			this.#input.id = id;
-			this.#label.for = id;
+			this.#input.setAttribute('id', id);
+			this.#label.setAttribute('for', id);
 		} else {
 			const newId = `radio-${[...document.querySelectorAll('ac-radio')].findIndex((a) => a === this)}`;
-			this.#input.id = newId;
-			this.#label.for = newId;
+			this.#input.setAttribute('id', newId);
+			this.#label.setAttribute('for', newId);
 			this.setAttribute('id', newId);
 		}
-		this.#input.name = name;
-		this.#input.value = value;
+		this.#input.setAttribute('name', name);
+		this.#input.setAttribute('value', value);
 		this.#input.addEventListener('change', this.handleChange);
-		this.ariaChecked = checked;
-		this.tabIndex = 0;
+		this.setAttribute('aria-checked', checked);
+		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 

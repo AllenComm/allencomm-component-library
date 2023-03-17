@@ -48,7 +48,7 @@ export default class Slider extends HTMLElement {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
 			this.#output.innerText = newVal;
-			this.ariaValueNow = newVal;
+			this.setAttribute('aria-valueNow', newVal);
 		}
 	}
 
@@ -57,30 +57,30 @@ export default class Slider extends HTMLElement {
 		const min = this.getAttribute('min');
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
-		this.#input.ariaHidden = true;
+		this.#input.setAttribute('aria-hidden', true);
 		if (max != null) {
-			this.#input.max = max;
-			this.ariaValueMax = max;
+			this.#input.setAttribute('max', max);
+			this.setAttribute('aria-valueMax', max);
 		}
 		if (min != null) {
-			this.#input.min = min;
-			this.ariaValueMin = min;
+			this.#input.setAttribute('min', min);
+			this.setAttribute('aria-valueMin', min);
 		}
-		if (step) this.#input.step = step;
+		if (step) this.#input.setAttribute('step', step);
 		if (value != null) {
 			this.#input.value = parseFloat(value);
-			this.ariaValueNow = value;
+			this.setAttribute('aria-valueNow', value);
 		}
 		this.#input.addEventListener('input', this.handleChange);
-		this.#output.innerText = parseFloat(value);
-		this.ariaOrientation = 'horizontal';
-		this.tabIndex = 0;
+		this.#output.innerText = value;
+		this.setAttribute('aria-orientation', 'horizontal');
+		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {
 		this.#output.innerText = this.value;
-		this.ariaValueNow = parseFloat(this.value);
+		this.setAttribute('aria-valueNow', parseFloat(this.value));
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 

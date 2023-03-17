@@ -47,7 +47,7 @@ export default class Number extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
-			this.ariaValueNow = newVal;
+			this.setAttribute('aria-valueNow', newVal);
 		}
 	}
 
@@ -61,28 +61,28 @@ export default class Number extends HTMLElement {
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
 		if (max != null) {
-			this.#input.max = max;
-			this.ariaValueMax = max;
+			this.#input.setAttribute('max', max);
+			this.setAttribute('aria-valueMax', max);
 		}
-		if (maxlength) this.#input.maxlength = maxlength;
+		if (maxlength) this.#input.setAttribute('maxlength', maxlength);
 		if (min != null) {
-			this.#input.min = min;
-			this.ariaValueMin = min;
+			this.#input.setAttribute('min', min);
+			this.setAttribute('aria-valueMin', min);
 		}
-		if (minlength) this.#input.minlength = minlength;
-		if (placeholder) this.#input.placeholder = placeholder;
-		if (size) this.#input.size = size;
-		if (step) this.#input.step = step;
+		if (minlength) this.#input.setAttribute('minlength', minlength);
+		if (placeholder) this.#input.setAttribute('placeholder', placeholder);
+		if (size) this.#input.setAttribute('size', size);
+		if (step) this.#input.setAttribute('step', step);
 		if (value != null) {
 			this.#input.value = parseFloat(value);
-			this.ariaValueNow = value;
+			this.setAttribute('aria-valueNow', value);
 		}
 		this.#input.addEventListener('change', this.handleChange);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {
-		if (this.value != null) this.ariaValueNow = this.value;
+		if (this.value != null) this.setAttribute('aria-valueNow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 

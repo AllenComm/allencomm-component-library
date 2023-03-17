@@ -101,9 +101,9 @@ export default class Listbox extends HTMLElement {
 				}
 			});
 		}
+		this.setAttribute('role', 'listbox');
 		this.addEventListener('focus', this.handleFocus);
 		this.addEventListener('keydown', this.handleKeydown);
-		this.role = 'listbox';
 	}
 
 	focus() {

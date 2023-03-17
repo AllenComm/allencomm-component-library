@@ -50,7 +50,7 @@ export default class Tabs extends HTMLElement {
 	set #tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
-		const initialSelected = this.getAttribute('selected') || null;
+		const initialSelected = this.getAttribute('selected');
 		const tabs = [...document.querySelectorAll('ac-tabs')];
 		const tabCounts = tabs.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-tab').length;
