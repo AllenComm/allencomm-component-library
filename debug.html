@@ -14,71 +14,17 @@
 	<body>
 		<main>
 			<section>
-				<ac-radio name='radio'>Radio</ac-radio>
-				<ac-radio name='radio'>Radio</ac-radio>
-				<ac-radio name='radio'>Radio</ac-radio>
-				<ac-radio name='radio'>Radio</ac-radio>
-				<ac-radio name='radio'>Radio</ac-radio>
-			</section>
-			<section>
-				<ac-button>Click</ac-button>
-			</section>
-			<section>
-				<ac-text-area resize='both' rows='5' maxlength='50' minlength='3'>Text-Area</ac-text-area>
-			</section>
-			<section>
-				<ac-text-field placeholder='name' size='5' maxlength='5' minlength='3'>Text-Field</ac-text-field>
-			</section>
-			<section>
-				<ac-number min='0' max='10'>Number</ac-number>
-				<ac-number max='10'>Number</ac-number>
-			</section>
-			<section>
-				<ac-button onclick='randomizeValues()'>Randomize Values</ac-button>
-				<ac-button onclick='resetValues()'>Reset Values</ac-button>
+				<ac-listbox selected='option-2'>
+					<ac-option>One</ac-option>
+					<ac-option>Two</ac-option>
+					<ac-option>Three</ac-option>
+				</ac-listbox>
+				<ac-listbox multiple='true' orientation='horizontal'>
+					<ac-option selected='true'>One</ac-option>
+					<ac-option selected='true'>Two</ac-option>
+					<ac-option>Three</ac-option>
+				</ac-listbox>
 			</section>
 		</main>
-		<script>
-			const getRand = (min, max) => {
-				min = Math.ceil(min);
-				max = Math.floor(max);
-				return Math.floor(Math.random() * (max - min) + min);
-			};
-
-			const randomizeValues = () => {
-				[...document.querySelectorAll('ac-slider'), ...document.querySelectorAll('ac-number')].map((el) => {
-					const min = el.getAttribute('min') || 0;
-					const max = el.getAttribute('max') || 10;
-					el.setAttribute('value', getRand(min, max));
-				});
-				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch'), ...document.querySelectorAll('ac-radio')].map((el) => {
-					if (el.getAttribute('checked')) {
-						el.removeAttribute('checked');
-					} else {
-						el.setAttribute('checked', true);
-					}
-				});
-			};
-
-			const resetValues = () => {
-				[...document.querySelectorAll('ac-slider'), ...document.querySelectorAll('ac-number')].map((el) => {
-					el.setAttribute('value', 0);
-				});
-				[...document.querySelectorAll('ac-checkbox'), ...document.querySelectorAll('ac-switch'), ...document.querySelectorAll('ac-radio')].map((el) => {
-					el.removeAttribute('checked');
-				});
-			};
-
-			window.onload = () => {
-				const els = [...document.querySelectorAll('*')].filter((b) => customElements.get(b.nodeName.toLowerCase()));
-				els.map((a) => {
-					if (a.nodeName.toLowerCase() !== 'ac-tab' && a.nodeName.toLowerCase() !== 'ac-tab-panel') {
-						a.addEventListener('change', (e) => {
-							console.log('CHANGE:', { a, e });
-						});
-					}
-				});
-			};
-		</script>
 	</body>
 </html>

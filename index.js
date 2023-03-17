@@ -3,6 +3,7 @@ import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
+import Option from './src/option.js';
 import Radio from './src/radio.js';
 import Slider from './src/slider.js';
 import Switch from './src/switch.js';
@@ -18,6 +19,7 @@ export {
 	Checkbox,
 	Listbox,
 	Number,
+	Option,
 	Radio,
 	Slider,
 	Switch,

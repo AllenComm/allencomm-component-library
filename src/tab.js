@@ -27,7 +27,7 @@ export default class Tab extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.setAttribute('tabindex', 1);
+		this.setAttribute('tabindex', 0);
 	}
 }
 

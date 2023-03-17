@@ -47,38 +47,51 @@ export default class Slider extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
-			this.setAttribute('aria-valuenow', newVal);
+			this.#output.innerText = newVal;
+			this.ariaValueNow = newVal;
 		}
 	}
 
 	connectedCallback() {
-		const max = this.getAttribute('max') || 10;
-		const min = this.getAttribute('min') || 0;
-		const step = this.getAttribute('step') || 1;
-		const value = this.getAttribute('value') || 0;
+		const max = this.getAttribute('max');
+		const min = this.getAttribute('min');
+		const step = this.getAttribute('step');
+		const value = this.getAttribute('value');
+		this.#input.ariaHidden = true;
+		if (max != null) {
+			this.#input.max = max;
+			this.ariaValueMax = max;
+		}
+		if (min != null) {
+			this.#input.min = min;
+			this.ariaValueMin = min;
+		}
+		if (step) this.#input.step = step;
+		if (value != null) {
+			this.#input.value = parseFloat(value);
+			this.ariaValueNow = value;
+		}
 		this.#input.addEventListener('input', this.handleChange);
-		this.#input.setAttribute('max', max);
-		this.#input.setAttribute('min', min);
-		this.#input.setAttribute('step', step);
-		this.#input.value = parseFloat(value);
-		this.#output.innerText = parseFloat(this.#input.value);
-		this.setAttribute('aria-orientation', 'horizontal');
-		this.setAttribute('aria-valuemax', max);
-		this.setAttribute('aria-valuemin', min);
-		this.setAttribute('aria-valuenow', value);
-		this.setAttribute('tabindex', 0);
+		this.#output.innerText = parseFloat(value);
+		this.ariaOrientation = 'horizontal';
+		this.tabIndex = 0;
 		this.addEventListener('keydown', this.handleKeydown);
 	}
-	
+
 	handleChange = () => {
-		this.#output.innerText = parseFloat(this.#input.value);
-		this.setAttribute('aria-valuenow', parseFloat(this.#input.value));
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
+		this.#output.innerText = this.value;
+		this.ariaValueNow = parseFloat(this.value);
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {
-		const val = parseFloat(this.#input.value);
-		const step = parseFloat(this.#input.getAttribute('step'));
+		let val = 0;
+		if (!isNaN(parseFloat(this.value))) {
+			val = parseFloat(this.value);
+		} else if (!isNaN(parseFloat(this.#input.min)) && parseFloat(this.#input.min) > 0) {
+			val = parseFloat(this.#input.min);
+		}
+		const step = isNaN(parseFloat(this.#input.step)) ? 1 : parseFloat(this.#input.step);
 		switch (e.code) {
 			case 'ArrowUp':
 			case 'ArrowRight':

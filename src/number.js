@@ -47,7 +47,7 @@ export default class Number extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
-			this.#input.ariaValueNow = newVal;
+			this.ariaValueNow = newVal;
 		}
 	}
 
@@ -62,12 +62,12 @@ export default class Number extends HTMLElement {
 		const value = this.getAttribute('value');
 		if (max != null) {
 			this.#input.max = max;
-			this.#input.ariaValueMax = max;
+			this.ariaValueMax = max;
 		}
 		if (maxlength) this.#input.maxlength = maxlength;
 		if (min != null) {
 			this.#input.min = min;
-			this.#input.ariaValueMin = min;
+			this.ariaValueMin = min;
 		}
 		if (minlength) this.#input.minlength = minlength;
 		if (placeholder) this.#input.placeholder = placeholder;
@@ -75,14 +75,14 @@ export default class Number extends HTMLElement {
 		if (step) this.#input.step = step;
 		if (value != null) {
 			this.#input.value = parseFloat(value);
-			this.#input.ariaValueNow = value;
+			this.ariaValueNow = value;
 		}
 		this.#input.addEventListener('change', this.handleChange);
 		this.addEventListener('keydown', this.handleKeydown);
 	}
-	
+
 	handleChange = () => {
-		if (this.value != null) this.#input.ariaValueNow = this.value;
+		if (this.value != null) this.ariaValueNow = this.value;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 

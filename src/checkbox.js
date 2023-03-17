@@ -53,7 +53,7 @@ export default class Checkbox extends HTMLElement {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
 			this.#input.checked = bool;
-			this.setAttribute('aria-checked', bool);
+			this.ariaChecked = bool;
 		}
 	}
 
@@ -61,13 +61,13 @@ export default class Checkbox extends HTMLElement {
 		const checked = this.getAttribute('checked') || false;
 		this.#input.checked = checked;
 		this.#input.addEventListener('change', this.handleChange);
-		this.setAttribute('aria-checked', checked);
-		this.setAttribute('tabindex', 0);
+		this.ariaChecked = checked;
+		this.tabIndex = 0;
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 	
 	handleChange = () => {
-		this.setAttribute('aria-checked', this.#input.checked);
+		this.ariaChecked = this.#input.checked;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
 	}
 

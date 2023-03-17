@@ -109,13 +109,14 @@ export default class Tabs extends HTMLElement {
 
 	handleChange = (e) => {
 		e.stopPropagation();
+		const target = e.target;
 		this.#tabs.forEach((a, i) => {
-			if (a.id !== e.target.id && a.getAttribute('aria-selected')) {
+			if (a.id !== target.id && a.getAttribute('aria-selected')) {
 				a.setAttribute('aria-selected', false);
 				this.#panels[i]?.setAttribute('aria-selected', false);
 				this.#panels[i]?.setAttribute('hidden', true);
 			} else {
-				e.target.setAttribute('aria-selected', true);
+				target.setAttribute('aria-selected', true);
 				this.#panels[i]?.setAttribute('hidden', false);
 				this.#selected = i;
 			}

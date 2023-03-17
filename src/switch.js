@@ -17,7 +17,6 @@ export default class Switch extends HTMLElement {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
-					z-index: 1;
 				}
 				input {
 					display: none;
@@ -104,7 +103,7 @@ export default class Switch extends HTMLElement {
 	handleChange = (e) => {
 		this.setAttribute('aria-checked', this.#input.checked);
 		if (e) {
-			this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
+			this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 		}
 	}
 

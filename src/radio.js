@@ -72,6 +72,7 @@ export default class Radio extends HTMLElement {
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
 		this.#input.ariaHidden = true;
+		this.#input.checked = checked;
 		if (id != null) {
 			this.#input.id = id;
 			this.#label.for = id;
@@ -83,14 +84,13 @@ export default class Radio extends HTMLElement {
 		}
 		this.#input.name = name;
 		this.#input.value = value;
-		this.#input.checked = checked;
 		this.#input.addEventListener('change', this.handleChange);
 		this.ariaChecked = checked;
 		this.tabIndex = 0;
 		this.addEventListener('keydown', this.handleKeydown);
 	}
-	
-	handleChange = (e) => {
+
+	handleChange = () => {
 		this.setAttribute('aria-checked', this.#input.checked);
 		Array.from(window.document.querySelectorAll('ac-radio')).map((a) => {
 			const name = a.attributes?.name?.nodeValue;
@@ -100,7 +100,7 @@ export default class Radio extends HTMLElement {
 				a.checked = false;
 			}
 		});
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));			
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
 	handleKeydown = (e) => {
@@ -113,7 +113,7 @@ export default class Radio extends HTMLElement {
 				e.stopPropagation();
 				if (!this.#input.checked) {
 					this.#input.checked = true;
-					this.handleChange(e);
+					this.handleChange();
 				}
 				break;
 		}
