@@ -12,7 +12,12 @@ export default class Card extends HTMLElement {
 					border-radius: 3px;
 					box-shadow: 0 2px 1px -1px rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 1px 3px 0 rgb(0 0 0 / 12%);
 					display: block;
+				}
+				:host([density='cozy']) {
 					padding: 15px;
+				}
+				:host([density='cozy']) div {
+					gap: 10px;
 				}
 				:host([density='comfortable']) {
 					padding: 10px;
@@ -26,12 +31,6 @@ export default class Card extends HTMLElement {
 				:host([density='compact']) div {
 					gap: 2px;
 				}
-				:host([density='none']) {
-					padding: 0;
-				}
-				:host([density='none']) div {
-					gap: 0;
-				}
 				:host([shadow='0']) {
 					box-shadow: none;
 				}
@@ -44,7 +43,6 @@ export default class Card extends HTMLElement {
 				div {
 					display: flex;
 					flex-direction: column;
-					gap: 10px;
 					width: 100%;
 				}
 			</style>

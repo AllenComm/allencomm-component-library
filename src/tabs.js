@@ -147,9 +147,11 @@ export default class Tabs extends HTMLElement {
 			case 'NumpadEnter':
 			case 'Enter':
 			case 'Space':
-				e.preventDefault();
-				e.stopPropagation();
-				this.handleChange(e);
+				if (e.target.nodeName.toLowerCase() === 'ac-tab') {
+					e.preventDefault();
+					e.stopPropagation();
+					this.handleChange(e);
+				}
 				break;
 		}
 	}
