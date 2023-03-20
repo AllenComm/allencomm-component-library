@@ -114,6 +114,8 @@ section {
 section > div {
 	align-items: flex-start;
 	column-gap: 30px;
+	row-gap: 30px;
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 }
