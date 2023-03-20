@@ -110,3 +110,10 @@ section {
 	margin-bottom: 30px;
 	padding: 16px;
 }
+
+section > div {
+	align-items: flex-start;
+	column-gap: 30px;
+	display: flex;
+	flex-direction: row;
+}
