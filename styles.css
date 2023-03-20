@@ -77,6 +77,8 @@ body {
 	align-items: center;
 	background-color: #eee;
 	display: grid;
+	font-family: sans-serif;
+	font-size: 14px;
 	grid-template-columns: 300px 1fr;
 	grid-template-rows: 50px 1fr;
 	width: 100%;
@@ -114,6 +116,8 @@ section {
 section > div {
 	align-items: flex-start;
 	column-gap: 30px;
+	row-gap: 30px;
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 }
