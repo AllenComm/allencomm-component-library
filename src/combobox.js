@@ -35,14 +35,17 @@ export default class Combobox extends HTMLElement {
 	get selected() { return this._selected; }
 
 	get #expanded() { return this._expanded; }
-	get #listbox() { return this._listbox; }
+	get #listbox() { return this.shadowRoot.querySelector('ac-listbox'); }
 	get #options() { return this._options; }
+	get #textfield() { return this.shadowRoot.querySelector('ac-text-field'); }
 
-	set #expanded(newVal) { this._expanded = newVal; }
-	set #listbox(elem) { this._listbox = elem; }
+	set #expanded(newVal) {
+		this._expanded = newVal;
+		this.setAttribute('expanded', newVal);
+	}
 	set #options(arr) { this._options = arr; }
 	set #selected(newVal) { this._selected = newVal; }
-	
+
 	connectedCallback() {
 		this.childNodes.forEach((a) => {
 			if (a.nodeName.toLowerCase() === 'ac-option') {
@@ -51,30 +54,58 @@ export default class Combobox extends HTMLElement {
 		});
 		this.shadowRoot.childNodes.forEach((a) => {
 			if (a.nodeName.toLowerCase() === 'ac-listbox') {
-				this.#listbox = a;
+				a.addEventListener('change', this.handleSelected);
+				a.addEventListener('cancel', this.handleFocusReset);
 				this.#options.forEach((b) => a.appendChild(b));
 			} else if (a.nodeName.toLowerCase() === 'ac-text-field') {
-				a.addEventListener('blur', this.handleFocusOut);
 				a.addEventListener('click', this.handleFocusIn);
 				a.addEventListener('focus', this.handleFocusIn);
-				a.addEventListener('keydown', this.handleFocusIn);
+				a.addEventListener('input', this.handleSearch);
 			}
 		});
-		this.setAttribute('expanded', false);
+		this.addEventListener('blur', this.handleFocusOut);
+		this.addEventListener('keydown', this.handleKeydown);
+		this.#expanded = false;
 	}
 
 	handleFocusIn = (e) => {
 		if ((e.code && e.code.toLowerCase() !== 'tab') || !e.code) {
 			if (!this.#expanded) {
 				this.#expanded = true;
-				this.setAttribute('expanded', true);
 			}
 		}
 	}
 
-	handleFocusOut = (e) => {
+	handleFocusOut = () => {
 		this.#expanded = false;
-		this.setAttribute('expanded', false);
+	}
+
+	handleFocusReset = (e) => {
+		this.#textfield.input.focus();
+		this.handleFocusOut();
+	}
+
+	handleKeydown = (e) => {
+		if (e.target.nodeName.toLowerCase() === 'ac-combobox' && e.code === 'ArrowDown') {
+			if (this.selected > -1) {
+				this.#options[this.selected].focus();
+			} else {
+				this.#options[0].focus();
+			}
+
+			if (!this.#expanded) {
+				this.#expanded = true;
+			}
+		}
+	}
+
+	handleSelected = (e) => {
+		this.handleFocusOut();
+		this.#selected = e.target.selected;
+		this.#textfield.input.value = this.#options[this.selected].value;
+		this.#textfield.input.focus();
+		this.#expanded = false;
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 }
 

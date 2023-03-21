@@ -158,7 +158,7 @@ export default class Listbox extends HTMLElement {
 			case 'ArrowRight':
 				e.preventDefault();
 				e.stopPropagation();
-				if (e.target.nextElementSibling) {
+				if (e.target?.nextElementSibling?.nodeName.toLowerCase() === 'ac-option') {
 					e.target.nextElementSibling.focus();
 				}
 				break;
@@ -166,7 +166,7 @@ export default class Listbox extends HTMLElement {
 			case 'ArrowUp':
 				e.preventDefault();
 				e.stopPropagation();
-				if (e.target.previousElementSibling) {
+				if (e.target?.previousElementSibling?.nodeName.toLowerCase() === 'ac-option') {
 					e.target.previousElementSibling.focus();
 				}
 				break;
@@ -176,6 +176,9 @@ export default class Listbox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				this.handleChange(e);
+				break;
+			case 'Escape':
+				this.dispatchEvent(new CustomEvent('cancel', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 				break;
 		}
 	}

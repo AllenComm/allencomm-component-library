@@ -22,6 +22,8 @@ export default class Option extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
+	get value() { return this.innerText }
+
 	connectedCallback() {
 		this.setAttribute('tabindex', 0);
 	}

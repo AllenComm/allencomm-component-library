@@ -41,13 +41,12 @@ export default class TextField extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get value() { return this.#input.value; }
-
-	get #input() { return this.shadowRoot.querySelector('input'); }
+	get value() { return this.input.value; }
+	get input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.#input.value = newVal;
+			this.input.value = newVal;
 			this.setAttribute('aria-valueNow', newVal);
 		}
 	}
@@ -58,15 +57,15 @@ export default class TextField extends HTMLElement {
 		const placeholder = this.getAttribute('placeholder');
 		const size = this.getAttribute('size');
 		const value = this.getAttribute('value');
-		if (maxlength) this.#input.setAttribute('maxlength', maxlength);
-		if (minlength) this.#input.setAttribute('minlength', minlength);
-		if (placeholder) this.#input.setAttribute('placeholder', placeholder);
-		if (size) this.#input.setAttribute('size', size);
+		if (maxlength) this.input.setAttribute('maxlength', maxlength);
+		if (minlength) this.input.setAttribute('minlength', minlength);
+		if (placeholder) this.input.setAttribute('placeholder', placeholder);
+		if (size) this.input.setAttribute('size', size);
 		if (value != null) {
-			this.#input.value = value;
+			this.input.value = value;
 			this.setAttribute('aria-valueNow', value);
 		}
-		this.#input.addEventListener('input', this.handleChange);
+		this.input.addEventListener('input', this.handleChange);
 	}
 
 	handleChange = () => {
