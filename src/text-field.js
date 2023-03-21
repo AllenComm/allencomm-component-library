@@ -10,8 +10,12 @@ export default class TextField extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: block;
 					outline: none;
 					width: 100%;
+				}
+				:host([variant='wide']) label {
+					align-items: stretch;
 				}
 				input {
 					border-radius: 3px;

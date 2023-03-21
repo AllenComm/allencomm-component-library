@@ -19,10 +19,23 @@ export default class Combobox extends HTMLElement {
 					position: absolute;
 				}
 				ac-listbox {
+					background: #fff;
+					border: 1px ridge #767676;
+					border-radius: 0 0 3px 3px;
 					display: none;
+					margin-top: -5px;
+					padding-top: 5px;
+					width: 100%;
+					z-index: 1;
+				}
+				ac-text-field {
+					display: block;
+					position: relative;
+					width: 100%;
+					z-index: 2;
 				}
 			</style>
-			<ac-text-field></ac-text-field>
+			<ac-text-field variant='wide'></ac-text-field>
 			<ac-listbox></ac-listbox>
 		`;
 
@@ -61,6 +74,7 @@ export default class Combobox extends HTMLElement {
 				a.addEventListener('click', this.handleFocusIn);
 				a.addEventListener('focus', this.handleFocusIn);
 				a.addEventListener('input', this.handleSearch);
+				setTimeout(() => a.input.setAttribute('role', 'combobox'));
 			}
 		});
 		this.addEventListener('blur', this.handleFocusOut);
