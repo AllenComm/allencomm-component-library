@@ -169,15 +169,12 @@ export default class Combobox extends HTMLElement {
 
 	handleChildSelect = (e) => {
 		e.stopPropagation();
-		const target = e.target;
-		const multiple = this.getAttribute('aria-multiselectable');
-		const cur = target.getAttribute('aria-selected') === 'true';
 		this.#expanded = false;
 		this.#options.forEach((a, i) => {
-			if (a.id !== target.id && a.getAttribute('aria-selected')) {
+			if (a.id !== e.target.id && a.getAttribute('aria-selected')) {
 				a.setAttribute('aria-selected', false);
 			} else {
-				target.setAttribute('aria-selected', true);
+				e.target.setAttribute('aria-selected', true);
 				this.#selected = i;
 			}
 		});
