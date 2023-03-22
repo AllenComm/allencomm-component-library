@@ -93,8 +93,8 @@ export default class Listbox extends HTMLElement {
 					a.addEventListener('click', this.handleChange);
 					a.addEventListener('focus', this.handleChildFocus);
 					a.addEventListener('keydown', this.handleChildKeydown);
-					a.setAttribute('slot', 'options');
 					a.setAttribute('aria-selected', false);
+					a.setAttribute('slot', 'options');
 					if (!a.id) {
 						a.id = `option-${optionId + 1}`;
 					}
@@ -176,9 +176,6 @@ export default class Listbox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				this.handleChange(e);
-				break;
-			case 'Escape':
-				this.dispatchEvent(new CustomEvent('cancel', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 				break;
 		}
 	}
