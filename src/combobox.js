@@ -36,7 +36,6 @@ export default class Combobox extends HTMLElement {
 					gap: 1px;
 					position: absolute;
 					width: 100%;
-					top: 5px;
 					z-index: 1;
 				}
 			</style>
@@ -210,6 +209,15 @@ export default class Combobox extends HTMLElement {
 				this.#expanded = true;
 			}
 		}
+	}
+
+	handleSearch = (e) => {
+		console.log(e);
+		// Search term is not case sensitive, simple left to right character
+		// checking against the options in the list.
+		// If autocomplete is list: remove options from list as you filter/type
+		// If inline: guess and fill as user types
+		// If both: combine both functionalities
 	}
 
 	handleValueChange = () => {
