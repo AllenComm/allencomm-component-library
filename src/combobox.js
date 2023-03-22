@@ -216,8 +216,10 @@ export default class Combobox extends HTMLElement {
 		// Search term is not case sensitive, simple left to right character
 		// checking against the options in the list.
 		// If autocomplete is list: remove options from list as you filter/type
-		// If inline: guess and fill as user types
+		// If inline: guess and fill input as user types
 		// If both: combine both functionalities
+		// If none: allow typed value to select option (same rules, non-case
+		// sensitive, left to right checking
 	}
 
 	handleValueChange = () => {
