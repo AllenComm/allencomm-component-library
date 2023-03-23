@@ -108,7 +108,7 @@ export default class Combobox extends HTMLElement {
 					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
 					a.addEventListener('blur', this.handleChildBlur);
-					a.addEventListener('click', this.handleSearch);
+					a.addEventListener('click', this.handleSubmit);
 					a.addEventListener('focus', this.handleChildFocus);
 					a.addEventListener('keydown', this.handleChildKeydown);
 					a.setAttribute('aria-selected', false);
@@ -127,7 +127,7 @@ export default class Combobox extends HTMLElement {
 		}
 		this.#expanded = false;
 		this.#input.addEventListener('click', () => this.#expanded = !this.#expanded);
-		this.#input.addEventListener('input', this.handleSearch);
+		this.#input.addEventListener('input', this.handleFilter);
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
 		this.addEventListener('blur', this.handleFocusOut);
@@ -186,7 +186,7 @@ export default class Combobox extends HTMLElement {
 			case 'Space':
 				e.preventDefault();
 				e.stopPropagation();
-				this.handleSearch(e);
+				this.handleSubmit(e);
 				break;
 			case 'Escape':
 				e.preventDefault();
@@ -239,7 +239,7 @@ export default class Combobox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				if (this.#expanded) {
-					this.handleSearch(e);
+					this.handleSubmit(e);
 					this.#expanded = false;
 				} else {
 					this.#expanded = true;
@@ -250,7 +250,7 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
-	handleSearch = (e) => {
+	handleFilter = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		const getFilteredIndexes = () => {
@@ -282,28 +282,14 @@ export default class Combobox extends HTMLElement {
 
 		const guessInput = () => {
 			if (e?.inputType !== 'deleteContentBackward') {
-			const filteredIndexes = getFilteredIndexes();
-			const cursorStart = this.#input.selectionStart;
-			if (this.#options?.[filteredIndexes[0]]?.value) {
-				this.#input.value = this.#options[filteredIndexes[0]].value;
-				const cursorEnd = this.#input.selectionEnd;
-				this.#input.setSelectionRange(cursorStart, cursorEnd);
+				const filteredIndexes = getFilteredIndexes();
+				const cursorStart = this.#input.selectionStart;
+				if (this.#options?.[filteredIndexes[0]]?.value) {
+					this.#input.value = this.#options[filteredIndexes[0]].value;
+					const cursorEnd = this.#input.selectionEnd;
+					this.#input.setSelectionRange(cursorStart, cursorEnd);
+				}
 			}
-			}
-		};
-
-		const selectInput = () => {
-			const result = values.findIndex((a) => a === currentVal);
-			const target = e?.target;
-			if (target) {
-				this.#selected = this.#options.findIndex((a) => a === target);
-			} else if (this.#options[result]) {
-				this.#selected = result;
-			}
-			this.#input.value = this.#options[this.selected].value;
-			this.#expanded = false;
-			this.#input.focus();
-			this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 		};
 
 		const currentVal = this.#input.value.toLowerCase();
@@ -320,10 +306,19 @@ export default class Combobox extends HTMLElement {
 				filterList();
 			}
 		}
+	}
 
-		if ((e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) || (e.type === 'click')) {
-			selectInput();
+	handleSubmit = (e) => {
+		const target = e?.target;
+		if (target && target.nodeName.toLowerCase() === 'ac-option') {
+			this.#selected = this.#options.findIndex((a) => a === target);
+		} else {
+			this.#selected = this.#options.findIndex(() => this.#visibleOptions[0]);
 		}
+		this.#input.value = this.#options[this.selected].value;
+		this.#expanded = false;
+		this.#input.focus();
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 }
 
