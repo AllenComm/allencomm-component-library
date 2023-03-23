@@ -46,6 +46,7 @@ export default class Combobox extends HTMLElement {
 		`;
 
 		this._expanded = false;
+		this._focused = null;
 		this._options = [];
 		this._selected = -1;
 	}
@@ -54,17 +55,36 @@ export default class Combobox extends HTMLElement {
 	get value() { return this.#input.value; }
 
 	get #expanded() { return this._expanded; }
+	get #focused() { return this._focused; }
 	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #list() { return this.shadowRoot.querySelector('.list'); }
 	get #options() { return this._options; }
+	get #visibleOptions() { return this.#options.filter((a) => a.getAttribute('hidden') !== 'true'); }
 
 	set #expanded(newVal) {
 		this._expanded = newVal;
 		this.setAttribute('expanded', newVal);
 		this.setAttribute('aria-expanded', newVal);
 	}
+	set #focused(newVal) { this._focused = newVal };
 	set #options(arr) { this._options = arr; }
-	set #selected(newVal) { this._selected = newVal; }
+	set #selected(newVal) {
+		this._selected = newVal;
+		if (newVal > -1) {
+			this.#options[newVal].setAttribute('aria-selected', true);
+		}
+		this.#options.map((a, i) => {
+			if (newVal > -1 && i === newVal) {
+				this.#input.value = this.#options[this.selected].value;
+				this.#expanded = false;
+				this.#input.focus();
+				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+				a.setAttribute('aria-selected', true);
+			} else {
+				a.setAttribute('aria-selected', false);
+			}
+		});
+	}
 
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
@@ -97,12 +117,7 @@ export default class Combobox extends HTMLElement {
 						a.id = `option-${optionId + 1}`;
 					}
 					if (initialSelected === a.id || optionSelected) {
-						if (multiple) {
-							this.#selected = this.selected.push(optionIndex);
-						} else {
-							this.#selected = optionIndex;
-						}
-						a.setAttribute('aria-selected', true);
+						this.#selected = optionIndex;
 					}
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;
@@ -112,6 +127,7 @@ export default class Combobox extends HTMLElement {
 		}
 		this.#expanded = false;
 		this.#input.addEventListener('input', this.handleSearch);
+		this.#input.addEventListener('focus', this.handleSearch);
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
 		this.addEventListener('blur', this.handleFocusOut);
@@ -120,6 +136,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleChildBlur = (e) => {
+		this.#focused = null;
 		if (this.contains(e.target) && (!this.contains(e.relatedTarget) || e.relatedTarget === this) && this.getAttribute('aria-activedescendant')) {
 			this.removeAttribute('aria-activedescendant');
 			this.handleFocusOut(e);
@@ -127,6 +144,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleChildFocus = (e) => {
+		this.#focused = e.target;
 		if (this.contains(e.target) && this.getAttribute('aria-activedescendant') !== 'true') {
 			this.setAttribute('aria-activedescendant', e.target.id);
 		}
@@ -143,11 +161,10 @@ export default class Combobox extends HTMLElement {
 				const nextSibling = e.target?.nextElementSibling;
 				isHidden = nextSibling?.getAttribute('hidden') === 'true';
 				if (nextSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
-					e.target.nextElementSibling.focus();
-				} else if (this.selected <= -1) {
-					i = this.#options.findIndex((a) => a === e.target);
-					const arr = this.#options.filter((a) => a.getAttribute('hidden') !== true && a.getAttribute('hidden') !== 'true');
-					arr?.[i + 1].focus();
+					nextSibling.focus();
+				} else {
+					const curIndex = this.#visibleOptions.findIndex((a) => a === this.#focused);
+					this.#visibleOptions[curIndex + 1].focus();
 				}
 				break;
 			case 'ArrowLeft':
@@ -158,8 +175,11 @@ export default class Combobox extends HTMLElement {
 				isHidden = prevSibling?.getAttribute('hidden') === 'true';
 				if (prevSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
 					prevSibling.focus();
-				} else if (prevSibling === null || isHidden) {
+				} else if (prevSibling === null) {
 					this.#input.focus();
+				} else {
+					const curIndex = this.#visibleOptions.findIndex((a) => a === this.#focused);
+					this.#visibleOptions[curIndex - 1].focus();
 				}
 				break;
 			case 'NumpadEnter':
@@ -191,10 +211,11 @@ export default class Combobox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				if (e.target.nodeName.toLowerCase() === 'ac-combobox') {
+					console.log('up/down');
 					if (this.selected > -1 && this.#options[this.selected].getAttribute('hidden') !== 'true') {
 						this.#options[this.selected].focus();
 					} else if (this.#options[0].getAttribute('hidden') === 'true') {
-						this.#options.find((a) => a.getAttribute('hidden') !== 'true').focus();
+						this.#visibleOptions[0].focus();
 					} else {
 						this.#options[0].focus();
 					}
@@ -272,17 +293,13 @@ export default class Combobox extends HTMLElement {
 		const selectInput = () => {
 			const result = values.findIndex((a) => a === currentVal);
 			const target = e?.target;
-			console.log(result, target);
 			this.#options.forEach((a, i) => {
 				if (i === result || a === target) {
-					a.setAttribute('aria-selected', true);
 					this.#selected = i;
 					this.#input.value = this.#options[this.selected].value;
 					this.#expanded = false;
 					this.#input.focus();
 					this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-				} else {
-					a.setAttribute('aria-selected', false);
 				}
 			});
 		};
@@ -305,19 +322,6 @@ export default class Combobox extends HTMLElement {
 		if (e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) {
 			selectInput();
 		}
-
-		// Search term is not case sensitive, simple left to right character
-		// checking against the options in the list.
-		// If autocomplete is list: remove options from list as you filter/type
-		// If inline: guess and fill input as user types
-		// If both: combine both functionalities
-		// If none: allow typed value to select option (same rules, non-case
-		// sensitive, left to right checking
-	}
-
-	handleValueChange = () => {
-		this.setAttribute('aria-valueNow', this.value);
-		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
 
