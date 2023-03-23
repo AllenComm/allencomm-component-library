@@ -13,23 +13,14 @@ export default class Card extends HTMLElement {
 					box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
 					display: block;
 				}
-				:host([density='cozy']) {
+				:host([density='cozy']) > div {
 					padding: 15px;
 				}
-				:host([density='cozy']) div {
-					gap: 10px;
-				}
-				:host([density='comfortable']) {
+				:host([density='comfortable']) > div {
 					padding: 10px;
 				}
-				:host([density='comfortable']) div {
-					gap: 6px;
-				}
-				:host([density='compact']) {
+				:host([density='compact']) > div {
 					padding: 5px;
-				}
-				:host([density='compact']) div {
-					gap: 2px;
 				}
 				:host([shadow='0']) {
 					box-shadow: none;
