@@ -295,7 +295,8 @@ export default class Combobox extends HTMLElement {
 		const selectInput = () => {
 			const result = values.findIndex((a) => a === currentVal);
 			const target = e?.target;
-			if (target && this.#focused === target) {
+			if (target) {
+				console.log(target, this.#focused);
 				this.#selected = this.#options.findIndex((a) => a === target);
 			} else if (this.#options[result]) {
 				this.#selected = result;
