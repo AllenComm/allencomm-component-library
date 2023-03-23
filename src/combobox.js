@@ -25,7 +25,7 @@ export default class Combobox extends HTMLElement {
 					outline: none;
 					position: relative;
 					width: 100%;
-					z-index: 2;
+					z-index: 1;
 				}
 				.list {
 					background: #fff;
@@ -36,7 +36,7 @@ export default class Combobox extends HTMLElement {
 					gap: 1px;
 					position: absolute;
 					width: 100%;
-					z-index: 1;
+					z-index: 2;
 				}
 			</style>
 			<input type='text'/>
@@ -133,21 +133,33 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleChildKeydown = (e) => {
+		let isHidden = false;
+		let i = 0;
 		switch (e.code) {
 			case 'ArrowDown':
 			case 'ArrowRight':
 				e.preventDefault();
 				e.stopPropagation();
-				if (e.target?.nextElementSibling?.nodeName.toLowerCase() === 'ac-option') {
+				const nextSibling = e.target?.nextElementSibling;
+				isHidden = nextSibling?.getAttribute('hidden') === 'true';
+				if (nextSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
 					e.target.nextElementSibling.focus();
+				} else if (this.selected <= -1) {
+					i = this.#options.findIndex((a) => a === e.target);
+					const arr = this.#options.filter((a) => a.getAttribute('hidden') !== true && a.getAttribute('hidden') !== 'true');
+					arr?.[i + 1].focus();
 				}
 				break;
 			case 'ArrowLeft':
 			case 'ArrowUp':
 				e.preventDefault();
 				e.stopPropagation();
-				if (e.target?.previousElementSibling?.nodeName.toLowerCase() === 'ac-option') {
-					e.target.previousElementSibling.focus();
+				const prevSibling = e.target?.previousElementSibling;
+				isHidden = prevSibling?.getAttribute('hidden') === 'true';
+				if (prevSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
+					prevSibling.focus();
+				} else if (prevSibling === null || isHidden) {
+					this.#input.focus();
 				}
 				break;
 			case 'NumpadEnter':
@@ -155,7 +167,7 @@ export default class Combobox extends HTMLElement {
 			case 'Space':
 				e.preventDefault();
 				e.stopPropagation();
-				this.handleChildSelect(e);
+				this.handleSearch(e);
 				break;
 			case 'Escape':
 				e.preventDefault();
@@ -166,22 +178,6 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
-	handleChildSelect = (e) => {
-		e.stopPropagation();
-		this.#expanded = false;
-		this.#options.forEach((a, i) => {
-			if (a.id !== e.target.id && a.getAttribute('aria-selected')) {
-				a.setAttribute('aria-selected', false);
-			} else {
-				e.target.setAttribute('aria-selected', true);
-				this.#selected = i;
-			}
-		});
-		this.#input.value = this.#options[this.selected].value;
-		this.#input.focus();
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-	}
-
 	handleFocusOut = (e) => {
 		if (e.target.nodeName.toLowerCase() !== 'ac-combobox' || (e.relatedTarget === null || e.relatedTarget.nodeName.toLowerCase() !== 'ac-option')) {
 			this.#expanded = false;
@@ -189,30 +185,127 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		if (e.code === 'Escape' && this.#expanded) {
-			e.preventDefault();
-			e.stopPropagation();
-			this.#expanded = false;
-			this.#input.focus();
-		} else if (e.target.nodeName.toLowerCase() === 'ac-combobox') {
-			if (e.code === 'ArrowDown' || e.code === 'ArrowUp') {
+		switch (e.code) {
+			case 'ArrowDown':
+			case 'ArrowUp':
 				e.preventDefault();
 				e.stopPropagation();
-				if (this.selected > -1) {
-					this.#options[this.selected].focus();
-				} else {
-					this.#options[0].focus();
+				if (e.target.nodeName.toLowerCase() === 'ac-combobox') {
+					if (this.selected > -1 && this.#options[this.selected].getAttribute('hidden') !== 'true') {
+						this.#options[this.selected].focus();
+					} else if (this.#options[0].getAttribute('hidden') === 'true') {
+						this.#options.find((a) => a.getAttribute('hidden') !== 'true').focus();
+					} else {
+						this.#options[0].focus();
+					}
 				}
-			}
-
-			if (!this.#expanded) {
-				this.#expanded = true;
-			}
+				if (!this.#expanded) {
+					this.#expanded = true;
+				}
+				break;
+			case 'Backspace':
+				if (this.selected > -1) {
+					this.#selected = -1;
+				}
+				this.#input.focus();
+				break;
+			case 'Escape':
+				e.preventDefault();
+				e.stopPropagation();
+				this.#expanded = false;
+				this.#input.focus();
+				break;
+			case 'Enter':
+			case 'NumpadEnter':
+				e.preventDefault();
+				e.stopPropagation();
+				this.handleSearch(e);
+				this.#expanded = false;
+			default:
+				this.#input.focus();
+				break;
 		}
 	}
 
 	handleSearch = (e) => {
-		console.log(e);
+		e.preventDefault();
+		e.stopPropagation();
+		const getFilteredIndexes = () => {
+			return values.map((a, i) => {
+				const val = a.split('');
+				const cur = currentVal.split('');
+				for (let i = 0; i < cur.length; i++) {
+					if (val[i] !== cur[i]) {
+						return undefined;
+					}
+				}
+				return i;
+			}).filter((b) => b !== undefined);
+		};
+
+		const filterList = () => {
+			if (!this.#expanded) {
+				this.#expanded = true;
+			}
+			const filteredIndexes = getFilteredIndexes();
+			this.#options.map((a, i) => {
+				if (filteredIndexes.indexOf(i) == -1) {
+					a.setAttribute('hidden', true);
+				} else {
+					a.setAttribute('hidden', false);
+				}
+			});
+		};
+
+		const guessInput = () => {
+			if (e?.inputType !== 'deleteContentBackward') {
+			const filteredIndexes = getFilteredIndexes();
+			const cursorStart = this.#input.selectionStart;
+			if (this.#options?.[filteredIndexes[0]]?.value) {
+				this.#input.value = this.#options[filteredIndexes[0]].value;
+				const cursorEnd = this.#input.selectionEnd;
+				this.#input.setSelectionRange(cursorStart, cursorEnd);
+			}
+			}
+		};
+
+		const selectInput = () => {
+			const result = values.findIndex((a) => a === currentVal);
+			const target = e?.target;
+			console.log(result, target);
+			this.#options.forEach((a, i) => {
+				if (i === result || a === target) {
+					a.setAttribute('aria-selected', true);
+					this.#selected = i;
+					this.#input.value = this.#options[this.selected].value;
+					this.#expanded = false;
+					this.#input.focus();
+					this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+				} else {
+					a.setAttribute('aria-selected', false);
+				}
+			});
+		};
+
+		const currentVal = this.#input.value.toLowerCase();
+		const values = this.#options.map((a) => a.innerText.toLowerCase());
+		const autocomplete = this.getAttribute('autocomplete');
+		if (autocomplete != null) {
+			const type = autocomplete;
+			if (type === 'inline') {
+				guessInput();
+			} else if (type === 'list') {
+				filterList();
+			} else if (type === 'both') {
+				guessInput();
+				filterList();
+			}
+		}
+
+		if (e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) {
+			selectInput();
+		}
+
 		// Search term is not case sensitive, simple left to right character
 		// checking against the options in the list.
 		// If autocomplete is list: remove options from list as you filter/type

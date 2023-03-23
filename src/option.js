@@ -1,4 +1,6 @@
 export default class Option extends HTMLElement {
+	static observedAttributes = ['hidden'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -16,6 +18,9 @@ export default class Option extends HTMLElement {
 				:host([aria-selected='true']) {
 					background: #0075ff;
 				}
+				:host([hidden='true']) {
+					display: none;
+				}
 			</style>
 			<slot></slot>
 		`;
@@ -23,6 +28,13 @@ export default class Option extends HTMLElement {
 	}
 
 	get value() { return this.innerText }
+
+	attributeChangedCallback(attr, oldVal, newVal) {
+		if (attr === 'hidden') {
+			const bool = newVal === 'true';
+			this.setAttribute('aria-hidden', bool);
+		}
+	}
 
 	connectedCallback() {
 		this.setAttribute('tabindex', 0);
