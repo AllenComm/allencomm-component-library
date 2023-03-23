@@ -286,6 +286,7 @@ export default class Combobox extends HTMLElement {
 				const cursorStart = this.#input.selectionStart;
 				if (this.#options?.[filteredIndexes[0]]?.value) {
 					this.#input.value = this.#options[filteredIndexes[0]].value;
+					this.#selected = filteredIndexes[0];
 					const cursorEnd = this.#input.selectionEnd;
 					this.#input.setSelectionRange(cursorStart, cursorEnd);
 				}
@@ -313,7 +314,7 @@ export default class Combobox extends HTMLElement {
 		if (target && target.nodeName.toLowerCase() === 'ac-option') {
 			this.#selected = this.#options.findIndex((a) => a === target);
 		} else {
-			this.#selected = this.#options.findIndex(() => this.#visibleOptions[0]);
+			this.#selected = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
 		}
 		this.#input.value = this.#options[this.selected].value;
 		this.#expanded = false;
