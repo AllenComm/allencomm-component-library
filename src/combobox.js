@@ -296,7 +296,6 @@ export default class Combobox extends HTMLElement {
 			const result = values.findIndex((a) => a === currentVal);
 			const target = e?.target;
 			if (target) {
-				console.log(target, this.#focused);
 				this.#selected = this.#options.findIndex((a) => a === target);
 			} else if (this.#options[result]) {
 				this.#selected = result;
@@ -305,7 +304,6 @@ export default class Combobox extends HTMLElement {
 			this.#expanded = false;
 			this.#input.focus();
 			this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-			
 		};
 
 		const currentVal = this.#input.value.toLowerCase();
