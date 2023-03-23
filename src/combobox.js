@@ -285,8 +285,8 @@ export default class Combobox extends HTMLElement {
 				const filteredIndexes = getFilteredIndexes();
 				const cursorStart = this.#input.selectionStart;
 				if (this.#options?.[filteredIndexes[0]]?.value) {
-					this.#input.value = this.#options[filteredIndexes[0]].value;
 					this.#selected = filteredIndexes[0];
+					this.#input.value = this.#options[filteredIndexes[0]].value;
 					const cursorEnd = this.#input.selectionEnd;
 					this.#input.setSelectionRange(cursorStart, cursorEnd);
 				}
@@ -311,12 +311,14 @@ export default class Combobox extends HTMLElement {
 
 	handleSubmit = (e) => {
 		const target = e?.target;
-		if (target && target.nodeName.toLowerCase() === 'ac-option') {
-			this.#selected = this.#options.findIndex((a) => a === target);
-		} else {
-			this.#selected = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
+		if (this.#options[this.selected].innerText !== this.#input.value) {
+			if (target && target.nodeName.toLowerCase() === 'ac-option') {
+				this.#selected = this.#options.findIndex((a) => a === target);
+			} else {
+				this.#selected = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
+			}
+			this.#input.value = this.#options[this.selected].value;
 		}
-		this.#input.value = this.#options[this.selected].value;
 		this.#expanded = false;
 		this.#input.focus();
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
