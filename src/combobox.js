@@ -152,7 +152,6 @@ export default class Combobox extends HTMLElement {
 
 	handleChildKeydown = (e) => {
 		let isHidden = false;
-		let i = 0;
 		switch (e.code) {
 			case 'ArrowDown':
 			case 'ArrowRight':
@@ -211,7 +210,6 @@ export default class Combobox extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				if (e.target.nodeName.toLowerCase() === 'ac-combobox') {
-					console.log('up/down');
 					if (this.selected > -1 && this.#options[this.selected].getAttribute('hidden') !== 'true') {
 						this.#options[this.selected].focus();
 					} else if (this.#options[0].getAttribute('hidden') === 'true') {
@@ -293,15 +291,16 @@ export default class Combobox extends HTMLElement {
 		const selectInput = () => {
 			const result = values.findIndex((a) => a === currentVal);
 			const target = e?.target;
-			this.#options.forEach((a, i) => {
-				if (i === result || a === target) {
-					this.#selected = i;
-					this.#input.value = this.#options[this.selected].value;
-					this.#expanded = false;
-					this.#input.focus();
-					this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-				}
-			});
+			if (target && this.#focused === target) {
+				this.#selected = this.#options.findIndex((a) => a === target);
+			} else if (this.#options[result]) {
+				this.#selected = result;
+			}
+			this.#input.value = this.#options[this.selected].value;
+			this.#expanded = false;
+			this.#input.focus();
+			this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+			
 		};
 
 		const currentVal = this.#input.value.toLowerCase();
