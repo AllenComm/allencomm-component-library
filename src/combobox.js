@@ -108,7 +108,7 @@ export default class Combobox extends HTMLElement {
 					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
 					a.addEventListener('blur', this.handleChildBlur);
-					a.addEventListener('click', this.handleChildSelect);
+					a.addEventListener('click', this.handleSearch);
 					a.addEventListener('focus', this.handleChildFocus);
 					a.addEventListener('keydown', this.handleChildKeydown);
 					a.setAttribute('aria-selected', false);
@@ -126,8 +126,8 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 		this.#expanded = false;
+		this.#input.addEventListener('click', () => this.#expanded = !this.#expanded);
 		this.#input.addEventListener('input', this.handleSearch);
-		this.#input.addEventListener('focus', this.handleSearch);
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
 		this.addEventListener('blur', this.handleFocusOut);
@@ -238,8 +238,12 @@ export default class Combobox extends HTMLElement {
 			case 'NumpadEnter':
 				e.preventDefault();
 				e.stopPropagation();
-				this.handleSearch(e);
-				this.#expanded = false;
+				if (this.#expanded) {
+					this.handleSearch(e);
+					this.#expanded = false;
+				} else {
+					this.#expanded = true;
+				}
 			default:
 				this.#input.focus();
 				break;
@@ -318,7 +322,7 @@ export default class Combobox extends HTMLElement {
 			}
 		}
 
-		if (e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) {
+		if ((e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) || (e.type === 'click')) {
 			selectInput();
 		}
 	}
