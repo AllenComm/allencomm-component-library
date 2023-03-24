@@ -88,12 +88,12 @@ export default class Combobox extends HTMLElement {
 
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
-		const options = [...document.querySelectorAll('ac-combobox')];
-		const optionCounts = options.map((a) => {
+		const combos = [...document.querySelectorAll('ac-combobox')];
+		const comboCounts = combos.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
 		});
-		const currentTabsIndex = options.findIndex((a) => a === this);
-		const offset = optionCounts.map((a, i) => {
+		const currentTabsIndex = combos.findIndex((a) => a === this);
+		const offset = comboCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
 			}
@@ -126,7 +126,7 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 		this.#expanded = false;
-		this.#input.addEventListener('click', () => this.#expanded = !this.#expanded);
+		this.#input.addEventListener('click', () => this.#expanded = true);
 		this.#input.addEventListener('input', this.handleFilter);
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
@@ -203,6 +203,71 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
+	handleFilter = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const currentVal = this.#input.value.toLowerCase();
+		const values = this.#options.map((a) => a.innerText);
+		const autocomplete = this.getAttribute('autocomplete');
+
+		const getFilteredIndexes = () => {
+			return values.map((a, i) => {
+				const val = a.split('');
+				const cur = currentVal.split('');
+				for (let i = 0; i < cur.length; i++) {
+					if (this.getAttribute('strict') === 'true') {
+						if (val[i] !== cur[i]) {
+							return undefined;
+						}
+					} else {
+						if (val[i] === undefined || val[i].toLowerCase() !== cur[i].toLowerCase()) {
+							return undefined;
+						}
+					}
+				}
+				return i;
+			}).filter((b) => b !== undefined);
+		};
+
+		const filterList = () => {
+			if (!this.#expanded) {
+				this.#expanded = true;
+			}
+			const filteredIndexes = getFilteredIndexes();
+			this.#options.map((a, i) => {
+				if (filteredIndexes.indexOf(i) == -1) {
+					a.setAttribute('hidden', true);
+				} else {
+					a.setAttribute('hidden', false);
+				}
+			});
+		};
+
+		const guessInput = () => {
+			if (e?.inputType !== 'deleteContentBackward') {
+				const filteredIndexes = getFilteredIndexes();
+				const start = this.#input.selectionStart;
+				if (this.#options?.[filteredIndexes[0]]?.value) {
+					this.handleSubmit(e, filteredIndexes[0]);
+					const end = this.#input.selectionEnd;
+					this.#input.setSelectionRange(start, end);
+				}
+			}
+		};
+
+		if (autocomplete != null) {
+			const type = autocomplete;
+			if (type === 'inline') {
+				guessInput();
+			} else if (type === 'list') {
+				filterList();
+			} else if (type === 'both') {
+				guessInput();
+				filterList();
+			}
+		}
+	}
+
 	handleKeydown = (e) => {
 		switch (e.code) {
 			case 'ArrowDown':
@@ -212,7 +277,7 @@ export default class Combobox extends HTMLElement {
 				if (e.target.nodeName.toLowerCase() === 'ac-combobox') {
 					if (this.selected > -1 && this.#options[this.selected].getAttribute('hidden') !== 'true') {
 						this.#options[this.selected].focus();
-					} else if (this.#options[0].getAttribute('hidden') === 'true') {
+					} else if (this.#options[0].getAttribute('hidden') === 'true' && this.#visibleOptions?.[0]) {
 						this.#visibleOptions[0].focus();
 					} else {
 						this.#options[0].focus();
@@ -238,88 +303,42 @@ export default class Combobox extends HTMLElement {
 			case 'NumpadEnter':
 				e.preventDefault();
 				e.stopPropagation();
-				if (this.#expanded) {
-					this.handleSubmit(e);
+				if (!this.#expanded) {
 					this.#expanded = false;
-				} else {
-					this.#expanded = true;
 				}
+				this.handleSubmit(e);
 			default:
 				this.#input.focus();
 				break;
 		}
 	}
 
-	handleFilter = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		const getFilteredIndexes = () => {
-			return values.map((a, i) => {
-				const val = a.split('');
-				const cur = currentVal.split('');
-				for (let i = 0; i < cur.length; i++) {
-					if (val[i] !== cur[i]) {
-						return undefined;
-					}
-				}
-				return i;
-			}).filter((b) => b !== undefined);
-		};
-
-		const filterList = () => {
-			if (!this.#expanded) {
-				this.#expanded = true;
-			}
-			const filteredIndexes = getFilteredIndexes();
-			this.#options.map((a, i) => {
-				if (filteredIndexes.indexOf(i) == -1) {
-					a.setAttribute('hidden', true);
-				} else {
-					a.setAttribute('hidden', false);
-				}
-			});
-		};
-
-		const guessInput = () => {
-			if (e?.inputType !== 'deleteContentBackward') {
-				const filteredIndexes = getFilteredIndexes();
-				const cursorStart = this.#input.selectionStart;
-				if (this.#options?.[filteredIndexes[0]]?.value) {
-					this.#selected = filteredIndexes[0];
-					this.#input.value = this.#options[filteredIndexes[0]].value;
-					const cursorEnd = this.#input.selectionEnd;
-					this.#input.setSelectionRange(cursorStart, cursorEnd);
-				}
-			}
-		};
-
-		const currentVal = this.#input.value.toLowerCase();
-		const values = this.#options.map((a) => a.innerText.toLowerCase());
-		const autocomplete = this.getAttribute('autocomplete');
-		if (autocomplete != null) {
-			const type = autocomplete;
-			if (type === 'inline') {
-				guessInput();
-			} else if (type === 'list') {
-				filterList();
-			} else if (type === 'both') {
-				guessInput();
-				filterList();
-			}
-		}
-	}
-
-	handleSubmit = (e) => {
+	handleSubmit = (e, overrideIndex) => {
 		const target = e?.target;
-		if (this.#options[this.selected].innerText !== this.#input.value) {
-			if (target && target.nodeName.toLowerCase() === 'ac-option') {
-				this.#selected = this.#options.findIndex((a) => a === target);
-			} else {
-				this.#selected = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
-			}
-			this.#input.value = this.#options[this.selected].value;
+		let int = -1;
+
+		if (overrideIndex) {
+			// input typed in and overrided
+			int = overrideIndex;
+		} else if (target.nodeName.toLowerCase() === 'ac-combobox') {
+			// input change OR input submit
+			int = this.#options.findIndex((a) => a.innerText.toLowerCase() === this.#input.value.toLowerCase());
+		} else if (target.nodeName.toLowerCase() === 'ac-option') {
+			// select from list
+			int = this.#options.findIndex((a) => a === target);
+		} else if (this.#visibleOptions?.[0]) {
+			// default to first in list
+			int = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
 		}
-		this.#expanded = false;
+
+		if (int > -1) {
+			this.#selected = int;
+			this.#input.value = this.#options[int].value;
+			if (this.#expanded) {
+				this.#expanded = false;
+			}
+		}
+
 		this.#input.focus();
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
