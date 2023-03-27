@@ -2,10 +2,12 @@ import Button from './src/button.js';
 import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Combobox from './src/combobox.js';
+import Divider from './src/divider.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
 import Option from './src/option.js';
 import Radio from './src/radio.js';
+import Select from './src/select.js';
 import Slider from './src/slider.js';
 import Switch from './src/switch.js';
 import Tab from './src/tab.js';
@@ -19,10 +21,12 @@ export {
 	Card,
 	Checkbox,
 	Combobox,
+	Divider,
 	Listbox,
 	Number,
 	Option,
 	Radio,
+	Select,
 	Slider,
 	Switch,
 	Tab,
