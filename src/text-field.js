@@ -15,6 +15,7 @@ export default class TextField extends HTMLElement {
 					width: 100%;
 				}
 				:host([search='true']) input {
+					border-radius: 20px;
 					padding-right: 30px;
 				}
 				input {
