@@ -59,6 +59,8 @@ export default class Combobox extends HTMLElement {
 					display: none;
 					flex-direction: column;
 					gap: 1px;
+					max-height: 300px;
+					overflow-y: auto;
 					position: absolute;
 					width: 100%;
 					z-index: 3;
