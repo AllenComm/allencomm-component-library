@@ -28,7 +28,7 @@ export default class Select extends HTMLElement {
 				:host([expanded='true']) .list {
 					display: flex;
 				}
-				.arrow, .clear {
+				.arrow {
 					cursor: pointer;
 					display: block;
 					height: 24px;
