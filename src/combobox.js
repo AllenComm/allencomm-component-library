@@ -117,6 +117,7 @@ export default class Combobox extends HTMLElement {
 			this.#options[newVal].setAttribute('aria-selected', true);
 			this.#btnClear.setAttribute('hidden', false);
 		} else {
+			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			this.#btnClear.setAttribute('hidden', true);
 		}
 		this.#options.map((a, i) => {
@@ -251,8 +252,9 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleFocusOut = (e) => {
-		if (e.target.nodeName.toLowerCase() !== 'ac-combobox' || (e.relatedTarget === null || e.relatedTarget.nodeName.toLowerCase() !== 'ac-option')) {
+		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
+			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			if (this.selected <= -1) {
 				if (!this.#options.some((a) => a.innerText === this.#input.value)) {
 					this.#input.value = '';
