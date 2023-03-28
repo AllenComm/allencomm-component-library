@@ -171,9 +171,9 @@ export default class Combobox extends HTMLElement {
 				}
 			});
 		}
-		this.#expanded = false;
 		this.#btnArrow.addEventListener('click', () => this.#expanded = !this.#expanded);
 		this.#btnClear.addEventListener('click', this.handleBtnClearClick);
+		this.#expanded = false;
 		this.#input.addEventListener('click', () => this.#expanded = true);
 		this.#input.addEventListener('input', this.handleFilter);
 		this.#input.setAttribute('role', 'combobox');
@@ -257,7 +257,10 @@ export default class Combobox extends HTMLElement {
 				if (!this.#options.some((a) => a.innerText === this.#input.value)) {
 					this.#input.value = '';
 				} else {
-					this.#selected = this.#options.findIndex((a) => a.innerText === this.#input.value);
+					const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
+					if (this.#options[index].value.length > 0) {
+						this.#selected = index;
+					}
 				}
 			} else if (this.#input.value !== this.#options[this.selected].innerText) {
 				this.#input.value = this.#options[this.selected].innerText;
@@ -272,9 +275,12 @@ export default class Combobox extends HTMLElement {
 		const values = this.#options.map((a) => a.innerText);
 		const autocomplete = this.getAttribute('autocomplete');
 
-		const getFilteredIndexes = () => {
+		const getFilteredIndexes = (strictOverride) => {
 			return values.map((a, i) => {
-				if (this.getAttribute('strict') === 'true') {
+				if (a.length <= 0 || a.length === null || a.length === undefined) {
+					return undefined;
+				}
+				if (this.getAttribute('strict') === 'true' || strictOverride) {
 					const val = a.split('');
 					const cur = currentVal.split('');
 					for (let j = 0; j < cur.length; j++) {
@@ -317,10 +323,11 @@ export default class Combobox extends HTMLElement {
 
 		const guessInput = () => {
 			if (e?.inputType !== 'deleteContentBackward') {
-				const filteredIndexes = getFilteredIndexes();
+				const filteredIndexes = getFilteredIndexes(true);
 				const start = this.#input.selectionStart;
-				if (this.#options?.[filteredIndexes[0]]?.value) {
-					this.handleSubmit(e, filteredIndexes[0]);
+				const firstOption = this.#options?.[filteredIndexes[0]];
+				if (firstOption?.value) {
+					this.#input.value = this.#input.value + firstOption.value.split('').slice(start).join('');
 					const end = this.#input.selectionEnd;
 					this.#input.setSelectionRange(start, end);
 				}
@@ -339,7 +346,7 @@ export default class Combobox extends HTMLElement {
 			}
 		}
 
-		if (this.#input.value.length <=0) {
+		if (this.#input.value.length <= 0) {
 			this.#selected = -1;
 		}
 	}
@@ -383,30 +390,28 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
-	handleSubmit = (e, overrideIndex) => {
+	handleSubmit = (e) => {
 		const target = e?.target;
 		let int = -1;
-
-		if (overrideIndex) {
-			// input typed in and overrided
-			int = overrideIndex;
-		} else if (target.nodeName.toLowerCase() === 'ac-combobox') {
-			// input change OR input submit
-			int = this.#options.findIndex((a) => a.innerText.toLowerCase() === this.#input.value.toLowerCase());
-		} else if (target.nodeName.toLowerCase() === 'ac-option') {
-			// select from list
-			int = this.#options.findIndex((a) => a === target);
-		} else if (this.#visibleOptions?.[0]) {
-			// default to first in list
-			int = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
+		if (target?.value?.length > 0) {
+			if (target.nodeName.toLowerCase() === 'ac-combobox') {
+				int = this.#options.findIndex((a) => a.innerText.toLowerCase() === this.#input.value.toLowerCase());
+			} else if (target.nodeName.toLowerCase() === 'ac-option') {
+				int = this.#options.findIndex((a) => a === target);
+			} else if (this.#visibleOptions?.[0]) {
+				int = this.#options.findIndex((a) => a === this.#visibleOptions[0]);
+			}
 		}
 
 		if (int > -1) {
 			this.#selected = int;
 			this.#input.value = this.#options[int].value;
-			if (this.#expanded) {
-				this.#expanded = false;
-			}
+		} else {
+			this.#selected = -1;
+		}
+
+		if (this.#expanded) {
+			this.#expanded = false;
 		}
 
 		this.#input.focus();
