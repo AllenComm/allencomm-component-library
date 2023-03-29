@@ -22,12 +22,8 @@ export default class Tab extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<button tabindex='-1'><slot></slot></button>
+			<button tabindex='0'><slot></slot></button>
 		`;
-	}
-
-	connectedCallback() {
-		this.setAttribute('tabindex', 0);
 	}
 }
 

@@ -8,116 +8,79 @@ export default class Accordion extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					display: flex;
+					border-bottom: 1px solid #000;
+					display: grid;
 					flex-direction: column;
+					justify-items: flex-start;
 					width: 100%;
 				}
-				:host([variant='alternate']) .list {
-					background-color: #d3d3d3;
-					border-color: #d3d3d3;
-					border-radius: 3px;
-					border-style: solid;
-					border-width: 1px;
-					grid-gap: 2px;
-					grid-template-rows: auto;
-				}
-				:host([variant='alternate']) .indicator {
-					background-color: #fff;
-					border-radius: 3px;
-					grid-row: 1;
-					height: calc(100% - 2px);
-					margin: 1px;
-					width: calc(100% - 2px);
-				}
-				.list {
-					display: grid;
-					grid-auto-flow: row;
-					grid-template-rows: auto 2px;
-					justify-items: center;
-				}
-				.indicator {
-					background-color: #0075ff;
-					height: 2px;
-					transform: translateX(0);
-					width: 98%;
-				}
-				slot[name="panels"] {
-					display: grid;
-				}
 			</style>
-			<div class='list'>
-				<slot name='tabs'></slot>
-				<div class='indicator'></div>
-			</div>
-			<slot name='panels'></slot>
+			<slot name='content'></slot>
 		`;
-		this._panels = [];
+		this._buttons = [];
+		this._content = [];
 		this._selected = 0;
-		this._tabs = [];
 	}
 
 	get selected() { return this._selected; }
 
-	get #indicator() { return this.shadowRoot.querySelector('.indicator'); }
-	get #panels() { return this._panels; }
-	get #tabs() { return this._tabs; }
+	get #buttons() { return this._buttons; }
+	get #content() { return this._content; }
 
-	set #panels(arr) { this._panels = arr; }
+	set #buttons(arr) { this._buttons = arr; }
+	set #content(arr) { this._content = arr; }
 	set #selected(i) { this._selected = i; }
-	set #tabs(arr) { this._tabs = arr; }
 
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
-		const isAlternate = this.getAttribute('variant') === 'alternate';
-		const tabs = [...document.querySelectorAll('ac-accordion')];
-		const tabCounts = tabs.map((a) => {
+		const buttons = [...document.querySelectorAll('ac-accordion')];
+		const buttonCounts = buttons.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-accordion-button').length;
 		});
-		const currentTabsIndex = tabs.findIndex((a) => a === this);
-		const offset = tabCounts.map((a, i) => {
+		const currentTabsIndex = buttons.findIndex((a) => a === this);
+		const offset = buttonCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
 			}
 			return 0;
 		}).reduce((a, b) => a + b, 0);
-		let tabIndex = 0;
-		let panelIndex = 0;
-		let tabId = tabIndex + offset;
-		let panelId = panelIndex + offset;
+		let buttonIndex = 0;
+		let contentIndex = 0;
+		let buttonId = buttonIndex + offset;
+		let contentId = contentIndex + offset;
 
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
-				if (a.nodeName.toLowerCase() === 'ac-accordion') {
-					const tabSelected = a.getAttribute('selected') || false;
-					this.#tabs.push(a);
+				if (a.nodeName.toLowerCase() === 'ac-accordion-button') {
+					const buttonSelected = a.getAttribute('selected') || false;
+					this.#buttons.push(a);
 					a.addEventListener('click', this.handleChange);
-					a.setAttribute('slot', 'tabs');
+					a.setAttribute('slot', 'content');
 					a.setAttribute('aria-selected', false);
-					a.style.setProperty('grid-column', `${tabIndex + 1} / auto`);
-					a.style.setProperty('grid-row', '1');
-					if (isAlternate) a.style.setProperty('z-index', '2');
-					if (!a.id) a.id = `tab-${tabId + 1}`;
-					if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
-						this.#selected = tabIndex;
+					a.style.setProperty('grid-row', (buttonIndex > 0 ? (buttonIndex * 2) + 1 : 1));
+					if (!a.id) a.id = `button-${buttonId + 1}`;
+					if (initialSelected === a.id || buttonSelected || (!initialSelected && !buttonSelected && buttonIndex === 0)) {
+						this.#selected = buttonIndex;
 						a.setAttribute('aria-selected', true);
-						this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 					}
-					tabIndex = tabIndex + 1;
-					tabId = tabId + 1;
+					buttonIndex = buttonIndex + 1;
+					buttonId = buttonId + 1;
 				} else if (a.nodeName.toLowerCase() === 'ac-accordion-content') {
-					this.#panels.push(a);
-					a.setAttribute('slot', 'panels');
+					this.#content.push(a);
+					a.setAttribute('slot', 'content');
 					a.setAttribute('hidden', true);
-					if (!a.id) a.id = `panel-${panelId + 1}`;
-					if (this.#tabs[panelIndex]) {
-						this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
-						a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);
+					a.setAttribute('role', 'region');
+					a.style.setProperty('grid-row', (contentIndex > 0 ? (contentIndex * 2) + 2 : 2));
+					if (!a.id) a.id = `content-${contentId + 1}`;
+					if (this.#buttons[contentIndex]) {
+						this.#buttons[contentIndex].setAttribute('aria-controls', a.id);
+						a.setAttribute('aria-labelledby', this.#buttons[contentIndex].id);
 					}
-					if (this.selected === panelIndex) {
+					if (this.selected === contentIndex) {
 						a.setAttribute('hidden', false);
 					}
-					panelIndex = panelIndex + 1;
-					panelId = panelId + 1;
+					contentIndex = contentIndex + 1;
+					contentId = contentId + 1;
 				}
 			});
 		}
@@ -127,18 +90,16 @@ export default class Accordion extends HTMLElement {
 	handleChange = (e) => {
 		e.stopPropagation();
 		const target = e.target;
-		this.#tabs.forEach((a, i) => {
+		this.#buttons.forEach((a, i) => {
 			if (a.id !== target.id && a.getAttribute('aria-selected')) {
 				a.setAttribute('aria-selected', false);
-				this.#panels[i]?.setAttribute('aria-selected', false);
-				this.#panels[i]?.setAttribute('hidden', true);
+				this.#content[i]?.setAttribute('hidden', true);
 			} else {
 				target.setAttribute('aria-selected', true);
-				this.#panels[i]?.setAttribute('hidden', false);
+				this.#content[i]?.setAttribute('hidden', false);
 				this.#selected = i;
 			}
 		});
-		this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 

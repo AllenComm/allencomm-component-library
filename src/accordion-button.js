@@ -8,6 +8,7 @@ export default class AccordionButton extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					border-top: 1px solid #000;
 					display: block;
 					width: 100%;
 				}
@@ -17,17 +18,13 @@ export default class AccordionButton extends HTMLElement {
 					cursor: pointer;
 					display: flex;
 					padding: 10px;
-					place-content: center;
+					place-content: flex-start;
 					text-align: center;
 					width: 100%;
 				}
 			</style>
-			<button tabindex='-1'><slot></slot></button>
+			<button role='heading' tabindex='0'><slot></slot></button>
 		`;
-	}
-
-	connectedCallback() {
-		this.setAttribute('tabindex', 0);
 	}
 }
 
