@@ -80,9 +80,9 @@ export default class Accordion extends HTMLElement {
 					if (!a.id) a.id = `button-${buttonId + 1}`;
 					if (initialSelected === a.id || buttonSelected) {
 						if (multiple) {
-							this.#selected = this.selected.push(optionIndex);
+							this.#selected = this.selected.push(buttonIndex);
 						} else {
-							this.#selected = optionIndex;
+							this.#selected = buttonIndex;
 						}
 						a.setAttribute('aria-selected', true);
 					}
