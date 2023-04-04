@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Library of AllenComm made UI components.">
+		<title>Example</title>
+		<base href="/">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="./styles.css" rel="stylesheet">
+		<script src="./index.js" type="module" defer></script>
+		<style>
+			body {
+				align-items: center;
+				display: flex;
+				justify-content: center;
+			}
+			ac-card {
+				max-width: 320px;
+			}
+			ac-tab-panel {
+				max-height: 420px;
+				overflow: auto;
+				padding: 16px;
+			}
+			ac-tab-panel label {
+				font-size: 12px;
+				font-weight: bold;
+				opacity: .6;
+				text-transform: uppercase;
+			}
+			ac-tab-panel > * {
+				margin-bottom: 10px;
+			}
+			aside {
+				opacity: .4;
+			}
+			.big ac-option {
+				align-items: center;
+				display: flex;
+				font-size: 26px;
+				line-height: 31px;
+				justify-content: center;
+				height: 31px;
+				width: 31px;
+			}
+			.rotate-90 {
+				transform: rotate(90deg);
+			}
+		</style>
+	</head>
+	<body>
+		<ac-card shadow="3">
+			<ac-tabs>
+				<ac-tab>Format</ac-tab>
+				<ac-tab>Background</ac-tab>
+				<ac-tab>Design</ac-tab>
+				<ac-tab-panel>
+					<label>Grid</label>
+					<ac-number value="12">Rows</ac-number>
+					<ac-listbox orientation="horizontal">
+						Gap
+						<ac-option selected="true">SM</ac-option>	
+						<ac-option>MD</ac-option>	
+						<ac-option>LG</ac-option>	
+					</ac-listbox>
+					<ac-divider></ac-divider>
+					<label>Section</label>
+					<ac-switch>Fill Screen</ac-switch>
+					<ac-listbox orientation="horizontal">
+						Height
+						<ac-option>SM</ac-option>	
+						<ac-option>MD</ac-option>	
+						<ac-option>LG</ac-option>	
+						<ac-option selected="true">...</ac-option>	
+					</ac-listbox>
+					<ac-slider value="10"></ac-slider>
+					<ac-listbox class="big" orientation="horizontal">
+						Alignment
+						<ac-option>&#10514;</ac-option>	
+						<ac-option class="rotate-90" selected="true">&#x21f9;</ac-option>	
+						<ac-option>&#10515;</ac-option>	
+					</ac-listbox>
+					<aside>Fill screen will expand the background height to fill a portion of the user’s screen.</aside>
+					<ac-divider></ac-divider>
+					<label>Styling</label>
+					<ac-switch>Divider</ac-switch>
+				</ac-tab-panel>
+				<ac-tab-panel>
+					<ac-tabs variant="alternate">
+						<ac-tab>Image</ac-tab>
+						<ac-tab>Video</ac-tab>
+						<ac-tab>Art</ac-tab>
+						<ac-tab-panel style="padding: 16px 0;">
+							<img src="http://www.alleycat.org/wp-content/uploads/2019/03/FELV-cat.jpg"></img>
+							<ac-button>Replace Image</ac-button>
+						</ac-tab-panel>
+					</ac-tabs>
+				</ac-tab-panel>
+				<ac-tab-panel>Hello World 2!</ac-tab-panel>
+			</ac-tabs>
+		</ac-card>
+	</body>
+</html>
+
