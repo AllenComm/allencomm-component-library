@@ -18,9 +18,10 @@
 			ac-card {
 				max-width: 320px;
 			}
-			ac-tab-panel {
+			ac-tab-panel.main {
 				max-height: 420px;
-				overflow: auto;
+				overflow-x: hidden;
+				overflow-y: auto;
 				padding: 16px;
 			}
 			ac-tab-panel label {
@@ -55,7 +56,7 @@
 				<ac-tab>Format</ac-tab>
 				<ac-tab>Background</ac-tab>
 				<ac-tab>Design</ac-tab>
-				<ac-tab-panel>
+				<ac-tab-panel class="main">
 					<label>Grid</label>
 					<ac-number value="12">Rows</ac-number>
 					<ac-listbox orientation="horizontal">
@@ -86,18 +87,25 @@
 					<label>Styling</label>
 					<ac-switch>Divider</ac-switch>
 				</ac-tab-panel>
-				<ac-tab-panel>
+				<ac-tab-panel class="main">
 					<ac-tabs variant="alternate">
 						<ac-tab>Image</ac-tab>
 						<ac-tab>Video</ac-tab>
 						<ac-tab>Art</ac-tab>
-						<ac-tab-panel style="padding: 16px 0;">
+						<ac-tab-panel style="padding: 16px 0; max-height: none;">
 							<img src="http://www.alleycat.org/wp-content/uploads/2019/03/FELV-cat.jpg"></img>
 							<ac-button>Replace Image</ac-button>
+							<label>Filter</label>
+							<ac-select>
+								<ac-option selected="true">None</ac-option>
+								<ac-option>Blur</ac-option>
+								<ac-option>Brightness</ac-option>
+								<ac-option>Contrast</ac-option>
+							</ac-select>
 						</ac-tab-panel>
 					</ac-tabs>
 				</ac-tab-panel>
-				<ac-tab-panel>Hello World 2!</ac-tab-panel>
+				<ac-tab-panel class="main">Hello World 2!</ac-tab-panel>
 			</ac-tabs>
 		</ac-card>
 	</body>
