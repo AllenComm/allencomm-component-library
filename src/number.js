@@ -1,5 +1,5 @@
 export default class Number extends HTMLElement {
-	static observedAttributes = ['value'];
+	static observedAttributes = ['disabled', 'value'];
 
 	constructor() {
 		super();
@@ -38,16 +38,39 @@ export default class Number extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 	}
 
 	get value() { return parseFloat(this.#input.value); }
 
+	get #disabled() { return this._disabled; }
 	get #input() { return this.shadowRoot.querySelector('input'); }
+
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.#input.setAttribute('disabled', bool);
+			this.#input.removeEventListener('change', this.handleChange);
+			this.removeEventListener('keydown', this.handleKeydown);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+		} else {
+			this.#input.removeAttribute('disabled');
+			this.#input.addEventListener('change', this.handleChange);
+			this.addEventListener('keydown', this.handleKeydown);
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+		}
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
 			this.setAttribute('aria-valueNow', newVal);
+		} else if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
 		}
 	}
 
@@ -77,8 +100,11 @@ export default class Number extends HTMLElement {
 			this.#input.value = parseFloat(value);
 			this.setAttribute('aria-valueNow', value);
 		}
-		this.#input.addEventListener('change', this.handleChange);
-		this.addEventListener('keydown', this.handleKeydown);
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 	}
 
 	handleChange = () => {

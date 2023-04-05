@@ -1,5 +1,5 @@
 export default class TextField extends HTMLElement {
-	static observedAttributes = ['value'];
+	static observedAttributes = ['disabled', 'value'];
 
 	constructor() {
 		super();
@@ -72,9 +72,27 @@ export default class TextField extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 	}
 
+	get #disabled() { return this._disabled; }
 	get #icon() { return this.shadowRoot.querySelector('.icon'); }
+
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.input.removeEventListener('input', this.handleChange);
+			this.input.setAttribute('disabled', bool);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+		} else {
+			this.input.addEventListener('input', this.handleChange);
+			this.input.removeAttribute('disabled');
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+		}
+	}
 
 	get value() { return this.input.value; }
 	get input() { return this.shadowRoot.querySelector('input'); }
@@ -83,6 +101,9 @@ export default class TextField extends HTMLElement {
 		if (attr === 'value') {
 			this.input.value = newVal;
 			this.setAttribute('aria-valueNow', newVal);
+		} else if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
 		}
 	}
 
@@ -102,7 +123,11 @@ export default class TextField extends HTMLElement {
 			this.input.value = value;
 			this.setAttribute('aria-valueNow', value);
 		}
-		this.input.addEventListener('input', this.handleChange);
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 	}
 
 	handleChange = () => {

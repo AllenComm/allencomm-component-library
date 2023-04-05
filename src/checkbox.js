@@ -1,5 +1,5 @@
 export default class Checkbox extends HTMLElement {
-	static observedAttributes = ['checked'];
+	static observedAttributes = ['checked', 'disabled'];
 
 	constructor() {
 		super();
@@ -23,6 +23,9 @@ export default class Checkbox extends HTMLElement {
 					width: 13px;
 					z-index: 1;
 				}
+				:host([disabled='true']) input, :host([disabled='true']) label {
+					cursor: default;
+				}
 				input {
 					margin: 0;
 				}
@@ -43,27 +46,56 @@ export default class Checkbox extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 	}
 
 	get checked() { return this.#input.checked; }
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
+	get #disabled() { return this._disabled; }
+
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.#input.setAttribute('disabled', bool);
+			this.#input.removeEventListener('click', this.handleChange);
+			this.#input.removeEventListener('change', this.handleChange);
+			this.removeEventListener('keydown', this.handleKeydown);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+			this.setAttribute('tabindex', -1);
+		} else {
+			this.#input.removeAttribute('disabled');
+			this.#input.addEventListener('click', this.handleChange);
+			this.#input.addEventListener('change', this.handleChange);
+			this.addEventListener('keydown', this.handleKeydown);
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+			this.setAttribute('tabindex', 0);
+		}
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
 			this.#input.checked = bool;
 			this.setAttribute('aria-checked', bool);
+		} else if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
 		this.#input.checked = checked;
-		this.#input.addEventListener('change', this.handleChange);
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 		this.setAttribute('aria-checked', checked);
-		this.setAttribute('tabindex', 0);
-		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {

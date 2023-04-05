@@ -1,5 +1,5 @@
 export default class Slider extends HTMLElement {
-	static observedAttributes = ['value'];
+	static observedAttributes = ['disabled', 'value'];
 
 	constructor() {
 		super();
@@ -37,18 +37,43 @@ export default class Slider extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 	}
 
 	get value() { return this.#input.value; }
 
+	get #disabled() { return this._disabled; }
 	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #output() { return this.shadowRoot.querySelector('output'); }
+
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.#input.removeEventListener('change', this.handleChange);
+			this.#input.setAttribute('disabled', bool);
+			this.removeEventListener('keydown', this.handleKeydown);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+			this.setAttribute('tabindex', -1);
+		} else {
+			this.#input.addEventListener('change', this.handleChange);
+			this.#input.removeAttribute('disabled');
+			this.addEventListener('keydown', this.handleKeydown);
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+			this.setAttribute('tabindex', 0);
+		}
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
 			this.#output.innerText = newVal;
 			this.setAttribute('aria-valueNow', newVal);
+		} else if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
 		}
 	}
 
@@ -71,11 +96,13 @@ export default class Slider extends HTMLElement {
 			this.#input.value = parseFloat(value);
 			this.setAttribute('aria-valueNow', value);
 		}
-		this.#input.addEventListener('input', this.handleChange);
 		this.#output.innerText = value;
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 		this.setAttribute('aria-orientation', 'horizontal');
-		this.setAttribute('tabindex', 0);
-		this.addEventListener('keydown', this.handleKeydown);
 	}
 
 	handleChange = () => {

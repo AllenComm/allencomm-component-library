@@ -1,5 +1,5 @@
 export default class TextArea extends HTMLElement {
-	static observedAttributes = ['value'];
+	static observedAttributes = ['disabled', 'value'];
 
 	constructor() {
 		super();
@@ -40,16 +40,37 @@ export default class TextArea extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 	}
 
 	get value() { return this.#textarea.value; }
 
+	get #disabled() { return this._disabled; }
 	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
+
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.#textarea.removeEventListener('input', this.handleChange);
+			this.#textarea.setAttribute('disabled', bool);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+		} else {
+			this.#textarea.addEventListener('input', this.handleChange);
+			this.#textarea.removeAttribute('disabled');
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+		}
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#textarea.value = newVal;
 			this.setAttribute('aria-valueNow', newVal);
+		} else if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
 		}
 	}
 
@@ -71,7 +92,11 @@ export default class TextArea extends HTMLElement {
 			this.#textarea.value = value;
 			this.setAttribute('aria-valueNow', value);
 		}
-		this.#textarea.addEventListener('input', this.handleChange);
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 	}
 
 	handleChange = () => {

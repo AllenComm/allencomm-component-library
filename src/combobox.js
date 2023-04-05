@@ -1,4 +1,6 @@
 export default class Combobox extends HTMLElement {
+	static observedAttributes = ['disabled'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -19,6 +21,10 @@ export default class Combobox extends HTMLElement {
 				}
 				:host([expanded='true']) .list {
 					display: flex;
+				}
+				:host([disabled='true']) .arrow {
+					cursor: default;
+					fill: #b0b0b0;
 				}
 				input {
 					display: block;
@@ -86,6 +92,7 @@ export default class Combobox extends HTMLElement {
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 		this._expanded = false;
 		this._focused = null;
 		this._options = [];
@@ -97,6 +104,7 @@ export default class Combobox extends HTMLElement {
 
 	get #btnArrow() { return this.shadowRoot.querySelector('.arrow'); }
 	get #btnClear() { return this.shadowRoot.querySelector('.clear'); }
+	get #disabled() { return this._disabled; }
 	get #expanded() { return this._expanded; }
 	get #focused() { return this._focused; }
 	get #input() { return this.shadowRoot.querySelector('input'); }
@@ -104,6 +112,43 @@ export default class Combobox extends HTMLElement {
 	get #options() { return this._options; }
 	get #visibleOptions() { return this.#options.filter((a) => a.getAttribute('hidden') !== 'true'); }
 
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.#btnArrow.removeEventListener('click', this.handleExpandToggle);
+			this.#btnClear.removeEventListener('click', this.handleBtnClearClick);
+			this.#input.removeEventListener('click', this.handleExpandToggle);
+			this.#input.removeEventListener('input', this.handleFilter);
+			this.#input.setAttribute('disabled', bool);
+			this.removeEventListener('blur', this.handleFocusOut);
+			this.removeEventListener('keydown', this.handleKeydown);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+			this.#options.forEach((a) => {
+				a.removeEventListener('blur', this.handleChildBlur);
+				a.removeEventListener('click', this.handleSubmit);
+				a.removeEventListener('focus', this.handleChildFocus);
+				a.removeEventListener('keydown', this.handleChildKeydown);
+			});
+		} else {
+			this.#btnArrow.addEventListener('click', this.handleExpandToggle);
+			this.#btnClear.addEventListener('click', this.handleBtnClearClick);
+			this.#input.addEventListener('click', this.handleExpandToggle.bind(this, true));
+			this.#input.addEventListener('input', this.handleFilter);
+			this.#input.removeAttribute('disabled');
+			this.addEventListener('blur', this.handleFocusOut);
+			this.addEventListener('keydown', this.handleKeydown);
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+			this.#options.forEach((a) => {
+				a.addEventListener('blur', this.handleChildBlur);
+				a.addEventListener('click', this.handleSubmit);
+				a.addEventListener('focus', this.handleChildFocus);
+				a.addEventListener('keydown', this.handleChildKeydown);
+			});
+		}
+	}
 	set #expanded(newVal) {
 		this._expanded = newVal;
 		this.setAttribute('expanded', newVal);
@@ -133,6 +178,13 @@ export default class Combobox extends HTMLElement {
 		});
 	}
 
+	attributeChangedCallback(attr, oldVal, newVal) {
+		if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
+		}
+	}
+
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
 		const combos = [...document.querySelectorAll('ac-combobox')];
@@ -154,10 +206,6 @@ export default class Combobox extends HTMLElement {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
 					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
-					a.addEventListener('blur', this.handleChildBlur);
-					a.addEventListener('click', this.handleSubmit);
-					a.addEventListener('focus', this.handleChildFocus);
-					a.addEventListener('keydown', this.handleChildKeydown);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
@@ -172,15 +220,14 @@ export default class Combobox extends HTMLElement {
 				}
 			});
 		}
-		this.#btnArrow.addEventListener('click', () => this.#expanded = !this.#expanded);
-		this.#btnClear.addEventListener('click', this.handleBtnClearClick);
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 		this.#expanded = false;
-		this.#input.addEventListener('click', () => this.#expanded = true);
-		this.#input.addEventListener('input', this.handleFilter);
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
-		this.addEventListener('blur', this.handleFocusOut);
-		this.addEventListener('keydown', this.handleKeydown);
 		this.setAttribute('aria-haspopup', this.#list.id);
 	}
 
@@ -248,6 +295,14 @@ export default class Combobox extends HTMLElement {
 				this.#expanded = false;
 				this.#input.focus();
 				break;
+		}
+	}
+
+	handleExpandToggle = (override) => {
+		if (override) {
+			this.#expanded = override;
+		} else {
+			this.#expanded = !this.#expanded;
 		}
 	}
 

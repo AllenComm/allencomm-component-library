@@ -1,4 +1,6 @@
 export default class Select extends HTMLElement {
+	static observedAttributes = ['disabled'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -27,6 +29,15 @@ export default class Select extends HTMLElement {
 				}
 				:host([expanded='true']) .list {
 					display: flex;
+				}
+				:host([disabled='true']) {
+					background-color: #eee;
+					border-color: #b0b0b0;
+					outline: none;
+				}
+				:host([disabled='true']), :host([disabled='true']) .arrow {
+					cursor: default;
+					fill: #b0b0b0;
 				}
 				.arrow {
 					cursor: pointer;
@@ -75,6 +86,7 @@ export default class Select extends HTMLElement {
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._disabled = false;
 		this._expanded = false;
 		this._options = [];
 		this._selected = -1;
@@ -84,11 +96,38 @@ export default class Select extends HTMLElement {
 	get value() { return this.#inner.innerText; }
 
 	get #btnArrow() { return this.shadowRoot.querySelector('.arrow'); }
+	get #disabled() { return this._disabled; }
 	get #expanded() { return this._expanded; }
 	get #inner() { return this.shadowRoot.querySelector('.inner'); }
 	get #list() { return this.shadowRoot.querySelector('.list'); }
 	get #options() { return this._options; }
 
+	set #disabled(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._disabled = bool;
+		if (bool) {
+			this.removeEventListener('blur', this.handleFocusOut);
+			this.removeEventListener('click', this.handleOpen);
+			this.removeEventListener('keydown', this.handleKeydown);
+			this.setAttribute('aria-disabled', bool);
+			this.setAttribute('aria-hidden', bool);
+			this.setAttribute('tabindex', -1);
+			this.#options.forEach((a) => {
+				a.removeEventListener('click', this.handleSubmit);
+			});
+		} else {
+			this.addEventListener('blur', this.handleFocusOut);
+			this.addEventListener('click', this.handleOpen);
+			this.addEventListener('keydown', this.handleKeydown);
+			this.removeAttribute('aria-disabled');
+			this.removeAttribute('aria-hidden');
+			this.removeAttribute('aria-hidden');
+			this.setAttribute('tabindex', 0);
+			this.#options.forEach((a) => {
+				a.addEventListener('click', this.handleSubmit);
+			});
+		}
+	}
 	set #expanded(newVal) {
 		this._expanded = newVal;
 		this.setAttribute('expanded', newVal);
@@ -118,6 +157,13 @@ export default class Select extends HTMLElement {
 		});
 	}
 
+	attributeChangedCallback(attr, oldVal, newVal) {
+		if (attr === 'disabled') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#disabled = bool;
+		}
+	}
+
 	connectedCallback() {
 		const initialSelected = this.getAttribute('selected');
 		const combos = [...document.querySelectorAll('ac-select')];
@@ -139,7 +185,6 @@ export default class Select extends HTMLElement {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
 					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
-					a.addEventListener('click', this.handleSubmit);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
@@ -154,15 +199,16 @@ export default class Select extends HTMLElement {
 				}
 			});
 		}
+		if (this.getAttribute('disabled') === 'true') {
+			this.#disabled = true;
+		} else {
+			this.#disabled = false;
+		}
 		this.#expanded = false;
 		this.#btnArrow.addEventListener('click', () => this.#expanded = !this.#expanded);
 		this.#list.setAttribute('role', 'listbox');
-		this.addEventListener('blur', this.handleFocusOut);
-		this.addEventListener('click', this.handleOpen);
-		this.addEventListener('keydown', this.handleKeydown);
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.setAttribute('role', 'select');
-		this.setAttribute('tabindex', '0');
 	}
 
 	handleFocusOut = (e) => {
