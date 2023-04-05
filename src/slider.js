@@ -21,11 +21,11 @@ export default class Slider extends HTMLElement {
 				}
 				input {
 					cursor: pointer;
+					width: 100%;
 				}
 				label {
 					align-items: center;
 					display: flex;
-					flex-wrap: wrap;
 					gap: 0 10px;
 					width: 100%;
 				}
