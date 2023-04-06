@@ -20,7 +20,6 @@ export default class Select extends HTMLElement {
 					padding: 1px 2px;
 					position: relative;
 					width: 100%;
-					z-index: 3;
 				}
 				:host(:focus-within) {
 					border-radius: 3px;
@@ -47,7 +46,7 @@ export default class Select extends HTMLElement {
 					right: 0;
 					top: 0;
 					width: 24px;
-					z-index: 2;
+					z-index: 1;
 				}
 				.arrow div {
 					display: flex;
@@ -72,9 +71,9 @@ export default class Select extends HTMLElement {
 					position: absolute;
 					visibility: hidden;
 					width: 100%;
-					z-index: 3;
+					z-index: 2;
 				}
-				.list[above='true'] {
+				.list[anchor='bottom'] {
 					top: 0;
 					transform: translateY(-100%);
 				}
@@ -213,12 +212,7 @@ export default class Select extends HTMLElement {
 		this.#expanded = false;
 		this.#btnArrow.addEventListener('click', () => this.#expanded = !this.#expanded);
 		this.#list.setAttribute('role', 'listbox');
-		const rect = this.getBoundingClientRect();
-		const listRect = this.#list.getBoundingClientRect();
-		const parentRect = this.parentElement.getBoundingClientRect();
-		if ((rect.height + rect.top + listRect.height) > (parentRect.height + parentRect.top)) {
-			this.#list.setAttribute('above', 'true');
-		}
+		if (this.getAttribute('anchor') !== null) this.#list.setAttribute('anchor', this.getAttribute('anchor'));
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.setAttribute('role', 'select');
 	}
