@@ -50,14 +50,14 @@ export default class Slider extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
-			this.#input.removeEventListener('change', this.handleChange);
+			this.#input.removeEventListener('input', this.handleChange);
 			this.#input.setAttribute('disabled', bool);
 			this.removeEventListener('keydown', this.handleKeydown);
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
 			this.setAttribute('tabindex', -1);
 		} else {
-			this.#input.addEventListener('change', this.handleChange);
+			this.#input.addEventListener('input', this.handleChange);
 			this.#input.removeAttribute('disabled');
 			this.addEventListener('keydown', this.handleKeydown);
 			this.removeAttribute('aria-disabled');
