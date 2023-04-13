@@ -111,6 +111,7 @@ export default class Select extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
+			this.#btnArrow.removeEventListener('click', this.handleOpen);
 			this.removeEventListener('blur', this.handleFocusOut);
 			this.removeEventListener('click', this.handleOpen);
 			this.removeEventListener('keydown', this.handleKeydown);
@@ -121,6 +122,7 @@ export default class Select extends HTMLElement {
 				a.removeEventListener('click', this.handleSubmit);
 			});
 		} else {
+			this.#btnArrow.addEventListener('click', this.handleOpen);
 			this.addEventListener('blur', this.handleFocusOut);
 			this.addEventListener('click', this.handleOpen);
 			this.addEventListener('keydown', this.handleKeydown);
@@ -210,7 +212,6 @@ export default class Select extends HTMLElement {
 			this.#disabled = false;
 		}
 		this.#expanded = false;
-		this.#btnArrow.addEventListener('click', () => this.#expanded = !this.#expanded);
 		this.#list.setAttribute('role', 'listbox');
 		if (this.getAttribute('anchor') !== null) this.#list.setAttribute('anchor', this.getAttribute('anchor'));
 		this.setAttribute('aria-haspopup', this.#list.id);

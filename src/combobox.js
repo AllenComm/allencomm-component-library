@@ -299,7 +299,8 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleExpandToggle = (override) => {
-		if (override) {
+		this.#input.focus();
+		if (override === true || override === false) {
 			this.#expanded = override;
 		} else {
 			this.#expanded = !this.#expanded;
