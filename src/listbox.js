@@ -56,7 +56,6 @@ export default class Listbox extends HTMLElement {
 	set #options(arr) { this._options = arr; }
 	set #selected(newVal) {
 		if (typeof(newVal) === 'object') {
-			console.log('arr', this._selectedArr);
 			this._selectedArr = newVal;
 		} else {
 			this._selected = newVal;
