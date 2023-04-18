@@ -55,7 +55,8 @@ export default class Listbox extends HTMLElement {
 
 	set #options(arr) { this._options = arr; }
 	set #selected(newVal) {
-		if (typeof(newVal) === 'array') {
+		if (typeof(newVal) === 'object') {
+			console.log('arr', this._selectedArr);
 			this._selectedArr = newVal;
 		} else {
 			this._selected = newVal;
@@ -130,11 +131,14 @@ export default class Listbox extends HTMLElement {
 			});
 		} else {
 			const i = this.#options.findIndex((a) => a === target);
+			const newSelected = this.selected.slice();
 			target.setAttribute('aria-selected', !cur);
 			if (cur) {
-				this.#selected = this.selected.slice().splice(this.selected.indexOf(i), 1);
+				newSelected.splice(this.selected.indexOf(i), 1);
+				this.#selected = newSelected;
 			} else {
-				this.#selected = this.selected.push(i);
+				newSelected.push(i);
+				this.#selected = newSelected;
 			}
 		}
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
