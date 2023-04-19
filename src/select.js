@@ -98,7 +98,8 @@ export default class Select extends HTMLElement {
 	}
 
 	get selected() { return this._selected; }
-	get value() { return this.#inner.innerText; }
+	get textValue() { return this.#inner.innerText; }
+	get value() { return this.#options[this.selected].value; }
 
 	get #btnArrow() { return this.shadowRoot.querySelector('.arrow'); }
 	get #disabled() { return this._disabled; }
