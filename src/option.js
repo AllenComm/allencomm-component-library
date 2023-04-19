@@ -27,7 +27,12 @@ export default class Option extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
-	get value() { return this.innerText }
+	get value() {
+		if (this.getAttribute('value') !== null) {
+			return this.getAttribute('value');
+		}
+		return this.innerText;
+	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'hidden') {
