@@ -1,4 +1,6 @@
 export default class Listbox extends HTMLElement {
+	static observedAttributes = ['multiple'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -39,26 +41,39 @@ export default class Listbox extends HTMLElement {
 			</div>
 		`;
 		this._options = [];
+		this._multiple = false;
 		this._selected = -1;
 		this._selectedArr = [];
 	}
 
 	get selected() {
-		const multiple = this.getAttribute('aria-multiselectable');
-		if (multiple !== null && multiple) {
+		if (this.#multiple) {
 			return this._selectedArr;
 		}
 		return this._selected;
 	}
 
 	get #options() { return this._options; }
+	get #multiple() { return this._multiple; }
 
 	set #options(arr) { this._options = arr; }
+	set #multiple(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._multiple = bool;
+		this.setAttribute('aria-multiselectable', bool);
+	}
 	set #selected(newVal) {
 		if (typeof(newVal) === 'object') {
 			this._selectedArr = newVal;
 		} else {
 			this._selected = newVal;
+		}
+	}
+
+	attributeChangedCallback(attr, oldVal, newVal) {
+		if (attr === 'multiple') {
+			const bool = newVal === 'true' || newVal === true;
+			this.#multiple = bool;
 		}
 	}
 
@@ -80,8 +95,10 @@ export default class Listbox extends HTMLElement {
 		let optionId = optionIndex + offset;
 
 		if (multiple != null && multiple) {
-			this.setAttribute('aria-multiselectable', true);
+			this.#multiple = multiple;
 			this.#selected = [];
+		} else {
+			this.#multiple = false;
 		}
 
 		if (this.childNodes.length > 0) {
@@ -117,9 +134,8 @@ export default class Listbox extends HTMLElement {
 	handleChange = (e) => {
 		e.stopPropagation();
 		const target = e.target;
-		const multiple = this.getAttribute('aria-multiselectable');
 		const cur = target.getAttribute('aria-selected') === 'true';
-		if (!multiple) {
+		if (!this.#multiple) {
 			this.#options.forEach((a, i) => {
 				if (a.id !== target.id && a.getAttribute('aria-selected')) {
 					a.setAttribute('aria-selected', false);
