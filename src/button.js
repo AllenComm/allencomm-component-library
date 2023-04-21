@@ -37,13 +37,11 @@ export default class Button extends HTMLElement {
 		this._disabled = bool;
 		if (bool) {
 			this.#button.setAttribute('disabled', bool);
-			this.#button.removeEventListener('click', this.handleChange);
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
 			this.setAttribute('tabindex', -1);
 		} else {
 			this.#button.removeAttribute('disabled');
-			this.#button.addEventListener('click', this.handleChange);
 			this.removeAttribute('aria-disabled');
 			this.removeAttribute('aria-hidden');
 			this.setAttribute('tabindex', 0);
@@ -63,10 +61,6 @@ export default class Button extends HTMLElement {
 		} else {
 			this.#disabled = false;
 		}
-	}
-
-	handleChange = () => {
-		this.dispatchEvent(new Event('click', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
 
