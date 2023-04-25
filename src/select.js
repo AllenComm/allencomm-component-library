@@ -198,7 +198,7 @@ export default class Select extends HTMLElement {
 					if (!a.id) {
 						a.id = `option-${optionId + 1}`;
 					}
-					if (initialSelected === a.id || optionSelected) {
+					if (initialSelected === a.id || initialSelected === a.innerText || optionSelected) {
 						this.#selected = optionIndex;
 					}
 					optionIndex = optionIndex + 1;
