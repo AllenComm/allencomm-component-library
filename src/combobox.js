@@ -159,7 +159,6 @@ export default class Combobox extends HTMLElement {
 	set #selected(newVal) {
 		this._selected = newVal;
 		if (newVal > -1) {
-			this.#options[newVal].setAttribute('aria-selected', true);
 			this.#btnClear.setAttribute('hidden', false);
 		} else {
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
@@ -167,7 +166,7 @@ export default class Combobox extends HTMLElement {
 		}
 		this.#options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
-				this.#input.value = this.#options[this.selected].innerText;
+				this.#input.value = a.innerHTML;
 				this.#expanded = false;
 				this.#input.focus();
 				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
@@ -204,7 +203,6 @@ export default class Combobox extends HTMLElement {
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
-					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
@@ -229,6 +227,11 @@ export default class Combobox extends HTMLElement {
 		this.#input.setAttribute('role', 'combobox');
 		this.#list.setAttribute('role', 'listbox');
 		this.setAttribute('aria-haspopup', this.#list.id);
+		this.#options.map((a, i) => {
+			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
+				this.#selected = i;
+			}
+		});
 	}
 
 	handleBtnClearClick = () => {

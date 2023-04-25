@@ -149,12 +149,9 @@ export default class Select extends HTMLElement {
 	set #options(arr) { this._options = arr; }
 	set #selected(newVal) {
 		this._selected = newVal;
-		if (newVal > -1) {
-			this.#options[newVal].setAttribute('aria-selected', true);
-		}
 		this.#options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
-				this.#inner.innerText = this.#options[this.selected].innerText;
+				this.#inner.innerText = a.innerHTML;
 				this.#expanded = false;
 				this.focus();
 				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
@@ -191,19 +188,17 @@ export default class Select extends HTMLElement {
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
-					const optionSelected = a.getAttribute('selected') || false;
 					this.#options.push(a);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
 						a.id = `option-${optionId + 1}`;
 					}
-					if (initialSelected === a.id || initialSelected === a.innerText || optionSelected) {
-						this.#selected = optionIndex;
-					}
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;
-					setTimeout(() => a.setAttribute('tabindex', -1));
+					setTimeout(() => {
+						a.setAttribute('tabindex', -1)
+					});
 				}
 			});
 		}
@@ -217,6 +212,11 @@ export default class Select extends HTMLElement {
 		if (this.getAttribute('anchor') !== null) this.#list.setAttribute('anchor', this.getAttribute('anchor'));
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.setAttribute('role', 'select');
+		this.#options.map((a, i) => {
+			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
+				this.#selected = i;
+			}
+		});
 	}
 
 	handleFocusOut = (e) => {
