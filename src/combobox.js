@@ -167,7 +167,7 @@ export default class Combobox extends HTMLElement {
 		}
 		this.#options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
-				this.#input.value = this.#options[this.selected].value;
+				this.#input.value = this.#options[this.selected].innerText;
 				this.#expanded = false;
 				this.#input.focus();
 				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));

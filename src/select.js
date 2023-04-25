@@ -154,7 +154,7 @@ export default class Select extends HTMLElement {
 		}
 		this.#options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
-				this.#inner.innerText = this.#options[this.selected].value;
+				this.#inner.innerText = this.#options[this.selected].innerText;
 				this.#expanded = false;
 				this.focus();
 				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
