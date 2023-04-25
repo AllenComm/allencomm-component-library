@@ -1,4 +1,6 @@
 export default class Card extends HTMLElement {
+	static observedAttributes = ['face'];
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -39,9 +41,54 @@ export default class Card extends HTMLElement {
 				:host([shadow='5']) {
 					box-shadow: 0 24px 38px 3px rgb(0 0 0 / 14%), 0 9px 46px 8px rgb(0 0 0 / 12%), 0 11px 15px -7px rgb(0 0 0 / 20%);
 				}
+				:host([face='front']) .back {
+					display: none;
+				}
+				:host([face='back']) .front {
+					display: none;
+				}
 			</style>
-			<slot></slot>
+			<div class='front'>
+				<slot></slot>
+				<slot name='front'></slot>
+				<slot name='card-front-btn'></slot>
+			</div>
+			<div class='back'>
+				<slot name='back'></slot>
+				<slot name='card-back-btn'></slot>
+			</div>
 		`;
+		this._face = 'front';
+	}
+
+	get face() { return this._face; }
+
+	set face(newVal) {
+		this.setAttribute('face', newVal);
+		this._face = newVal;
+	}
+
+	connectedCallback() {
+		if (!this.hasAttribute('face')) {
+			this.face = 'front';
+		}
+
+		if (this.childNodes.length > 0) {
+			this.childNodes.forEach((a) => {
+				if (a.nodeName.toLowerCase() === 'button' && a.hasAttribute('slot')) {
+					a.addEventListener('click', this.onFlip);
+				}
+			});
+		}
+	}
+
+	onFlip = () => {
+		if (this.face === 'front') {
+			this.face = 'back';
+		} else {
+			this.face = 'front';
+		}
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 }
 

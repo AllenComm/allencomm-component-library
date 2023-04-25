@@ -13,66 +13,16 @@
 	<body>
 		<main>
 			<section>
-				<ac-button disabled='true'>disabled</ac-button>
-				<ac-button>enabled</ac-button>
-			</section>
-			<section>
-				<ac-checkbox disabled='true'>disabled</ac-checkbox>
-				<ac-checkbox>enabled</ac-checkbox>
-			</section>
-			<section>
-				<ac-combobox autocomplete='both' disabled='true'>
-					<ac-option></ac-option>
-					<ac-option>(500) Days of Summer</ac-option>
-					<ac-option>27 Dresses</ac-option>
-					<ac-option>A Dangerous Method</ac-option>
-					<ac-option>A Serious Man</ac-option>
-				</ac-combobox>
-				<ac-combobox autocomplete='both'>
-					<ac-option></ac-option>
-					<ac-option>(500) Days of Summer</ac-option>
-					<ac-option>27 Dresses</ac-option>
-					<ac-option>A Dangerous Method</ac-option>
-					<ac-option>A Serious Man</ac-option>
-				</ac-combobox>
-			</section>
-			<section>
-				<ac-number disabled='true'>disabled</ac-number>
-				<ac-number>enabled</ac-number>
-			</section>
-			<section>
-				<ac-radio disabled='true'>disabled</ac-radio>
-				<ac-radio>enabled</ac-radio>
-			</section>
-			<section>
-				disabled
-				<ac-select disabled='true'>
-					<ac-option></ac-option>
-					<ac-option>(500) Days of Summer</ac-option>
-					<ac-option>27 Dresses</ac-option>
-					<ac-option>A Dangerous Method</ac-option>
-					<ac-option>A Serious Man</ac-option>
-				</ac-select>
-				enabled
-				<ac-select>
-					<ac-option></ac-option>
-					<ac-option>(500) Days of Summer</ac-option>
-					<ac-option>27 Dresses</ac-option>
-					<ac-option>A Dangerous Method</ac-option>
-					<ac-option>A Serious Man</ac-option>
-				</ac-select>
-			</section>
-			<section>
-				<ac-slider disabled='true'>disabled</ac-slider>
-				<ac-slider>enabled</ac-slider>
-			</section>
-			<section>
-				<ac-text-area disabled='true'>disabled</ac-text-area>
-				<ac-text-area>enabled</ac-text-area>
-			</section>
-			<section>
-				<ac-text-field disabled='true'>disabled</ac-text-field>
-				<ac-text-field>enabled</ac-text-field>
+				<ac-card density='comfortable'>
+					<div slot='front'>
+						front paragraph
+					</div>
+					<div slot='back'>
+						back paragraph
+					</div>
+					<button slot="card-front-btn">To back</button>
+					<button slot="card-back-btn">To front</button>
+				</ac-card>
 			</section>
 		</main>
 	</body>
