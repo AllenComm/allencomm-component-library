@@ -49,13 +49,13 @@ export default class Card extends HTMLElement {
 				}
 			</style>
 			<div class='front'>
+				<slot name='card-front-btn'></slot>
 				<slot></slot>
 				<slot name='front'></slot>
-				<slot name='card-front-btn'></slot>
 			</div>
 			<div class='back'>
-				<slot name='back'></slot>
 				<slot name='card-back-btn'></slot>
+				<slot name='back'></slot>
 			</div>
 		`;
 		this._face = 'front';
