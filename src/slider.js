@@ -10,10 +10,11 @@ export default class Slider extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: block;
 					outline: none;
 					width: 100%;
 				}
-				:host(:focus-visible) input {
+				:host(:focus-within) input, input:focus-visible {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;

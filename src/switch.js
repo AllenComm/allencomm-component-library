@@ -29,6 +29,12 @@ export default class Switch extends HTMLElement {
 					gap: 0 10px;
 					width: 100%;
 				}
+				slot[name='off-label'] {
+					display: inline-block;
+				}
+				slot[name='on-label'] {
+					display: none;
+				}
 				.wrapper {
 					background: transparent;
 					border: 1px solid #b2b2b2;
@@ -46,6 +52,11 @@ export default class Switch extends HTMLElement {
 					position: absolute;
 					top: 2px;
 					width: 16px;
+				}
+				.inner {
+					display: flex;
+					flex: 1;
+					justify-content: flex-end;
 				}
 				label:hover .wrapper {
 					cursor: pointer;
@@ -67,13 +78,23 @@ export default class Switch extends HTMLElement {
 				label:has(input:checked):hover .indicator {
 					background-color: #efefef;
 				}
+				label:has(input:checked) slot[name='off-label'] {
+					display: none;
+				}
+				label:has(input:checked) slot[name='on-label'] {
+					display: inline-block;
+				}
 			</style>
 			<label tabindex='-1'>
-				<input tabindex='-1' type='checkbox'></input>
-				<div class='wrapper'>
-					<div class='indicator'></div>
-				</div>
+				<slot name='on-label'></slot>
+				<slot name='off-label'></slot>
 				<slot></slot>
+				<div class='inner'>
+					<input tabindex='-1' type='checkbox'></input>
+					<div class='wrapper'>
+						<div class='indicator'></div>
+					</div>
+				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());

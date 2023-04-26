@@ -10,13 +10,20 @@ export default class Number extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: block;
 					outline: none;
 					width: 100%;
+				}
+				.inner {
+					display: flex;
+					flex: 1;
+					justify-content: flex-end;
 				}
 				input {
 					border-radius: 3px;
 					border-width: 1px;
 					padding: 5px;
+					width: auto;
 				}
 				input:focus-visible {
 					border-color: #000;
@@ -33,8 +40,10 @@ export default class Number extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
-				<input type='number'></input>
 				<slot></slot>
+				<div class='inner'>
+					<input type='number'></input>
+				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());

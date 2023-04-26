@@ -13,6 +13,7 @@ export default class Listbox extends HTMLElement {
 					align-items: flex-start;
 					display: flex;
 					flex-direction: column;
+					gap: 10px;
 					justify-items: center;
 					padding: 1px;
 				}

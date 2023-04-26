@@ -11,7 +11,8 @@ export default class Combobox extends HTMLElement {
 				}
 				:host {
 					border-radius: 3px;
-					display: block;
+					display: flex;
+					gap: 10px;
 					position: relative;
 				}
 				:host(:focus-within) {
@@ -71,24 +72,33 @@ export default class Combobox extends HTMLElement {
 					width: 100%;
 					z-index: 3;
 				}
+				.outer {
+					flex: 1;
+					position: relative;
+				}
 			</style>
-			<input type='text'/>
-			<div class='arrow'>
-				<div>
-					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-						<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
-					</svg>
+			<slot></slot>
+			<div class='outer'>
+				<input type='text'/>
+				<slot name='expand-btn'></slot>
+				<div class='arrow'>
+					<div>
+						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+							<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
+						</svg>
+					</div>
 				</div>
-			</div>
-			<div class='clear' hidden='true'>
-				<div>
-					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-						<path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/>
-					</svg>
+				<slot name='clear-btn'></slot>
+				<div class='clear' hidden='true'>
+					<div>
+						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+							<path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/>
+						</svg>
+					</div>
 				</div>
-			</div>
-			<div class='list'>
-				<slot name='options'></slot>
+				<div class='list'>
+					<slot name='options'></slot>
+				</div>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -208,9 +218,6 @@ export default class Combobox extends HTMLElement {
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
 						a.id = `option-${optionId + 1}`;
-					}
-					if (initialSelected === a.id || optionSelected) {
-						this.#selected = optionIndex;
 					}
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;

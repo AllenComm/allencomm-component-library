@@ -10,6 +10,7 @@ export default class Radio extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: block;
 					outline: none;
 					width: 100%;
 				}
@@ -22,6 +23,11 @@ export default class Radio extends HTMLElement {
 					outline-offset: 2px;
 					width: 13px;
 					z-index: 1;
+				}
+				.inner {
+					display: flex;
+					flex: 1;
+					justify-content: flex-end;
 				}
 				input {
 					margin: 0;
@@ -36,10 +42,26 @@ export default class Radio extends HTMLElement {
 					gap: 0 10px;
 					width: 100%;
 				}
+				::slotted(*[slot='off-label']:not(:empty)) {
+					display: inline-block;
+				}
+				::slotted(*[slot='on-label']) {
+					display: none;
+				}
+				label:has(input:checked) ::slotted(*[slot='off-label']) {
+					display: none;
+				}
+				label:has(input:checked) ::slotted(*[slot='on-label']:not(:empty)) {
+					display: inline-block;
+				}
 			</style>
 			<label tabindex='-1'>
-				<input tabindex='-1' type='radio'></input>
+				<slot name='on-label'></slot>
+				<slot name='off-label'></slot>
 				<slot></slot>
+				<div class='inner'>
+					<input tabindex='-1' type='radio'></input>
+				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());

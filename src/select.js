@@ -10,18 +10,13 @@ export default class Select extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					background-color: #fff;
-					border: 1px solid #767676;
-					border-radius: 3px;
-					cursor: pointer;
-					display: block;
-					height: 24px;
-					outline: none;
-					padding: 1px 2px;
-					position: relative;
-					width: 100%;
+					display: flex;
+					gap: 10px;
 				}
-				:host(:focus-within) {
+				:host(:focus-visible) {
+					outline: none;
+				}
+				:host(:focus-within) .outer {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
@@ -77,16 +72,31 @@ export default class Select extends HTMLElement {
 					top: 0;
 					transform: translateY(-100%);
 				}
+				.outer {
+					background-color: #fff;
+					border: 1px solid #767676;
+					border-radius: 3px;
+					cursor: pointer;
+					display: block;
+					height: 24px;
+					outline: none;
+					padding: 1px 2px;
+					position: relative;
+					width: 100%;
+				}
 			</style>
-			<div class='inner'></div>
-			<div class='list'>
-				<slot name='options'></slot>
-			</div>
-			<div class='arrow'>
-				<div>
-					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-						<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
-					</svg>
+			<slot></slot>
+			<div class='outer'>
+				<div class='inner'></div>
+				<div class='list'>
+					<slot name='options'></slot>
+				</div>
+				<div class='arrow'>
+					<div>
+						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+							<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
+						</svg>
+					</div>
 				</div>
 			</div>
 		`;
