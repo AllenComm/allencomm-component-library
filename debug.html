@@ -48,6 +48,17 @@
 					<ac-option>Option 3a</ac-option>
 					<ac-option>Option 3b</ac-option>
 				</ac-combobox>
+				<ac-combobox autocomplete='both'>
+					Label
+					<img slot='clear-btn' src='./close.svg'/>
+					<img slot='expand-btn' src='./expand.svg'/>
+					<ac-option>Option 1a</ac-option>
+					<ac-option>Option 1b</ac-option>
+					<ac-option>Option 2a</ac-option>
+					<ac-option>Option 2b</ac-option>
+					<ac-option>Option 3a</ac-option>
+					<ac-option>Option 3b</ac-option>
+				</ac-combobox>
 			</section>
 			<section id="ac-listbox">
 				<h3>Listbox</h3>
@@ -79,12 +90,19 @@
 			<section id="ac-radio">
 				<h3>Radio</h3>
 				<ac-radio name='radio' value='1' id='one' checked=true><span slot='on-label'>On!</span><span slot='off-label'>Off!</span></ac-radio>
-				<ac-radio name='radio' value='2' id='two'>Label 2</ac-radio>
+				<ac-radio name='radio' value='2' id='two'>Label</ac-radio>
 			</section>
 			<section id="ac-select">
 				<h3>Select</h3>
 				<ac-select>
 					Label
+					<ac-option>Option 1</ac-option>
+					<ac-option>Option 2</ac-option>
+					<ac-option>Option 3</ac-option>
+				</ac-select>
+				<ac-select>
+					Label
+					<img slot='expand-btn' src='./expand.svg'/>
 					<ac-option>Option 1</ac-option>
 					<ac-option>Option 2</ac-option>
 					<ac-option>Option 3</ac-option>
@@ -96,7 +114,8 @@
 			</section>
 			<section id="ac-switch">
 				<h3>Switch</h3>
-				<ac-switch>Label<span slot='on-label'>On!</span><span slot='off-label'>Off!</span></ac-switch>
+				<ac-switch><span slot='on-label'>On!</span><span slot='off-label'>Off!</span></ac-switch>
+				<ac-switch>Label</ac-switch>
 			</section>
 			<section id="ac-text-area">
 				<h3>Text-Area</h3>

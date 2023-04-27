@@ -29,12 +29,6 @@ export default class Switch extends HTMLElement {
 					gap: 0 10px;
 					width: 100%;
 				}
-				slot[name='off-label'] {
-					display: inline-block;
-				}
-				slot[name='on-label'] {
-					display: none;
-				}
 				.wrapper {
 					background: transparent;
 					border: 1px solid #b2b2b2;
@@ -78,10 +72,16 @@ export default class Switch extends HTMLElement {
 				label:has(input:checked):hover .indicator {
 					background-color: #efefef;
 				}
-				label:has(input:checked) slot[name='off-label'] {
+				::slotted(*[slot='off-label']:not(:empty)) {
+					display: inline-block;
+				}
+				::slotted(*[slot='on-label']) {
 					display: none;
 				}
-				label:has(input:checked) slot[name='on-label'] {
+				label:has(input:checked) ::slotted(*[slot='off-label']) {
+					display: none;
+				}
+				label:has(input:checked) ::slotted(*[slot='on-label']:not(:empty)) {
 					display: inline-block;
 				}
 			</style>

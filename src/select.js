@@ -33,19 +33,24 @@ export default class Select extends HTMLElement {
 					cursor: default;
 					fill: #b0b0b0;
 				}
-				.arrow {
+				.arrow, slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;
-					height: 24px;
+					height: 22px;
 					position: absolute;
 					right: 0;
 					top: 0;
-					width: 24px;
+					width: 22px;
 					z-index: 1;
 				}
-				.arrow div {
-					display: flex;
+				.arrow.hidden {
+					display: none;
+				}
+				.arrow div, ::slotted(*[slot='expand-btn']) {
+					display: flex !important;
 					height: 100%;
+					max-height: 22px !important;
+					max-width: 22px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
@@ -91,6 +96,7 @@ export default class Select extends HTMLElement {
 				<div class='list'>
 					<slot name='options'></slot>
 				</div>
+				<slot name='expand-btn'></slot>
 				<div class='arrow'>
 					<div>
 						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
@@ -105,18 +111,25 @@ export default class Select extends HTMLElement {
 		this._expanded = false;
 		this._options = [];
 		this._selected = -1;
+		this._slotExpand = null;
 	}
 
 	get selected() { return this._selected; }
 	get textValue() { return this.#inner.innerText; }
 	get value() { return this.#options[this.selected].value; }
 
-	get #btnArrow() { return this.shadowRoot.querySelector('.arrow'); }
+	get #btnArrow() {
+		if (this.#slotExpand !== null) {
+			return this.#slotExpand;
+		}
+		return this.shadowRoot.querySelector('.arrow');
+	}
 	get #disabled() { return this._disabled; }
 	get #expanded() { return this._expanded; }
 	get #inner() { return this.shadowRoot.querySelector('.inner'); }
 	get #list() { return this.shadowRoot.querySelector('.list'); }
 	get #options() { return this._options; }
+	get #slotExpand() { return this._slotExpand; }
 
 	set #disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
@@ -171,6 +184,7 @@ export default class Select extends HTMLElement {
 			}
 		});
 	}
+	set #slotExpand(newVal) { this._slotExpand = newVal; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
@@ -209,6 +223,9 @@ export default class Select extends HTMLElement {
 					setTimeout(() => {
 						a.setAttribute('tabindex', -1)
 					});
+				} else if (a.slot === 'expand-btn') {
+					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
+					this.#slotExpand = a;
 				}
 			});
 		}
@@ -267,7 +284,11 @@ export default class Select extends HTMLElement {
 	}
 
 	handleOpen = (e) => {
-		if (e?.target.nodeName.toLowerCase() === 'ac-select') {
+		const name = e.target.nodeName.toLowerCase();
+		const className = e.target.className;
+		if (name === this.#slotExpand?.nodeName.toLowerCase() || name === 'ac-select' || className === 'arrow') {
+			e.preventDefault();
+			e.stopPropagation();
 			this.#expanded = !this.#expanded;
 		}
 	}

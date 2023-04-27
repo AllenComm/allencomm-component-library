@@ -34,30 +34,44 @@ export default class Combobox extends HTMLElement {
 					width: 100%;
 					z-index: 1;
 				}
-				.arrow, .clear {
+				.arrow, .clear, slot[name='clear-btn'], slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;
-					height: 24px;
+					height: 22px;
 					position: absolute;
 					top: 0;
-					width: 24px;
+					width: 22px;
 					z-index: 2;
 				}
-				.arrow div, .clear div {
-					display: flex;
+				slot[name='clear-btn'], slot[name='expand-btn'] {
+					display: flex !important;
 					height: 100%;
+					max-height: 24px !important;
+					max-width: 24px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
 				}
-				.arrow {
+				.arrow.hidden, .clear.hidden {
+					display: none;
+				}
+				.arrow div, .clear div, ::slotted(*[slot='expand-btn']), ::slotted(*[slot='clear-btn']) {
+					display: flex !important;
+					height: 100%;
+					max-height: 22px !important;
+					max-width: 22px !important;
+					place-content: center;
+					place-items: center;
+					width: 100%;
+				}
+				.arrow, slot[name='expand-btn'] {
 					right: 0;
 				}
-				.clear {
+				.clear, slot[name='clear-btn'] {
 					right: 24px;
 				}
-				.clear[hidden='true'] {
-					display: none;
+				.clear[hidden='true'], ::slotted(*[slot='clear-btn'][hidden='true']) {
+					display: none !important;
 				}
 				.list {
 					background: #fff;
@@ -107,19 +121,33 @@ export default class Combobox extends HTMLElement {
 		this._focused = null;
 		this._options = [];
 		this._selected = -1;
+		this._slotClear = null;
+		this._slotExpand = null;
 	}
 
 	get selected() { return this._selected; }
 	get value() { return this.#input.value; }
 
-	get #btnArrow() { return this.shadowRoot.querySelector('.arrow'); }
-	get #btnClear() { return this.shadowRoot.querySelector('.clear'); }
+	get #btnArrow() {
+		if (this.#slotExpand !== null) {
+			return this.#slotExpand;
+		}
+		return this.shadowRoot.querySelector('.arrow');
+	}
+	get #btnClear() {
+		if (this.#slotClear !== null) {
+			return this.#slotClear;
+		}
+		return this.shadowRoot.querySelector('.clear');
+	}
 	get #disabled() { return this._disabled; }
 	get #expanded() { return this._expanded; }
 	get #focused() { return this._focused; }
 	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #list() { return this.shadowRoot.querySelector('.list'); }
 	get #options() { return this._options; }
+	get #slotClear() { return this._slotClear; }
+	get #slotExpand() { return this._slotExpand; }
 	get #visibleOptions() { return this.#options.filter((a) => a.getAttribute('hidden') !== 'true'); }
 
 	set #disabled(newVal) {
@@ -186,6 +214,8 @@ export default class Combobox extends HTMLElement {
 			}
 		});
 	}
+	set #slotClear(newVal) { this._slotClear = newVal; }
+	set #slotExpand(newVal) { this._slotExpand = newVal; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
@@ -222,6 +252,13 @@ export default class Combobox extends HTMLElement {
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;
 					setTimeout(() => a.setAttribute('tabindex', -1));
+				} else if (a.slot === 'expand-btn') {
+					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
+					this.#slotExpand = a;
+				} else if (a.slot === 'clear-btn') {
+					this.shadowRoot.querySelector('.clear').classList.add('hidden');
+					this.#slotClear = a;
+					a.setAttribute('hidden', true);
 				}
 			});
 		}
@@ -315,6 +352,14 @@ export default class Combobox extends HTMLElement {
 		} else {
 			this.#expanded = !this.#expanded;
 		}
+
+		//const name = e.target.nodeName.toLowerCase();
+		//const className = e.target.className;
+		//if (name === this.#slotExpand?.nodeName.toLowerCase() || name === 'ac-select' || className === 'arrow') {
+		//	e.preventDefault();
+		//	e.stopPropagation();
+		//	this.#expanded = !this.#expanded;
+		//}
 	}
 
 	handleFocusOut = (e) => {
