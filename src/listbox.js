@@ -79,21 +79,7 @@ export default class Listbox extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const initialSelected = this.getAttribute('selected');
 		const multiple = this.getAttribute('multiple');
-		const options = [...document.querySelectorAll('ac-listbox')];
-		const optionCounts = options.map((a) => {
-			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
-		});
-		const currentTabsIndex = options.findIndex((a) => a === this);
-		const offset = optionCounts.map((a, i) => {
-			if (i < currentTabsIndex) {
-				return a;
-			}
-			return 0;
-		}).reduce((a, b) => a + b, 0);
-		let optionIndex = 0;
-		let optionId = optionIndex + offset;
 
 		if (multiple != null && multiple) {
 			this.#multiple = multiple;
@@ -102,34 +88,11 @@ export default class Listbox extends HTMLElement {
 			this.#multiple = false;
 		}
 
-		if (this.childNodes.length > 0) {
-			this.childNodes.forEach((a) => {
-				if (a.nodeName.toLowerCase() === 'ac-option') {
-					const optionSelected = a.getAttribute('selected') || false;
-					this.#options.push(a);
-					a.addEventListener('blur', this.handleChildBlur);
-					a.addEventListener('click', this.handleChange);
-					a.addEventListener('focus', this.handleChildFocus);
-					a.addEventListener('keydown', this.handleChildKeydown);
-					a.setAttribute('aria-selected', false);
-					a.setAttribute('slot', 'options');
-					if (!a.id) {
-						a.id = `option-${optionId + 1}`;
-					}
-					if (initialSelected === a.id || optionSelected) {
-						if (multiple) {
-							this.#selected = this.selected.push(optionIndex);
-						} else {
-							this.#selected = optionIndex;
-						}
-						a.setAttribute('aria-selected', true);
-					}
-					optionIndex = optionIndex + 1;
-					optionId = optionId + 1;
-				}
-			});
-		}
 		this.setAttribute('role', 'listbox');
+		this.updateChildren();
+		if (this.shadowRoot.querySelector('slot[name="options"]')) {
+			this.shadowRoot.querySelector('slot[name="options"]').addEventListener('slotchange', this.updateChildren);
+		}
 	}
 
 	handleChange = (e) => {
@@ -197,6 +160,51 @@ export default class Listbox extends HTMLElement {
 				e.stopPropagation();
 				this.handleChange(e);
 				break;
+		}
+	}
+
+	updateChildren = (e) => {
+		const initialSelected = this.getAttribute('selected');
+		const multiple = this.getAttribute('multiple');
+		const options = [...document.querySelectorAll('ac-listbox')];
+		const optionCounts = options.map((a) => {
+			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
+		});
+		const currentTabsIndex = options.findIndex((a) => a === this);
+		const offset = optionCounts.map((a, i) => {
+			if (i < currentTabsIndex) {
+				return a;
+			}
+			return 0;
+		}).reduce((a, b) => a + b, 0);
+		let optionIndex = 0;
+		let optionId = optionIndex + offset;
+		if (this.childNodes.length > 0) {
+			this.childNodes.forEach((a) => {
+				if (a.nodeName.toLowerCase() === 'ac-option') {
+					const optionSelected = a.getAttribute('selected') || false;
+					this.#options.push(a);
+					a.addEventListener('blur', this.handleChildBlur);
+					a.addEventListener('click', this.handleChange);
+					a.addEventListener('focus', this.handleChildFocus);
+					a.addEventListener('keydown', this.handleChildKeydown);
+					a.setAttribute('aria-selected', false);
+					a.setAttribute('slot', 'options');
+					if (!a.id) {
+						a.id = `option-${optionId + 1}`;
+					}
+					if (initialSelected === a.id || optionSelected) {
+						if (multiple) {
+							this.#selected = this.selected.push(optionIndex);
+						} else {
+							this.#selected = optionIndex;
+						}
+						a.setAttribute('aria-selected', true);
+					}
+					optionIndex = optionIndex + 1;
+					optionId = optionId + 1;
+				}
+			});
 		}
 	}
 }
