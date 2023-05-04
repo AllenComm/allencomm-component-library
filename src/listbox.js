@@ -41,10 +41,14 @@ export default class Listbox extends HTMLElement {
 				<slot name='options'></slot>
 			</div>
 		`;
+		this._initialized = false;
 		this._options = [];
 		this._multiple = false;
 		this._selected = -1;
 		this._selectedArr = [];
+
+		const observer = new MutationObserver(this.updateChildren);
+		observer.observe(this, { childList: true });
 	}
 
 	get selected() {
@@ -54,9 +58,11 @@ export default class Listbox extends HTMLElement {
 		return this._selected;
 	}
 
+	get #initialized() { return this._initialized; }
 	get #options() { return this._options; }
 	get #multiple() { return this._multiple; }
 
+	set #initialized(newVal) { this._initialized = newVal; }
 	set #options(arr) { this._options = arr; }
 	set #multiple(newVal) {
 		const bool = newVal === 'true' || newVal === true;
@@ -89,10 +95,7 @@ export default class Listbox extends HTMLElement {
 		}
 
 		this.setAttribute('role', 'listbox');
-		this.updateChildren();
-		if (this.shadowRoot.querySelector('slot[name="options"]')) {
-			this.shadowRoot.querySelector('slot[name="options"]').addEventListener('slotchange', this.updateChildren);
-		}
+		this.updateChildren(null, null, true);
 	}
 
 	handleChange = (e) => {
@@ -163,13 +166,12 @@ export default class Listbox extends HTMLElement {
 		}
 	}
 
-	updateChildren = (e) => {
+	updateChildren = (mutationList, observer, initial) => {
+		console.log('initial', initial)
 		const initialSelected = this.getAttribute('selected');
 		const multiple = this.getAttribute('multiple');
 		const options = [...document.querySelectorAll('ac-listbox')];
-		const optionCounts = options.map((a) => {
-			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
-		});
+		const optionCounts = options.map((a) => { return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length; });
 		const currentTabsIndex = options.findIndex((a) => a === this);
 		const offset = optionCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
@@ -179,6 +181,8 @@ export default class Listbox extends HTMLElement {
 		}).reduce((a, b) => a + b, 0);
 		let optionIndex = 0;
 		let optionId = optionIndex + offset;
+		this.#options = [];
+
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
@@ -188,12 +192,14 @@ export default class Listbox extends HTMLElement {
 					a.addEventListener('click', this.handleChange);
 					a.addEventListener('focus', this.handleChildFocus);
 					a.addEventListener('keydown', this.handleChildKeydown);
-					a.setAttribute('aria-selected', false);
+					if (initial) {
+						a.setAttribute('aria-selected', false);
+					}
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
 						a.id = `option-${optionId + 1}`;
 					}
-					if (initialSelected === a.id || optionSelected) {
+					if ((initialSelected === a.id || optionSelected) && initial) {
 						if (multiple) {
 							this.#selected = this.selected.push(optionIndex);
 						} else {
