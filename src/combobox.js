@@ -70,6 +70,12 @@ export default class Combobox extends HTMLElement {
 				.clear, slot[name='clear-btn'] {
 					right: 24px;
 				}
+				slot[name='clear-btn'] {
+					pointer-events: none;
+				}
+				::slotted(*[slot='clear-btn']) {
+					pointer-events: auto;
+				}
 				.clear[hidden='true'], ::slotted(*[slot='clear-btn'][hidden='true']) {
 					display: none !important;
 				}
@@ -94,7 +100,6 @@ export default class Combobox extends HTMLElement {
 			<slot></slot>
 			<div class='outer'>
 				<input type='text'/>
-				<slot name='expand-btn'></slot>
 				<div class='arrow'>
 					<div>
 						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
@@ -102,7 +107,7 @@ export default class Combobox extends HTMLElement {
 						</svg>
 					</div>
 				</div>
-				<slot name='clear-btn'></slot>
+				<slot name='expand-btn'></slot>
 				<div class='clear' hidden='true'>
 					<div>
 						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
@@ -110,6 +115,7 @@ export default class Combobox extends HTMLElement {
 						</svg>
 					</div>
 				</div>
+				<slot name='clear-btn'></slot>
 				<div class='list'>
 					<slot name='options'></slot>
 				</div>

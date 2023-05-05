@@ -1,6 +1,7 @@
 export default class TextField extends HTMLElement {
 	static observedAttributes = ['disabled', 'value'];
 
+	// TODO: Image support in slot for search icon
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -17,6 +18,9 @@ export default class TextField extends HTMLElement {
 				:host([search='true']) input {
 					border-radius: 20px;
 					padding-right: 30px;
+				}
+				:host(:not([search='true'])) .icon {
+					display: none !important;
 				}
 				input {
 					border-radius: 3px;
@@ -41,22 +45,32 @@ export default class TextField extends HTMLElement {
 					position: relative;
 					width: 100%;
 				}
-				.icon {
-					display: none;
+				.icon, slot[name='icon'] {
+					display: flex;
 					height: 30px;
 					position: absolute;
-					right: 0;
+					place-content: center;
+					place-items: center;
+					right: 2px;
 					top: 0;
 					user-select: none;
 					width: 30px;
 					z-index: 2;
 				}
-				.icon div {
-					display: flex;
+				.icon.hidden {
+					display: none;
+				}
+				.icon div, ::slotted(*[slot='icon']) {
+					display: flex !important;
 					height: 100%;
+					max-height: 22px !important;
+					max-width: 22px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
+				}
+				slot[name='icon'] {
+					pointer-events: none;
 				}
 			</style>
 			<label tabindex='-1'>
@@ -69,14 +83,22 @@ export default class TextField extends HTMLElement {
 						</svg>
 					</div>
 				</div>
+				<slot name='icon'></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._slotIcon = null;
 	}
 
 	get #disabled() { return this._disabled; }
-	get #icon() { return this.shadowRoot.querySelector('.icon'); }
+	get #getIcon() {
+		if (this.#slotIcon !== null) {
+			return this.#slotIcon;
+		}
+		return this.shadowRoot.querySelector('.icon');
+	}
+	get #slotIcon() { return this._slotIcon; }
 
 	set #disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
@@ -93,6 +115,7 @@ export default class TextField extends HTMLElement {
 			this.removeAttribute('aria-hidden');
 		}
 	}
+	set #slotIcon(newVal) { this._slotIcon = newVal; }
 
 	get value() { return this.input.value; }
 	get input() { return this.shadowRoot.querySelector('input'); }
@@ -117,7 +140,7 @@ export default class TextField extends HTMLElement {
 		if (maxlength) this.input.setAttribute('maxlength', maxlength);
 		if (minlength) this.input.setAttribute('minlength', minlength);
 		if (placeholder) this.input.setAttribute('placeholder', placeholder);
-		if (search != null && search === 'true') this.#icon.style.setProperty('display', 'block');
+		if (search != null && search === 'true') this.setAttribute('search', 'true');
 		if (size) this.input.setAttribute('size', size);
 		if (value != null) {
 			this.input.value = value;
@@ -127,6 +150,14 @@ export default class TextField extends HTMLElement {
 			this.#disabled = true;
 		} else {
 			this.#disabled = false;
+		}
+		if (this.childNodes.length > 0) {
+			this.childNodes.forEach((a) => {
+				if (a.slot === 'icon') {
+					this.shadowRoot.querySelector('.icon').classList.add('hidden');
+					this.#slotIcon = a;
+				}
+			});
 		}
 	}
 
