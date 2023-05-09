@@ -167,7 +167,6 @@ export default class Listbox extends HTMLElement {
 	}
 
 	updateChildren = (mutationList, observer, initial) => {
-		console.log('initial', initial)
 		const initialSelected = this.getAttribute('selected');
 		const multiple = this.getAttribute('multiple');
 		const options = [...document.querySelectorAll('ac-listbox')];

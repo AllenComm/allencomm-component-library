@@ -1,7 +1,6 @@
 export default class TextField extends HTMLElement {
 	static observedAttributes = ['disabled', 'value'];
 
-	// TODO: Image support in slot for search icon
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -27,6 +26,7 @@ export default class TextField extends HTMLElement {
 					border-width: 1px;
 					flex: 1;
 					padding: 5px;
+					width: 100%;
 				}
 				input:focus-visible {
 					border-color: #000;
