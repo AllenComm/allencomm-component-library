@@ -23,7 +23,7 @@ export default class Number extends HTMLElement {
 					border-radius: 3px;
 					border-width: 1px;
 					padding: 5px;
-					width: auto;
+					width: 100%;
 				}
 				input:focus-visible {
 					border-color: #000;
