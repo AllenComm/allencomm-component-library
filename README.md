@@ -34,10 +34,10 @@ Unnamed = Slots which allow any child to be placed inside
 - Button
 	- unnamed
 - Card
-	- unnamed/`front` - Assigned to front of card content
-	- `back` - Assigned to back of card content
-	- `card-front-btn` - Button on top of front face of card, switches face
-	- `card-back-btn` - Button on top of back face of card, switches face
+	- unnamed/`front` - (`front` is optional, but preferred if using `back`) Assigned to front of card content
+	- `back` - (Optional, cards can just be front facing) Assigned to back of card content
+	- `card-front-btn` - (Optional) Button on top of front face of card, switches face
+	- `card-back-btn` - (Optional) Button on top of back face of card, switches face
 - Checkbox
 	- unnamed
 	- `on-label` - (Optional) Only shown when checkbox is on
