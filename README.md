@@ -40,8 +40,8 @@ Unnamed = Slots which allow any child to be placed inside
 	- `card-back-btn` - Button on top of back face of card, switches face
 - Checkbox
 	- unnamed
-	- `on-label` - Only shown when checkbox is on
-	- `off-label` - Only shown when checkbox is off
+	- `on-label` - (Optional) Only shown when checkbox is on
+	- `off-label` - (Optional) Only shown when checkbox is off
 - Combobox
 	- unnamed
 	- `expand-btn` - (Optional, should be `<img>`) Used to replace the expand-btn icon
@@ -56,8 +56,8 @@ Unnamed = Slots which allow any child to be placed inside
 	- unnamed
 - Radio
 	- unnamed
-	- `on-label` - Only shown when radio is on
-	- `off-label` - Only shown when radio is off
+	- `on-label` - (Optional) Only shown when radio is on
+	- `off-label` - (Optional) Only shown when radio is off
 - Select
 	- unnamed
 	- `expand-btn` - (Optional, should be `<img>`) Used to replace the expand-btn icon
