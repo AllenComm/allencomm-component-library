@@ -76,17 +76,22 @@ export default class TextArea extends HTMLElement {
 
 	connectedCallback() {
 		const cols = this.getAttribute('cols');
+		const lines = this.getAttribute('lines');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
 		const placeholder = this.getAttribute('placeholder');
-		const rows = this.getAttribute('rows');
 		const resize = this.getAttribute('resize') || 'none';
+		const rows = this.getAttribute('rows');
 		const value = this.getAttribute('value');
 		if (cols) this.#textarea.setAttribute('cols', cols);
 		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
 		if (minlength) this.#textarea.setAttribute('minlength', minlength);
 		if (placeholder) this.#textarea.setAttribute('placeholder', placeholder);
-		if (rows) this.#textarea.setAttribute('rows', rows);
+		if (!lines || lines == null) {
+			if (rows) this.#textarea.setAttribute('rows', rows);
+		} else if (lines) {
+			this.#textarea.setAttribute('rows', lines);
+		}
 		this.#textarea.style.setProperty('resize', resize);
 		if (value != null) {
 			this.#textarea.value = value;

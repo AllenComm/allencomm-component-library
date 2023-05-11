@@ -117,12 +117,14 @@ export default class TextField extends HTMLElement {
 	}
 	set #slotIcon(newVal) { this._slotIcon = newVal; }
 
-	get value() { return this.input.value; }
 	get input() { return this.shadowRoot.querySelector('input'); }
+	get value() { return this.input.value; }
+
+	set value(newVal) { this.input.value = newVal }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.input.value = newVal;
+			this.value = newVal;
 			this.setAttribute('aria-valueNow', newVal);
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
@@ -143,7 +145,7 @@ export default class TextField extends HTMLElement {
 		if (search != null && search === 'true') this.setAttribute('search', 'true');
 		if (size) this.input.setAttribute('size', size);
 		if (value != null) {
-			this.input.value = value;
+			this.value = value;
 			this.setAttribute('aria-valueNow', value);
 		}
 		if (this.getAttribute('disabled') === 'true') {
