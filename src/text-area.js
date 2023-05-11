@@ -87,8 +87,8 @@ export default class TextArea extends HTMLElement {
 		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
 		if (minlength) this.#textarea.setAttribute('minlength', minlength);
 		if (placeholder) this.#textarea.setAttribute('placeholder', placeholder);
-		if (!lines || lines == null) {
-			if (rows) this.#textarea.setAttribute('rows', rows);
+		if (rows) {
+			this.#textarea.setAttribute('rows', rows);
 		} else if (lines) {
 			this.#textarea.setAttribute('rows', lines);
 		}

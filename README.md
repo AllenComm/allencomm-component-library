@@ -14,13 +14,15 @@ Each web component can be used as a normal HTML component, such as:
 
 ```
 <ac-tabs slot='front'>
-	<ac-tab>Content</ac-tab>
-	<ac-tab>Design</ac-tab>
-	<ac-tab-panel>
-		<ac-text-area onChange=${(e) => updateStem(e)} value=${stem}>Stem</ac-text-area>
-		<p>Options</p>
-		<ac-button onClick=${() => onAddNewOption()}>Add option</ac-button>
-	</ac-tab-panel>
+    <ac-tab>Content</ac-tab>
+    <ac-tab>Design</ac-tab>
+    <ac-tab-panel>
+        <p>First panel content would be here...</p>
+        <ac-switch><span slot='on-label'>On</span><span slot='off-label'>Off</span></ac-switch>
+    </ac-tab-panel>
+    <ac-tab-panel>
+        <p>Second panel content would be here...</p>
+    </ac-tab-panel>
 </ac-tabs>
 ```
 
@@ -29,61 +31,74 @@ Each web component can be used as a normal HTML component, such as:
 Unnamed = Slots which allow any child to be placed inside
 
 - Accordion
-	- `content` - Auto assigned children based on `ac-accordion-button` and `ac-accordion-content`
-	- Anything else is not slotted
+    - `content` - Auto assigned children based on `ac-accordion-button` and
+        `ac-accordion-content`
+    - Anything else is not slotted
 - Button
-	- unnamed
+    - unnamed
 - Card
-	- unnamed/`front` - (`front` is optional, but preferred if using `back`) Assigned to front of card content
-	- `back` - (Optional, cards can just be front facing) Assigned to back of card content
-	- `card-front-btn` - (Optional) Button on top of front face of card, switches face
-	- `card-back-btn` - (Optional) Button on top of back face of card, switches face
+    - unnamed/`front` - (`front` is optional, but preferred if using `back`)
+        Assigned to front of card content
+    - `back` - (Optional, cards can just be front facing) Assigned to back of
+        card content
+    - `card-front-btn` - (Optional) Button on top of front face of card,
+        switches face
+    - `card-back-btn` - (Optional) Button on top of back face of card, switches
+        face
 - Checkbox
-	- unnamed
-	- `on-label` - (Optional) Only shown when checkbox is on
-	- `off-label` - (Optional) Only shown when checkbox is off
+    - unnamed
+    - `on-label` - (Optional) Only shown when checkbox is on
+    - `off-label` - (Optional) Only shown when checkbox is off
 - Combobox
-	- unnamed
-	- `expand-btn` - (Optional, should be `<img>`) Used to replace the expand-btn icon
-	- `clear-btn` - (Optional, should be `<img>`) Used to replace the clear-btn icon
-	- `options` - Auto assigned children based on `ac-option`
+    - unnamed
+    - `expand-btn` - (Optional, should be `<img>`) Used to replace the
+        expand-btn icon
+    - `clear-btn` - (Optional, should be `<img>`) Used to replace the clear-btn
+        icon
+    - `options` - Auto assigned children based on `ac-option`
 - Listbox
-	- unnamed
-	- `options` - Auto assigned children based on `ac-option`
+    - unnamed
+    - `options` - Auto assigned children based on `ac-option`
 - Number
-	- unnamed
+    - unnamed
 - Option
-	- unnamed
+    - unnamed
 - Radio
-	- unnamed
-	- `on-label` - (Optional) Only shown when radio is on
-	- `off-label` - (Optional) Only shown when radio is off
+    - unnamed
+    - `on-label` - (Optional) Only shown when radio is on
+    - `off-label` - (Optional) Only shown when radio is off
 - Select
-	- unnamed
-	- `expand-btn` - (Optional, should be `<img>`) Used to replace the expand-btn icon
-	- `options` - Auto assigned children based on `ac-option`
+    - unnamed
+    - `expand-btn` - (Optional, should be `<img>`) Used to replace the
+        expand-btn icon
+    - `options` - Auto assigned children based on `ac-option`
 - Slider
-	- unnamed
+    - unnamed
 - Switch
-	- unnamed
-	- `on-label` - (Optional) Only shown when switch is on
-	- `off-label` - (Optional) Only shown when switch is off
+    - unnamed
+    - `on-label` - (Optional) Only shown when switch is on
+    - `off-label` - (Optional) Only shown when switch is off
 - Tabs
-	- `tabs` - Auto assigned children based on `ac-tab`
-	- `panels` - Auto assigned children based on `ac-tab-panel`
-	- Anything else is not slotted
+    - `tabs` - Auto assigned children based on `ac-tab`
+    - `panels` - Auto assigned children based on `ac-tab-panel`
+    - Anything else is not slotted
 - Text-Area
-	- unnamed
+    - unnamed
 - Text-Field
-	- unnamed
-	- `icon` - (Optional, should be `<img>`) Used to replace the search icon
+    - unnamed
+    - `icon` - (Optional, should be `<img>`) Used to replace the search icon
 
 ## Development
 
-Clone the repository and use a local server to serve the `index.html`. Each component is a named `.js` file and placed in the `src` directory.
+Clone the repository and use a local server to serve the `index.html`. Each
+component is a named `.js` file and placed in the `src` directory.
 
 To create a new component...
 
-- Create the `.js` file in the `src` directory following convention [[example]]
-- Export the component [[example]]
-- Import the component in the `src/index.js` file [[example]]
+- Create the `.js` file in the `src` directory following convention
+    `kebab-case.js`
+- Export the component
+    `export default class ComponentName extends HTMLElement {...` and
+    `customElements.define('ac-component-name', ComponentName);`
+- Import the component in the `index/debug/example.html` file(s) with
+    `<script src="./index.js" type="module" defer></script>`
