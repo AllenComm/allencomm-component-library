@@ -95,10 +95,12 @@ component is a named `.js` file and placed in the `src` directory.
 
 To create a new component...
 
-- Create the `.js` file in the `src` directory following convention
-    `kebab-case.js`
+- Create the `.js` file in the `src` directory following `kebab-case` convention
 - Export the component
     `export default class ComponentName extends HTMLElement {...` and
     `customElements.define('ac-component-name', ComponentName);`
+- Export the component in the `index.js` file with
+    `import ComponentName from './src/component-name.js';` and adding it to the
+    `export {...}` object
 - Import the component in the `index/debug/example.html` file(s) with
     `<script src="./index.js" type="module" defer></script>`

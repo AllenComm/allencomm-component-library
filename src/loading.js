@@ -1,6 +1,4 @@
 export default class Loading extends HTMLElement {
-	//static observedAttributes = ['disabled'];
-
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -14,19 +12,15 @@ export default class Loading extends HTMLElement {
 					outline: none;
 					width: 100%;
 				}
-				.icon, slot[name='icon'] {
+				.icon {
 					display: flex;
 					height: 30px;
-					position: absolute;
 					place-content: center;
 					place-items: center;
-					right: 2px;
-					top: 0;
 					user-select: none;
 					width: 30px;
-					z-index: 2;
 				}
-				.icon div, ::slotted(*[slot='icon']) {
+				.icon div {
 					display: flex !important;
 					height: 100%;
 					max-height: 22px !important;
@@ -35,36 +29,45 @@ export default class Loading extends HTMLElement {
 					place-items: center;
 					width: 100%;
 				}
-				slot[name='icon'] {
-					pointer-events: none;
+				.icon div svg {
+					animation: load;
+					animation-duration: 1s;
+					animation-iteration-count: infinite;
+					animation-play-state: running;
+					animation-timing-function: linear;
 				}
 				.wrapper {
-					align-items: flex-start;
-					cursor: pointer;
 					display: flex;
 					flex-direction: row;
-					flex-wrap: wrap;
-					gap: 0 10px;
+					outline: none;
+					place-content: center;
 					place-items: center;
 					position: relative;
 					width: 100%;
+				}
+				@keyframes load {
+					0% {
+						transform: rotate(0deg);
+					}
+					50% {
+						transform: rotate(180deg);
+					}
+					100% {
+						transform: rotate(360deg);
+					}
 				}
 			</style>
 			<div class='wrapper' tabindex='-1'>
 				<div class='icon'>
 					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18" fill="#000000">
-							<path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+						<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48">
+							<path d="M480 896q-133 0-226.5-93.5T160 576q0-133 93.5-226.5T480 256q85 0 149 34.5T740 385V256h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220 576q0 109 75.5 184.5T480 836q83 0 152-47.5T728 663h62q-29 105-115 169t-195 64Z"/>
 						</svg>
 					</div>
 				</div>
-				<slot name='icon'></slot>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
-	}
-
-	connectedCallback() {
 	}
 }
 

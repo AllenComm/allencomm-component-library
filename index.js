@@ -6,6 +6,7 @@ import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Combobox from './src/combobox.js';
 import Divider from './src/divider.js';
+import Loading from './src/loading.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
 import Option from './src/option.js';
@@ -28,6 +29,7 @@ export {
 	Checkbox,
 	Combobox,
 	Divider,
+	Loading,
 	Listbox,
 	Number,
 	Option,
