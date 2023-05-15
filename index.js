@@ -5,6 +5,7 @@ import Button from './src/button.js';
 import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Combobox from './src/combobox.js';
+import DraggableList from './src/draggable-list.js';
 import Divider from './src/divider.js';
 import Loading from './src/loading.js';
 import Listbox from './src/listbox.js';
@@ -28,6 +29,7 @@ export {
 	Card,
 	Checkbox,
 	Combobox,
+	DraggableList,
 	Divider,
 	Loading,
 	Listbox,

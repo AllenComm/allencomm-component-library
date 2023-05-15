@@ -24,7 +24,7 @@ export default class Option extends HTMLElement {
 			</style>
 			<slot></slot>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this.shadowRoot.addEventListener('mousedown', this.handleMouseDown);
 	}
 
 	get value() {
@@ -43,6 +43,12 @@ export default class Option extends HTMLElement {
 
 	connectedCallback() {
 		this.setAttribute('tabindex', 0);
+		const draggable = this.getAttribute('draggable');
+		if (draggable != null) this.shadowRoot.removeEventListener('mousedown', this.handleMouseDown);
+	}
+
+	handleMouseDown = (e) => {
+		e.stopPropagation();
 	}
 }
 
