@@ -43,6 +43,7 @@ export default class Tabs extends HTMLElement {
 				}
 				slot[name="panels"] {
 					display: grid;
+					grid-template-columns: 100%;
 				}
 			</style>
 			<div class='list'>
