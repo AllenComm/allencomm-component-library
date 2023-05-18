@@ -16,16 +16,17 @@
 				<h3>Draggable List</h3>
 				<ac-draggable-list>
 					Test
-					<ac-option>Option 1</ac-option>
-					<ac-option>Option 2</ac-option>
-					<ac-option>Option 3</ac-option>
-					<ac-option>Option 4</ac-option>
+					<ac-option onclick="testClick(1)">Option 1</ac-option>
+					<ac-option onclick="testClick(2)">Option 2</ac-option>
+					<ac-option onclick="testClick(3)">Option 3</ac-option>
+					<ac-option onclick="testClick(4)">Option 4</ac-option>
 				</ac-draggable-list>
 			</section>
-			<section>
-				<h3>Loading</h3>
-				<ac-loading></ac-loading>
-			</section>
 		</main>
+		<script>
+			function testClick(arg){
+				console.log(arg);
+			};
+		</script>
 	</body>
 </html>
