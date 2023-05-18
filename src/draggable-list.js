@@ -17,7 +17,13 @@ export default class DraggableList extends HTMLElement {
 					position: relative;
 				}
 				::slotted(ac-option) {
-					cursor: grab;
+					display: flex;
+					position: absolute;
+					z-index: 1;
+				}
+				::slotted(ac-option[dragging="true"]) {
+					cursor: grabbing;
+					z-index: 10;
 				}
 				.targets {
 					display: flex;
@@ -43,7 +49,6 @@ export default class DraggableList extends HTMLElement {
 	get #targetsElem() { return this.shadowRoot.querySelector('.targets'); }
 
 	set #activeEl(newEl) { this._activeEl = newEl; }
-	set #isMouseDown(newVal) { this._isMouseDown = newVal; }
 	set #sources(arr) { this._sources = arr; }
 	set #targets(arr) { this._targets = arr; }
 
@@ -71,8 +76,15 @@ export default class DraggableList extends HTMLElement {
 					a.setAttribute('draggable', 'true');
 					a.setAttribute('slot', 'sources');
 					a.setAttribute('drag-start', sourceId);
-					a.style.position = 'absolute';
-					a.style.zIndex = '1';
+
+					const handle = document.createElement('span');
+					handle.setAttribute('class', 'handle');
+					handle.style.cursor = 'grab';
+					handle.style.order = '-1';
+					handle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48">
+							<path d="M349.911 896Q321 896 300.5 875.411q-20.5-20.588-20.5-49.5Q280 797 300.589 776.5q20.588-20.5 49.5-20.5Q379 756 399.5 776.589q20.5 20.588 20.5 49.5Q420 855 399.411 875.5q-20.588 20.5-49.5 20.5Zm260 0Q581 896 560.5 875.411q-20.5-20.588-20.5-49.5Q540 797 560.589 776.5q20.588-20.5 49.5-20.5Q639 756 659.5 776.589q20.5 20.588 20.5 49.5Q680 855 659.411 875.5q-20.588 20.5-49.5 20.5Zm-260-250Q321 646 300.5 625.411q-20.5-20.588-20.5-49.5Q280 547 300.589 526.5q20.588-20.5 49.5-20.5Q379 506 399.5 526.589q20.5 20.588 20.5 49.5Q420 605 399.411 625.5q-20.588 20.5-49.5 20.5Zm260 0Q581 646 560.5 625.411q-20.5-20.588-20.5-49.5Q540 547 560.589 526.5q20.588-20.5 49.5-20.5Q639 506 659.5 526.589q20.5 20.588 20.5 49.5Q680 605 659.411 625.5q-20.588 20.5-49.5 20.5Zm-260-250Q321 396 300.5 375.411q-20.5-20.588-20.5-49.5Q280 297 300.589 276.5q20.588-20.5 49.5-20.5Q379 256 399.5 276.589q20.5 20.588 20.5 49.5Q420 355 399.411 375.5q-20.588 20.5-49.5 20.5Zm260 0Q581 396 560.5 375.411q-20.5-20.588-20.5-49.5Q540 297 560.589 276.5q20.588-20.5 49.5-20.5Q639 256 659.5 276.589q20.5 20.588 20.5 49.5Q680 355 659.411 375.5q-20.588 20.5-49.5 20.5Z"/>
+						</svg>`;
+					a.appendChild(handle);
 
 					const height = a.getBoundingClientRect().height;
 					const target = document.createElement('div');
@@ -91,8 +103,8 @@ export default class DraggableList extends HTMLElement {
 				}
 			});
 		}
-		window.addEventListener('mouseup', this.handleDragStop);
-		window.addEventListener('mousemove', this.handleDrag);
+		document.addEventListener('mouseup', this.handleDragStop);
+		document.addEventListener('mousemove', this.handleDrag);
 	}
 
 	getTargetIndex = () => {
@@ -103,30 +115,32 @@ export default class DraggableList extends HTMLElement {
 			const rect = a.getBoundingClientRect();
 			const y = Math.max(rect.y, childPos.y);
 			const yy = Math.min(rect.y + rect.height, childPos.y + childPos.height);
-			console.log(y, yy, intersection);
-			const h = yy - y;
-			if (h > intersection) {
-				intersection = h;
+			const area = yy - y;
+			if (area > intersection) {
+				intersection = area;
 				cur = i
 			}
 		});
-		console.log(cur, intersection);
 		return cur;
 	}
 
 	handleDrag = (e) => {
 		e.preventDefault();
-		const el = e.target;
-		if (this.#activeEl == null) {
+		if (this.#activeEl == null || e.button !== 0) {
 			return;
 		} else {
 			const parentPos = this.#targetsElem.getBoundingClientRect();
 			const childPos = this.#activeEl.getBoundingClientRect();
 			const nextIndex = this.getTargetIndex();
 			const prevIndex = parseInt(this.#activeEl.getAttribute('drag-current'));
-			const top = `${(e.clientY - (childPos.height / 2)) - parentPos.y}px`;
+			const restrainedY = e.clientY < parentPos.y
+				? parentPos.y
+				: e.clientY > parentPos.y + parentPos.height
+					? parentPos.y + parentPos.height
+					: e.clientY;
+			const top = `${(restrainedY - (childPos.height / 2)) - parentPos.y}px`;
 			this.#activeEl.style.top = top;
-			this.#sources.forEach((a, i) => {
+			this.#sources.forEach((a) => {
 				if (a.id !== this.#activeEl.id && parseInt(a.getAttribute('drag-current')) === nextIndex) {
 					a.style.top = `${this.#targets[prevIndex].getBoundingClientRect().y - this.#targetsElem.getBoundingClientRect().y}px`;
 					a.setAttribute('drag-current', prevIndex);
@@ -139,29 +153,43 @@ export default class DraggableList extends HTMLElement {
 
 	handleDragStart = (e) => {
 		e.preventDefault();
-		this.#isMouseDown = true;
-		if (this.#activeEl != null) {
+		if (this.#activeEl != null || e.button !== 0) {
 			return;
 		}
-		const el = e.target;
-		const parentPos = this.#targetsElem.getBoundingClientRect();
+
+		const findParentOption = (elem) => {
+			if (elem.parentNode && elem.parentNode.nodeName.toLowerCase() == 'ac-option') {
+				return elem.parentNode;
+			} else if (elem.parentNode) {
+				return findParentOption(elem.parentNode);
+			} else {
+				return null;
+			}
+		};
+
+		let el = e.target;
+		if (el.nodeName.toLowerCase() != 'ac-option') {
+			el = findParentOption(el);
+		}
 		this.#activeEl = el;
 		el.setAttribute('dragging', true);
-		if (el.style.zIndex != 10) el.style.zIndex = 10;
-		if (el.style.cursor != 'grabbing') el.style.cursor = 'grabbing';
+		const handle = [...el.childNodes].find((a) => a.className == 'handle');
+		if (handle != null) {
+			console.log(handle);
+			handle.style.cursor = 'grabbing';
+		}
 	}
 
 	handleDragStop = (e) => {
 		e.preventDefault();
-		if (this.#activeEl == null) {
+		if (this.#activeEl == null || e.button !== 0) {
 			return;
 		}
-		this.#activeEl.style.top = `${this.#targets[this.getTargetIndex()].getBoundingClientRect().y - this.#targetsElem.getBoundingClientRect().y}px`;
-		this.#activeEl.style.zIndex = '1';
 		this.#activeEl.removeAttribute('dragging');
-		this.#activeEl.style.cursor = 'grab';
+		this.#activeEl.style.top = `${this.#targets[this.getTargetIndex()].getBoundingClientRect().y - this.#targetsElem.getBoundingClientRect().y}px`;
+		this.#activeEl.style.zIndex = null;
 		this.#activeEl = null;
 	}
-};
+}
 
 customElements.define('ac-draggable-list', DraggableList);

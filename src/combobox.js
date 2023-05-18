@@ -198,7 +198,7 @@ export default class Combobox extends HTMLElement {
 		this.setAttribute('expanded', newVal);
 		this.setAttribute('aria-expanded', newVal);
 	}
-	set #focused(newVal) { this._focused = newVal };
+	set #focused(newVal) { this._focused = newVal }
 	set #options(arr) { this._options = arr; }
 	set #selected(newVal) {
 		this._selected = newVal;
@@ -414,8 +414,8 @@ export default class Combobox extends HTMLElement {
 						}
 					}
 				} else {
-					let val = a;
-					let cur = currentVal;
+					const val = a;
+					const cur = currentVal;
 					if (this.getAttribute('casesensitive') === 'true' && !val.includes(cur)) {
 						return undefined;
 					} else if (!val.toLowerCase().includes(cur.toLowerCase())) {

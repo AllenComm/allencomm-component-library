@@ -91,13 +91,12 @@ export default class TextField extends HTMLElement {
 		this._slotIcon = null;
 	}
 
+	get input() { return this.shadowRoot.querySelector('input'); }
+	get value() { return this.input.value; }
+
+	set value(newVal) { this.input.value = newVal }
+
 	get #disabled() { return this._disabled; }
-	get #getIcon() {
-		if (this.#slotIcon !== null) {
-			return this.#slotIcon;
-		}
-		return this.shadowRoot.querySelector('.icon');
-	}
 	get #slotIcon() { return this._slotIcon; }
 
 	set #disabled(newVal) {
@@ -116,11 +115,6 @@ export default class TextField extends HTMLElement {
 		}
 	}
 	set #slotIcon(newVal) { this._slotIcon = newVal; }
-
-	get input() { return this.shadowRoot.querySelector('input'); }
-	get value() { return this.input.value; }
-
-	set value(newVal) { this.input.value = newVal }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {

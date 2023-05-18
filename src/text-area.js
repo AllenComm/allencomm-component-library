@@ -45,6 +45,8 @@ export default class TextArea extends HTMLElement {
 
 	get value() { return this.#textarea.value; }
 
+	set value(newVal) { this.input.value = newVal }
+
 	get #disabled() { return this._disabled; }
 	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
 
