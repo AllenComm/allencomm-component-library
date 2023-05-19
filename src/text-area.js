@@ -10,7 +10,17 @@ export default class TextArea extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					display: block;
 					outline: none;
+					width: 100%;
+				}
+				label {
+					align-items: flex-start;
+					cursor: pointer;
+					display: flex;
+					flex-direction: column;
+					flex-wrap: wrap;
+					height: 100%;
 					width: 100%;
 				}
 				textarea {
@@ -25,14 +35,6 @@ export default class TextArea extends HTMLElement {
 					outline: 1px solid #000;
 					z-index: 1;
 				}
-				label {
-					align-items: flex-start;
-					cursor: pointer;
-					display: flex;
-					flex-direction: column;
-					flex-wrap: wrap;
-					width: 100%;
-				}
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
@@ -45,7 +47,10 @@ export default class TextArea extends HTMLElement {
 
 	get value() { return this.#textarea.value; }
 
-	set value(newVal) { this.#textarea.value = newVal }
+	set value(newVal) {
+		console.log(newVal);
+		this.#textarea.value = newVal;
+	}
 
 	get #disabled() { return this._disabled; }
 	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
@@ -77,6 +82,7 @@ export default class TextArea extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const autoHeight = this.getAttribute('auto-height');
 		const cols = this.getAttribute('cols');
 		const lines = this.getAttribute('lines');
 		const maxlength = this.getAttribute('maxlength');
@@ -85,6 +91,11 @@ export default class TextArea extends HTMLElement {
 		const resize = this.getAttribute('resize') || 'none';
 		const rows = this.getAttribute('rows');
 		const value = this.getAttribute('value');
+		if (autoHeight != null) {
+			this.#textarea.setAttribute('auto-height', autoHeight);
+		} else {
+			this.#textarea.setAttribute('auto-height', true);
+		}
 		if (cols) this.#textarea.setAttribute('cols', cols);
 		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
 		if (minlength) this.#textarea.setAttribute('minlength', minlength);
@@ -109,6 +120,14 @@ export default class TextArea extends HTMLElement {
 	handleChange = () => {
 		this.setAttribute('aria-valueNow', this.value);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
+		if (this.#textarea.getAttribute('auto-height')) {
+			const scrollHeight = this.#textarea.scrollHeight;
+			const styles = getComputedStyle(this.#textarea);
+			const border = parseInt(styles.borderBottomWidth) + parseInt(styles.borderTopWidth);
+			if (parseInt(styles.height) < scrollHeight + border) {
+				this.#textarea.style.height = `${scrollHeight + border}px`;
+			}
+		}
 	}
 }
 

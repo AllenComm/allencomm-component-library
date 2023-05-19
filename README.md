@@ -88,6 +88,12 @@ Unnamed = Slots which allow any child to be placed inside
     - unnamed
     - `icon` - (Optional, should be `<img>`) Used to replace the search icon
 
+### Attributes available
+
+- Text-Area
+    - `auto-height` - Toggles auto expansion by component when text is higher
+        than the default. *Default: true*
+
 ## Development
 
 Clone the repository and use a local server to serve the `index.html`. Each
