@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="Library of AllenComm made UI components.">
 		<title>AllenComm Component Library</title>
@@ -13,20 +12,42 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<h3>Draggable List</h3>
-				<ac-draggable-list>
-					Test
-					<ac-option onclick="testClick(1)">Option 1</ac-option>
-					<ac-option onclick="testClick(2)">Option 2</ac-option>
-					<ac-option onclick="testClick(3)">Option 3</ac-option>
-					<ac-option onclick="testClick(4)">Option 4</ac-option>
-				</ac-draggable-list>
+				<ac-card density='cozy'>Lorem ipsum...</ac-card>
+				<br/>
+				<ac-tabs>
+					<ac-tab>First</ac-tab>
+					<ac-tab-panel density='cozy'>Lorem ipsum...</ac-tab-panel>
+				</ac-tabs>
+				<br/>
+				<ac-accordion>
+					<ac-accordion-button selected='true'>First</ac-accordion-button>
+					<ac-accordion-content density='cozy'>Lorem ipsum...</ac-accordion-content>
+				</ac-accordion>
+				<br/>
+				<ac-card density='comfortable'>Lorem ipsum...</ac-card>
+				<br/>
+				<ac-tabs>
+					<ac-tab>First</ac-tab>
+					<ac-tab-panel density='comfortable'>Lorem ipsum...</ac-tab-panel>
+				</ac-tabs>
+				<br/>
+				<ac-accordion>
+					<ac-accordion-button selected='true'>First</ac-accordion-button>
+					<ac-accordion-content density='comfortable'>Lorem ipsum...</ac-accordion-content>
+				</ac-accordion>
+				<br/>
+				<ac-card density='compact'>Lorem ipsum...</ac-card>
+				<br/>
+				<ac-tabs>
+					<ac-tab>First</ac-tab>
+					<ac-tab-panel density='compact'>Lorem ipsum...</ac-tab-panel>
+				</ac-tabs>
+				<br/>
+				<ac-accordion>
+					<ac-accordion-button selected='true'>First</ac-accordion-button>
+					<ac-accordion-content density='compact'>Lorem ipsum...</ac-accordion-content>
+				</ac-accordion>
 			</section>
 		</main>
-		<script>
-			function testClick(arg){
-				console.log(arg);
-			};
-		</script>
 	</body>
 </html>

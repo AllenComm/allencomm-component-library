@@ -24,6 +24,15 @@ export default class AccordionContent extends HTMLElement {
 					opacity: 0;
 					z-index: -1;
 				}
+				:host([density='cozy']) {
+					padding: 24px;
+				}
+				:host([density='comfortable']) {
+					padding: 12px;
+				}
+				:host([density='compact']) {
+					padding: 6px;
+				}
 				.content {
 					display: flex;
 					flex-direction: column;

@@ -37,7 +37,7 @@ export default class Accordion extends HTMLElement {
 	set #buttons(arr) { this._buttons = arr; }
 	set #content(arr) { this._content = arr; }
 	set #selected(newVal) {
-		if (typeof(newVal) === 'array') {
+		if (typeof(newVal) === 'object' && newVal?.isArray()) {
 			this._selectedArr = newVal;
 		} else {
 			this._selected = newVal;

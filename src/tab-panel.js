@@ -22,6 +22,15 @@ export default class TabPanel extends HTMLElement {
 					opacity: 0;
 					z-index: -1;
 				}
+				:host([density='cozy']) {
+					padding: 24px;
+				}
+				:host([density='comfortable']) {
+					padding: 12px;
+				}
+				:host([density='compact']) {
+					padding: 6px;
+				}
 				.panel {
 					display: flex;
 					flex-direction: column;
