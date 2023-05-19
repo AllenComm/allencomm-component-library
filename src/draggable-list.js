@@ -123,9 +123,9 @@ export default class DraggableList extends HTMLElement {
 				}
 			});
 		}
-		this.shadowRoot.addEventListener('click', this.handleDragStop);
-		this.shadowRoot.addEventListener('mouseup', this.handleDragStop);
-		this.shadowRoot.addEventListener('mousemove', this.handleDrag);
+		document.addEventListener('click', this.handleDragStop);
+		document.addEventListener('mouseup', this.handleDragStop);
+		document.addEventListener('mousemove', this.handleDrag);
 	}
 	
 	findParentOption = (elem) => {
@@ -218,16 +218,14 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	handleDragStop = (e) => {
-		e.preventDefault();
 		if (this.#isDown) {
+			e.preventDefault();
 			if (this.#activeEl == null || e.button !== 0) {
 				clearTimeout(this.#timer);
 				return;
 			}
 			this.#activeEl.removeAttribute('dragging');
 			this.#activeEl.style.zIndex = null;
-		} else {
-			e.stopPropagation();
 		}
 		setTimeout(() => {
 			this.#activeEl = null;
