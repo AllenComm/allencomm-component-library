@@ -123,9 +123,9 @@ export default class DraggableList extends HTMLElement {
 				}
 			});
 		}
-		document.addEventListener('click', this.handleDragStop);
-		document.addEventListener('mouseup', this.handleDragStop);
-		document.addEventListener('mousemove', this.handleDrag);
+		this.shadowRoot.addEventListener('click', this.handleDragStop);
+		this.shadowRoot.addEventListener('mouseup', this.handleDragStop);
+		this.shadowRoot.addEventListener('mousemove', this.handleDrag);
 	}
 	
 	findParentOption = (elem) => {
