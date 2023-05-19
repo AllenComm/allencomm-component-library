@@ -50,6 +50,7 @@ export default class Combobox extends HTMLElement {
 					max-width: 24px !important;
 					place-content: center;
 					place-items: center;
+					pointer-events: none;
 					width: 100%;
 				}
 				.arrow.hidden, .clear.hidden {
@@ -62,6 +63,7 @@ export default class Combobox extends HTMLElement {
 					max-width: 22px !important;
 					place-content: center;
 					place-items: center;
+					pointer-events: all;
 					width: 100%;
 				}
 				.arrow, slot[name='expand-btn'] {
@@ -306,17 +308,18 @@ export default class Combobox extends HTMLElement {
 
 	handleChildKeydown = (e) => {
 		let isHidden = false;
+		const nextSibling = e.target?.nextElementSibling;
+		const prevSibling = e.target?.previousElementSibling;
+		const curIndex = this.#visibleOptions.findIndex((a) => a === this.#focused);
 		switch (e.code) {
 			case 'ArrowDown':
 			case 'ArrowRight':
 				e.preventDefault();
 				e.stopPropagation();
-				const nextSibling = e.target?.nextElementSibling;
 				isHidden = nextSibling?.getAttribute('hidden') === 'true';
 				if (nextSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
 					nextSibling.focus();
 				} else {
-					const curIndex = this.#visibleOptions.findIndex((a) => a === this.#focused);
 					this.#visibleOptions[curIndex + 1].focus();
 				}
 				break;
@@ -324,14 +327,12 @@ export default class Combobox extends HTMLElement {
 			case 'ArrowUp':
 				e.preventDefault();
 				e.stopPropagation();
-				const prevSibling = e.target?.previousElementSibling;
 				isHidden = prevSibling?.getAttribute('hidden') === 'true';
 				if (prevSibling?.nodeName.toLowerCase() === 'ac-option' && !isHidden) {
 					prevSibling.focus();
 				} else if (prevSibling === null) {
 					this.#input.focus();
 				} else {
-					const curIndex = this.#visibleOptions.findIndex((a) => a === this.#focused);
 					this.#visibleOptions[curIndex - 1].focus();
 				}
 				break;
@@ -348,28 +349,22 @@ export default class Combobox extends HTMLElement {
 				this.#expanded = false;
 				this.#input.focus();
 				break;
+			default:
+				return;
 		}
 	}
 
 	handleExpandToggle = (override) => {
 		this.#input.focus();
-		if (override === true || override === false) {
+		if (typeof(override) === 'boolean') {
 			this.#expanded = override;
 		} else {
 			this.#expanded = !this.#expanded;
 		}
-
-		//const name = e.target.nodeName.toLowerCase();
-		//const className = e.target.className;
-		//if (name === this.#slotExpand?.nodeName.toLowerCase() || name === 'ac-select' || className === 'arrow') {
-		//	e.preventDefault();
-		//	e.stopPropagation();
-		//	this.#expanded = !this.#expanded;
-		//}
 	}
 
 	handleFocusOut = (e) => {
-		if (!e.srcElement.contains(e.relatedTarget)) {
+		if (!e.srcElement.contains(e.relatedTarget) && e.target != this) {
 			this.#expanded = false;
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			if (this.selected <= -1) {
@@ -503,6 +498,7 @@ export default class Combobox extends HTMLElement {
 					this.#expanded = false;
 				}
 				this.handleSubmit(e);
+				break;
 			default:
 				this.#input.focus();
 				break;

@@ -170,71 +170,77 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	handleDrag = (e) => {
-		e.preventDefault();
-		if (this.#activeEl == null || e.button !== 0) {
-			return;
-		} else {
-			const parentPos = this.#targetsElem.getBoundingClientRect();
-			const childPos = this.#activeEl.getBoundingClientRect();
-			const nextIndex = this.getTargetIndex();
-			const prevIndex = parseInt(this.#activeEl.getAttribute('drag-current'));
-			const restrainedY = e.clientY < parentPos.y
-				? parentPos.y
-				: e.clientY > parentPos.y + parentPos.height
-					? parentPos.y + parentPos.height
-					: e.clientY;
-			const top = `${(restrainedY - (childPos.height / 2)) - parentPos.y}px`;
-			this.#activeEl.style.top = top;
-			this.#sources.forEach((a) => {
-				if (a.id !== this.#activeEl.id && parseInt(a.getAttribute('drag-current')) === nextIndex) {
-					a.setAttribute('drag-current', prevIndex);
+		if (this.shadowRoot.contains(e.target)) {
+			e.preventDefault();
+			if (this.#activeEl == null || e.button !== 0) {
+				return;
+			} else {
+				const parentPos = this.#targetsElem.getBoundingClientRect();
+				const childPos = this.#activeEl.getBoundingClientRect();
+				const nextIndex = this.getTargetIndex();
+				const prevIndex = parseInt(this.#activeEl.getAttribute('drag-current'));
+				const restrainedY = e.clientY < parentPos.y
+					? parentPos.y
+					: e.clientY > parentPos.y + parentPos.height
+						? parentPos.y + parentPos.height
+						: e.clientY;
+				const top = `${(restrainedY - (childPos.height / 2)) - parentPos.y}px`;
+				this.#activeEl.style.top = top;
+				this.#sources.forEach((a) => {
+					if (a.id !== this.#activeEl.id && parseInt(a.getAttribute('drag-current')) === nextIndex) {
+						a.setAttribute('drag-current', prevIndex);
+					}
+				});
+				if (this.#activeEl.getAttribute('drag-current') !== nextIndex) {
+					this.#activeEl.setAttribute('drag-current', nextIndex);
 				}
-			});
-			if (this.#activeEl.getAttribute('drag-current') !== nextIndex) {
-				this.#activeEl.setAttribute('drag-current', nextIndex);
 			}
 		}
 	}
 
 	handleDragStart = (e) => {
-		e.preventDefault();
-		this.#isDown = false;
-		if (this.#activeEl != null || e.button !== 0) {
-			return;
+		if (this.shadowRoot.contains(e.target)) {
+			e.preventDefault();
+			this.#isDown = false;
+			if (this.#activeEl != null || e.button !== 0) {
+				return;
+			}
+			this.#timer = setTimeout(() => {
+				this.#isDown = true;
+				let el = e.target;
+				if (el.nodeName.toLowerCase() != 'ac-option') {
+					el = this.findParentOption(el);
+				}
+				this.#activeEl = el;
+				el.setAttribute('dragging', true);
+				const handle = [...el.childNodes].find((a) => a.className == 'handle');
+				if (handle != null) {
+					handle.style.cursor = 'grabbing';
+				}
+			}, 100);
 		}
-		this.#timer = setTimeout(() => {
-			this.#isDown = true;
-			let el = e.target;
-			if (el.nodeName.toLowerCase() != 'ac-option') {
-				el = this.findParentOption(el);
-			}
-			this.#activeEl = el;
-			el.setAttribute('dragging', true);
-			const handle = [...el.childNodes].find((a) => a.className == 'handle');
-			if (handle != null) {
-				handle.style.cursor = 'grabbing';
-			}
-		}, 100);
 	}
 
 	handleDragStop = (e) => {
-		if (this.#isDown) {
-			e.preventDefault();
-			if (this.#activeEl == null || e.button !== 0) {
-				clearTimeout(this.#timer);
-				return;
+		if (this.shadowRoot.contains(e.target)) {
+			if (this.#isDown) {
+				e.preventDefault();
+				if (this.#activeEl == null || e.button !== 0) {
+					clearTimeout(this.#timer);
+					return;
+				}
+				this.#activeEl.removeAttribute('dragging');
+				this.#activeEl.style.zIndex = null;
 			}
-			this.#activeEl.removeAttribute('dragging');
-			this.#activeEl.style.zIndex = null;
+			setTimeout(() => {
+				this.#activeEl = null;
+				this.#isDown = false;
+				clearTimeout(this.#timer);
+			});
 		}
-		setTimeout(() => {
-			this.#activeEl = null;
-			this.#isDown = false;
-			clearTimeout(this.#timer);
-		});
 	}
 
-	handleOptionUpdate = (mutationList, observer) => {
+	handleOptionUpdate = (mutationList) => {
 		mutationList.forEach((mutation) => {
 			if (mutation.attributeName == 'drag-current' && !mutation.target.getAttribute('dragging')) {
 				mutation.target.style.top = `${this.#targets[mutation.target.getAttribute('drag-current')].getBoundingClientRect().y - this.#targetsElem.getBoundingClientRect().y}px`;
