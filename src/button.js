@@ -30,9 +30,9 @@ export default class Button extends HTMLElement {
 	}
 
 	get #button() { return this.shadowRoot.querySelector('button'); }
-	get #disabled() { return this._disabled; }
 
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -51,15 +51,15 @@ export default class Button extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
 	connectedCallback() {
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 	}
 }

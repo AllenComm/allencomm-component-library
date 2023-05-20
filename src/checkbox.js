@@ -73,10 +73,8 @@ export default class Checkbox extends HTMLElement {
 
 	get checked() { return this.#input.checked; }
 
-	get #input() { return this.shadowRoot.querySelector('input'); }
-	get #disabled() { return this._disabled; }
-
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -98,6 +96,8 @@ export default class Checkbox extends HTMLElement {
 		}
 	}
 
+	get #input() { return this.shadowRoot.querySelector('input'); }
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
@@ -105,7 +105,7 @@ export default class Checkbox extends HTMLElement {
 			this.setAttribute('aria-checked', bool);
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -113,9 +113,9 @@ export default class Checkbox extends HTMLElement {
 		const checked = this.getAttribute('checked') || false;
 		this.#input.checked = checked;
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		this.setAttribute('aria-checked', checked);
 	}

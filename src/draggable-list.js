@@ -48,16 +48,20 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	get #activeEl() { return this._activeEl; }
-	get #isDown() { return this._isDown; }
-	get #sources() { return this._sources; }
-	get #targets() { return this._targets; }
-	get #targetsElem() { return this.shadowRoot.querySelector('.targets'); }
-	get #timer() { return this._timer; }
-
 	set #activeEl(newEl) { this._activeEl = newEl; }
+
+	get #isDown() { return this._isDown; }
 	set #isDown(newVal) { this._isDown = newVal; }
+
 	set #sources(arr) { this._sources = arr; }
+	get #sources() { return this._sources; }
+
+	get #targets() { return this._targets; }
 	set #targets(arr) { this._targets = arr; }
+
+	get #targetsElem() { return this.shadowRoot.querySelector('.targets'); }
+
+	get #timer() { return this._timer; }
 	set #timer(newVal) { this._timer = newVal; }
 
 	connectedCallback() {

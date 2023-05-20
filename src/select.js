@@ -114,24 +114,15 @@ export default class Select extends HTMLElement {
 		this._slotExpand = null;
 	}
 
-	get selected() { return this._selected; }
-	get textValue() { return this.#inner.innerText; }
-	get value() { return this.#options[this.selected].value; }
-
 	get #btnArrow() {
 		if (this.#slotExpand !== null) {
 			return this.#slotExpand;
 		}
 		return this.shadowRoot.querySelector('.arrow');
 	}
-	get #disabled() { return this._disabled; }
-	get #expanded() { return this._expanded; }
-	get #inner() { return this.shadowRoot.querySelector('.inner'); }
-	get #list() { return this.shadowRoot.querySelector('.list'); }
-	get #options() { return this._options; }
-	get #slotExpand() { return this._slotExpand; }
 
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -159,6 +150,8 @@ export default class Select extends HTMLElement {
 			});
 		}
 	}
+
+	get #expanded() { return this._expanded; }
 	set #expanded(newVal) {
 		this._expanded = newVal;
 		this.setAttribute('expanded', newVal);
@@ -169,8 +162,19 @@ export default class Select extends HTMLElement {
 			this.setAttribute('aria-controls', '');
 		}
 	}
+
+	get #inner() { return this.shadowRoot.querySelector('.inner'); }
+
+	get #list() { return this.shadowRoot.querySelector('.list'); }
+
+	get #options() { return this._options; }
 	set #options(arr) { this._options = arr; }
-	set #selected(newVal) {
+
+	get #slotExpand() { return this._slotExpand; }
+	set #slotExpand(newVal) { this._slotExpand = newVal; }
+
+	get selected() { return this._selected; }
+	set selected(newVal) {
 		this._selected = newVal;
 		this.#options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
@@ -184,12 +188,15 @@ export default class Select extends HTMLElement {
 			}
 		});
 	}
-	set #slotExpand(newVal) { this._slotExpand = newVal; }
+
+	get textValue() { return this.#inner.innerText; }
+
+	get value() { return this.#options[this.selected].value; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -230,9 +237,9 @@ export default class Select extends HTMLElement {
 			});
 		}
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		this.#expanded = false;
 		this.#list.setAttribute('role', 'listbox');
@@ -241,7 +248,7 @@ export default class Select extends HTMLElement {
 		this.setAttribute('role', 'select');
 		this.#options.map((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
-				this.#selected = i;
+				this.selected = i;
 			}
 		});
 	}
@@ -260,11 +267,11 @@ export default class Select extends HTMLElement {
 				e.stopPropagation();
 				if (e.target.nodeName.toLowerCase() === 'ac-select') {
 					if (this.selected > -1 && this.selected < this.#options.length - 1) {
-						this.#selected = this.selected + 1;
+						this.selected = this.selected + 1;
 					} else if (this.selected > -1 && this.selected === this.#options.length - 1) {
 						break;
 					} else {
-						this.#selected = 0;
+						this.selected = 0;
 					}
 				}
 				break;
@@ -274,9 +281,9 @@ export default class Select extends HTMLElement {
 				e.stopPropagation();
 				if (e.target.nodeName.toLowerCase() === 'ac-select') {
 					if (this.selected > 0) {
-						this.#selected = this.selected - 1;
+						this.selected = this.selected - 1;
 					} else {
-						this.#selected = 0;
+						this.selected = 0;
 					}
 				}
 				break;
@@ -295,7 +302,7 @@ export default class Select extends HTMLElement {
 
 	handleSubmit = (e) => {
 		if (e?.target.nodeName.toLowerCase() === 'ac-option') {
-			this.#selected = this.#options.findIndex((a) => a === e.target);
+			this.selected = this.#options.findIndex((a) => a === e.target);
 		}
 	}
 }

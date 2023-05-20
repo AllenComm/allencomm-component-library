@@ -92,14 +92,12 @@ export default class TextField extends HTMLElement {
 	}
 
 	get input() { return this.shadowRoot.querySelector('input'); }
-	get value() { return this.input.value; }
 
+	get value() { return this.input.value; }
 	set value(newVal) { this.input.value = newVal }
 
-	get #disabled() { return this._disabled; }
-	get #slotIcon() { return this._slotIcon; }
-
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -114,6 +112,8 @@ export default class TextField extends HTMLElement {
 			this.removeAttribute('aria-hidden');
 		}
 	}
+
+	get #slotIcon() { return this._slotIcon; }
 	set #slotIcon(newVal) { this._slotIcon = newVal; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -122,7 +122,7 @@ export default class TextField extends HTMLElement {
 			this.setAttribute('aria-valueNow', newVal);
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -143,9 +143,9 @@ export default class TextField extends HTMLElement {
 			this.setAttribute('aria-valueNow', value);
 		}
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {

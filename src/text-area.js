@@ -46,16 +46,13 @@ export default class TextArea extends HTMLElement {
 	}
 
 	get value() { return this.#textarea.value; }
-
 	set value(newVal) {
 		console.log(newVal);
 		this.#textarea.value = newVal;
 	}
 
-	get #disabled() { return this._disabled; }
-	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
-
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -71,13 +68,15 @@ export default class TextArea extends HTMLElement {
 		}
 	}
 
+	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#textarea.value = newVal;
 			this.setAttribute('aria-valueNow', newVal);
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -111,9 +110,9 @@ export default class TextArea extends HTMLElement {
 			this.setAttribute('aria-valueNow', value);
 		}
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 	}
 

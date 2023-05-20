@@ -69,15 +69,14 @@ export default class Radio extends HTMLElement {
 	}
 
 	get checked() { return this.#input.checked; }
-	get id() { return this.#input.id; }
-	get name() { return this.#input.name; }
+	set checked(newVal) {
+		const bool = newVal === 'true';
+		this.#input.checked = bool;
+		this.setAttribute('aria-checked', bool);
+	}
 
-	get #disabled() { return this._disabled; }
-	get #input() { return this.shadowRoot.querySelector('input'); }
-	get #label() { return this.shadowRoot.querySelector('label'); }
-	get #slot() { return this.shadowRoot.querySelector('slot'); }
-
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -97,11 +96,15 @@ export default class Radio extends HTMLElement {
 		}
 	}
 
-	set checked(newVal) {
-		const bool = newVal === 'true';
-		this.#input.checked = bool;
-		this.setAttribute('aria-checked', bool);
-	}
+	get id() { return this.#input.id; }
+
+	get #input() { return this.shadowRoot.querySelector('input'); }
+
+	get #label() { return this.shadowRoot.querySelector('label'); }
+
+	get name() { return this.#input.name; }
+
+	get #slot() { return this.shadowRoot.querySelector('slot'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
@@ -109,7 +112,7 @@ export default class Radio extends HTMLElement {
 			this.#input.checked = bool;
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -132,9 +135,9 @@ export default class Radio extends HTMLElement {
 		this.#input.setAttribute('name', name);
 		this.#input.setAttribute('value', value);
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		this.setAttribute('aria-checked', checked);
 	}

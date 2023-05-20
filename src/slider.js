@@ -41,13 +41,8 @@ export default class Slider extends HTMLElement {
 		this._disabled = false;
 	}
 
-	get value() { return this.#input.value; }
-
-	get #disabled() { return this._disabled; }
-	get #input() { return this.shadowRoot.querySelector('input'); }
-	get #output() { return this.shadowRoot.querySelector('output'); }
-
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -67,6 +62,12 @@ export default class Slider extends HTMLElement {
 		}
 	}
 
+	get #input() { return this.shadowRoot.querySelector('input'); }
+
+	get #output() { return this.shadowRoot.querySelector('output'); }
+
+	get value() { return this.#input.value; }
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.#input.value = parseFloat(newVal);
@@ -74,7 +75,7 @@ export default class Slider extends HTMLElement {
 			this.setAttribute('aria-valueNow', newVal);
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -99,9 +100,9 @@ export default class Slider extends HTMLElement {
 		}
 		this.#output.innerText = value;
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		this.setAttribute('aria-orientation', 'horizontal');
 	}

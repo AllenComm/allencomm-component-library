@@ -133,32 +133,22 @@ export default class Combobox extends HTMLElement {
 		this._slotExpand = null;
 	}
 
-	get selected() { return this._selected; }
-	get value() { return this.#input.value; }
-
 	get #btnArrow() {
 		if (this.#slotExpand !== null) {
 			return this.#slotExpand;
 		}
 		return this.shadowRoot.querySelector('.arrow');
 	}
+
 	get #btnClear() {
 		if (this.#slotClear !== null) {
 			return this.#slotClear;
 		}
 		return this.shadowRoot.querySelector('.clear');
 	}
-	get #disabled() { return this._disabled; }
-	get #expanded() { return this._expanded; }
-	get #focused() { return this._focused; }
-	get #input() { return this.shadowRoot.querySelector('input'); }
-	get #list() { return this.shadowRoot.querySelector('.list'); }
-	get #options() { return this._options; }
-	get #slotClear() { return this._slotClear; }
-	get #slotExpand() { return this._slotExpand; }
-	get #visibleOptions() { return this.#options.filter((a) => a.getAttribute('hidden') !== 'true'); }
 
-	set #disabled(newVal) {
+	get disabled() { return this._disabled; }
+	set disabled(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
@@ -195,14 +185,26 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 	}
+
+	get #expanded() { return this._expanded; }
 	set #expanded(newVal) {
 		this._expanded = newVal;
 		this.setAttribute('expanded', newVal);
 		this.setAttribute('aria-expanded', newVal);
 	}
+
+	get #focused() { return this._focused; }
 	set #focused(newVal) { this._focused = newVal }
+
+	get #input() { return this.shadowRoot.querySelector('input'); }
+
+	get #list() { return this.shadowRoot.querySelector('.list'); }
+
+	get #options() { return this._options; }
 	set #options(arr) { this._options = arr; }
-	set #selected(newVal) {
+
+	get selected() { return this._selected; }
+	set selected(newVal) {
 		this._selected = newVal;
 		if (newVal > -1) {
 			this.#btnClear.setAttribute('hidden', false);
@@ -222,13 +224,21 @@ export default class Combobox extends HTMLElement {
 			}
 		});
 	}
+
+	get #slotClear() { return this._slotClear; }
 	set #slotClear(newVal) { this._slotClear = newVal; }
+
+	get #slotExpand() { return this._slotExpand; }
 	set #slotExpand(newVal) { this._slotExpand = newVal; }
+
+	get value() { return this.#input.value; }
+
+	get #visibleOptions() { return this.#options.filter((a) => a.getAttribute('hidden') !== 'true'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
-			this.#disabled = bool;
+			this.disabled = bool;
 		}
 	}
 
@@ -271,9 +281,9 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 		if (this.getAttribute('disabled') === 'true') {
-			this.#disabled = true;
+			this.disabled = true;
 		} else {
-			this.#disabled = false;
+			this.disabled = false;
 		}
 		this.#expanded = false;
 		this.#input.setAttribute('role', 'combobox');
@@ -281,14 +291,14 @@ export default class Combobox extends HTMLElement {
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.#options.map((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
-				this.#selected = i;
+				this.selected = i;
 			}
 		});
 	}
 
 	handleBtnClearClick = () => {
 		this.#input.value = '';
-		this.#selected = -1;
+		this.selected = -1;
 	};
 
 	handleChildBlur = (e) => {
@@ -373,7 +383,7 @@ export default class Combobox extends HTMLElement {
 				} else {
 					const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
 					if (this.#options[index].value.length > 0) {
-						this.#selected = index;
+						this.selected = index;
 					}
 				}
 			} else if (this.#input.value !== this.#options[this.selected].innerText) {
@@ -461,7 +471,7 @@ export default class Combobox extends HTMLElement {
 		}
 
 		if (this.#input.value.length <= 0) {
-			this.#selected = -1;
+			this.selected = -1;
 		}
 	}
 
@@ -519,10 +529,10 @@ export default class Combobox extends HTMLElement {
 		}
 
 		if (int > -1) {
-			this.#selected = int;
+			this.selected = int;
 			this.#input.value = this.#options[int].value;
 		} else {
-			this.#selected = -1;
+			this.selected = -1;
 		}
 
 		if (this.#expanded) {
