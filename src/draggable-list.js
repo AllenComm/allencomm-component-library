@@ -174,7 +174,7 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	handleDrag = (e) => {
-		if (this.shadowRoot.contains(e.target)) {
+		if (this.contains(e.target)) {
 			e.preventDefault();
 			if (this.#activeEl == null || e.button !== 0) {
 				return;
@@ -203,7 +203,7 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	handleDragStart = (e) => {
-		if (this.shadowRoot.contains(e.target)) {
+		if (this.contains(e.target)) {
 			e.preventDefault();
 			this.#isDown = false;
 			if (this.#activeEl != null || e.button !== 0) {
@@ -226,7 +226,7 @@ export default class DraggableList extends HTMLElement {
 	}
 
 	handleDragStop = (e) => {
-		if (this.shadowRoot.contains(e.target)) {
+		if (this.contains(e.target)) {
 			if (this.#isDown) {
 				e.preventDefault();
 				if (this.#activeEl == null || e.button !== 0) {

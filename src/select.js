@@ -254,12 +254,14 @@ export default class Select extends HTMLElement {
 	}
 
 	handleFocusOut = (e) => {
+		console.log('handleFocusOut');
 		if (e.target.nodeName.toLowerCase() !== 'ac-select' || (e.relatedTarget === null || e.relatedTarget.nodeName.toLowerCase() !== 'ac-option')) {
 			this.#expanded = false;
 		}
 	}
 
 	handleKeydown = (e) => {
+		console.log('handleKeydown');
 		switch (e.code) {
 			case 'ArrowDown':
 			case 'ArrowRight':
@@ -291,6 +293,7 @@ export default class Select extends HTMLElement {
 	}
 
 	handleOpen = (e) => {
+		console.log('handleOpen');
 		const name = e.target.nodeName.toLowerCase();
 		const className = e.target.className;
 		if (name === this.#slotExpand?.nodeName.toLowerCase() || name === 'ac-select' || className === 'arrow') {
@@ -301,6 +304,7 @@ export default class Select extends HTMLElement {
 	}
 
 	handleSubmit = (e) => {
+		console.log('handleSubmit');
 		if (e?.target.nodeName.toLowerCase() === 'ac-option') {
 			this.selected = this.#options.findIndex((a) => a === e.target);
 		}

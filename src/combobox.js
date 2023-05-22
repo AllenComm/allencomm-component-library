@@ -53,7 +53,7 @@ export default class Combobox extends HTMLElement {
 					pointer-events: none;
 					width: 100%;
 				}
-				.arrow.hidden, .clear.hidden {
+				.arrow.disabled, .clear.disabled {
 					display: none;
 				}
 				.arrow div, .clear div, ::slotted(*[slot='expand-btn']), ::slotted(*[slot='clear-btn']) {
@@ -157,7 +157,7 @@ export default class Combobox extends HTMLElement {
 			this.#input.removeEventListener('click', this.handleExpandToggle);
 			this.#input.removeEventListener('input', this.handleFilter);
 			this.#input.setAttribute('disabled', bool);
-			this.removeEventListener('blur', this.handleFocusOut);
+			this.shadowRoot.removeEventListener('blur', this.handleFocusOut);
 			this.removeEventListener('keydown', this.handleKeydown);
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
@@ -173,7 +173,7 @@ export default class Combobox extends HTMLElement {
 			this.#input.addEventListener('click', this.handleExpandToggle.bind(this, true));
 			this.#input.addEventListener('input', this.handleFilter);
 			this.#input.removeAttribute('disabled');
-			this.addEventListener('blur', this.handleFocusOut);
+			this.shadowRoot.addEventListener('blur', this.handleFocusOut);
 			this.addEventListener('keydown', this.handleKeydown);
 			this.removeAttribute('aria-disabled');
 			this.removeAttribute('aria-hidden');
@@ -271,10 +271,10 @@ export default class Combobox extends HTMLElement {
 					optionId = optionId + 1;
 					setTimeout(() => a.setAttribute('tabindex', -1));
 				} else if (a.slot === 'expand-btn') {
-					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
+					this.shadowRoot.querySelector('.arrow').classList.add('disabled');
 					this.#slotExpand = a;
 				} else if (a.slot === 'clear-btn') {
-					this.shadowRoot.querySelector('.clear').classList.add('hidden');
+					this.shadowRoot.querySelector('.clear').classList.add('disabled');
 					this.#slotClear = a;
 					a.setAttribute('hidden', true);
 				}
@@ -359,8 +359,6 @@ export default class Combobox extends HTMLElement {
 				this.#expanded = false;
 				this.#input.focus();
 				break;
-			default:
-				return;
 		}
 	}
 
@@ -374,7 +372,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleFocusOut = (e) => {
-		if (!e.srcElement.contains(e.relatedTarget) && e.target != this) {
+		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			if (this.selected <= -1) {
@@ -510,7 +508,7 @@ export default class Combobox extends HTMLElement {
 				this.handleSubmit(e);
 				break;
 			default:
-				this.#input.focus();
+				this.#expanded = false;
 				break;
 		}
 	}
