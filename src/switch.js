@@ -78,6 +78,9 @@ export default class Switch extends HTMLElement {
 				::slotted(*[slot='on-label']) {
 					display: none;
 				}
+				slot {
+					user-select: none;
+				}
 				label:has(input:checked) ::slotted(*[slot='off-label']) {
 					display: none;
 				}
@@ -86,9 +89,9 @@ export default class Switch extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
+				<slot></slot>
 				<slot name='on-label'></slot>
 				<slot name='off-label'></slot>
-				<slot></slot>
 				<div class='inner'>
 					<input tabindex='-1' type='checkbox'></input>
 					<div class='wrapper'>
