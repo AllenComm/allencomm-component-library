@@ -47,6 +47,10 @@ export default class Card extends HTMLElement {
 				:host([face='back']) .front {
 					display: none;
 				}
+				.back,
+				.front {
+					width: 100%;
+				}
 			</style>
 			<div class='front'>
 				<slot name='card-front-btn'></slot>
