@@ -51,25 +51,26 @@ export default class Listbox extends HTMLElement {
 		observer.observe(this, { childList: true });
 	}
 
+	get #initialized() { return this._initialized; }
+	set #initialized(newVal) { this._initialized = newVal; }
+
+	get options() { return this._options; }
+	set #options(arr) { this._options = arr; }
+
+	get #multiple() { return this._multiple; }
+	set #multiple(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._multiple = bool;
+		this.setAttribute('aria-multiselectable', bool);
+	}
+
 	get selected() {
 		if (this.#multiple) {
 			return this._selectedArr;
 		}
 		return this._selected;
 	}
-
-	get #initialized() { return this._initialized; }
-	get #options() { return this._options; }
-	get #multiple() { return this._multiple; }
-
-	set #initialized(newVal) { this._initialized = newVal; }
-	set #options(arr) { this._options = arr; }
-	set #multiple(newVal) {
-		const bool = newVal === 'true' || newVal === true;
-		this._multiple = bool;
-		this.setAttribute('aria-multiselectable', bool);
-	}
-	set #selected(newVal) {
+	set selected(newVal) {
 		if (typeof(newVal) === 'object') {
 			this._selectedArr = newVal;
 		} else {
@@ -89,7 +90,7 @@ export default class Listbox extends HTMLElement {
 
 		if (multiple != null && multiple) {
 			this.#multiple = multiple;
-			this.#selected = [];
+			this.selected = [];
 		} else {
 			this.#multiple = false;
 		}
@@ -103,24 +104,24 @@ export default class Listbox extends HTMLElement {
 		const target = e.target;
 		const cur = target.getAttribute('aria-selected') === 'true';
 		if (!this.#multiple) {
-			this.#options.forEach((a, i) => {
+			this.options.forEach((a, i) => {
 				if (a.id !== target.id && a.getAttribute('aria-selected')) {
 					a.setAttribute('aria-selected', false);
 				} else {
 					target.setAttribute('aria-selected', true);
-					this.#selected = i;
+					this.selected = i;
 				}
 			});
 		} else {
-			const i = this.#options.findIndex((a) => a === target);
+			const i = this.options.findIndex((a) => a === target);
 			const newSelected = this.selected.slice();
 			target.setAttribute('aria-selected', !cur);
 			if (cur) {
 				newSelected.splice(this.selected.indexOf(i), 1);
-				this.#selected = newSelected;
+				this.selected = newSelected;
 			} else {
 				newSelected.push(i);
-				this.#selected = newSelected;
+				this.selected = newSelected;
 			}
 		}
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
@@ -186,7 +187,7 @@ export default class Listbox extends HTMLElement {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
 					const optionSelected = a.getAttribute('selected') || false;
-					this.#options.push(a);
+					this.options.push(a);
 					a.addEventListener('blur', this.handleChildBlur);
 					a.addEventListener('click', this.handleChange);
 					a.addEventListener('focus', this.handleChildFocus);
@@ -200,9 +201,9 @@ export default class Listbox extends HTMLElement {
 					}
 					if ((initialSelected === a.id || optionSelected) && initial) {
 						if (multiple) {
-							this.#selected = this.selected.push(optionIndex);
+							this.selected = this.selected.push(optionIndex);
 						} else {
-							this.#selected = optionIndex;
+							this.selected = optionIndex;
 						}
 						a.setAttribute('aria-selected', true);
 					}
