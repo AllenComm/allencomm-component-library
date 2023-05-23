@@ -43,12 +43,13 @@ export default class TextArea extends HTMLElement {
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._oldValue = null;
 	}
 
 	get value() { return this.#textarea.value; }
 	set value(newVal) {
-		console.log(newVal);
 		this.#textarea.value = newVal;
+		this.setAttribute('aria-valueNow', newVal);
 	}
 
 	get disabled() { return this._disabled; }
@@ -72,8 +73,7 @@ export default class TextArea extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
-			this.#textarea.value = newVal;
-			this.setAttribute('aria-valueNow', newVal);
+			this.value = newVal;
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
@@ -106,8 +106,7 @@ export default class TextArea extends HTMLElement {
 		}
 		this.#textarea.style.setProperty('resize', resize);
 		if (value != null) {
-			this.#textarea.value = value;
-			this.setAttribute('aria-valueNow', value);
+			this.value = value;
 		}
 		if (this.getAttribute('disabled') === 'true') {
 			this.disabled = true;
@@ -116,16 +115,15 @@ export default class TextArea extends HTMLElement {
 		}
 	}
 
-	handleChange = () => {
-		this.setAttribute('aria-valueNow', this.value);
+	handleChange = (e) => {
+		const target = e.target;
+		this.value = target.value;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
-		if (this.#textarea.getAttribute('auto-height')) {
-			const scrollHeight = this.#textarea.scrollHeight;
-			const styles = getComputedStyle(this.#textarea);
+		if (target.getAttribute('auto-height')) {
+			target.style.height = 'auto';
+			const styles = getComputedStyle(target);
 			const border = parseInt(styles.borderBottomWidth) + parseInt(styles.borderTopWidth);
-			if (parseInt(styles.height) < scrollHeight + border) {
-				this.#textarea.style.height = `${scrollHeight + border}px`;
-			}
+			target.style.height = target.scrollHeight + border + 'px';
 		}
 	}
 }
