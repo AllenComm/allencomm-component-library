@@ -56,11 +56,15 @@ export default class Combobox extends HTMLElement {
 				.arrow.disabled, .clear.disabled {
 					display: none;
 				}
-				.arrow div, .clear div, ::slotted(*[slot='expand-btn']), ::slotted(*[slot='clear-btn']) {
+				button.arrow, button.clear, ::slotted(*[slot='expand-btn']), ::slotted(*[slot='clear-btn']) {
+					background: none;
+					border: none;
 					display: flex !important;
 					height: 100%;
+					margin: 0;
 					max-height: 22px !important;
 					max-width: 22px !important;
+					padding: 0;
 					place-content: center;
 					place-items: center;
 					pointer-events: all;
@@ -102,21 +106,17 @@ export default class Combobox extends HTMLElement {
 			<slot></slot>
 			<div class='outer'>
 				<input type='text'/>
-				<div class='arrow'>
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-							<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
-						</svg>
-					</div>
-				</div>
+				<button class='arrow'>
+					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+						<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
+					</svg>
+				</button>
 				<slot name='expand-btn'></slot>
-				<div class='clear' hidden='true'>
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-							<path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/>
-						</svg>
-					</div>
-				</div>
+				<button class='clear' hidden='true'>
+					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+						<path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/>
+					</svg>
+				</button>
 				<slot name='clear-btn'></slot>
 				<div class='list'>
 					<slot name='options'></slot>
@@ -157,7 +157,7 @@ export default class Combobox extends HTMLElement {
 			this.#input.removeEventListener('click', this.handleExpandToggle);
 			this.#input.removeEventListener('input', this.handleFilter);
 			this.#input.setAttribute('disabled', bool);
-			this.shadowRoot.removeEventListener('blur', this.handleFocusOut);
+			this.removeEventListener('blur', this.handleFocusOut);
 			this.removeEventListener('keydown', this.handleKeydown);
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
@@ -173,7 +173,7 @@ export default class Combobox extends HTMLElement {
 			this.#input.addEventListener('click', this.handleExpandToggle.bind(this, true));
 			this.#input.addEventListener('input', this.handleFilter);
 			this.#input.removeAttribute('disabled');
-			this.shadowRoot.addEventListener('blur', this.handleFocusOut);
+			this.addEventListener('blur', this.handleFocusOut);
 			this.addEventListener('keydown', this.handleKeydown);
 			this.removeAttribute('aria-disabled');
 			this.removeAttribute('aria-hidden');
@@ -372,6 +372,8 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleFocusOut = (e) => {
+		console.log('handleFocusOut');
+		console.log(e);
 		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
