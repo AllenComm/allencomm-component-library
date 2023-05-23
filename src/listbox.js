@@ -1,5 +1,5 @@
 export default class Listbox extends HTMLElement {
-	static observedAttributes = ['multiple'];
+	static observedAttributes = ['multiple', 'selected'];
 
 	constructor() {
 		super();
@@ -74,7 +74,25 @@ export default class Listbox extends HTMLElement {
 		if (typeof(newVal) === 'object') {
 			this._selectedArr = newVal;
 		} else {
-			this._selected = newVal;
+			this._selected = parseInt(newVal);
+		}
+
+		if (this.#multiple) {
+			this.options.forEach((a, i) => {
+				if (this._selectedArr.includes(i)) {
+					a.setAttribute('aria-selected', true);
+				} else {
+					a.setAttribute('aria-selected', false);
+				}
+			});
+		} else {
+			this.options.forEach((a, i) => {
+				if (i === parseInt(newVal)) {
+					a.setAttribute('aria-selected', true);
+				} else if (a.getAttribute('aria-selected') === 'true' || a.getAttribute('aria-selected')) {
+					a.setAttribute('aria-selected', false);
+				}
+			});
 		}
 	}
 
@@ -82,6 +100,8 @@ export default class Listbox extends HTMLElement {
 		if (attr === 'multiple') {
 			const bool = newVal === 'true' || newVal === true;
 			this.#multiple = bool;
+		} else if (attr === 'selected') {
+			this.selected = newVal;
 		}
 	}
 
@@ -103,17 +123,10 @@ export default class Listbox extends HTMLElement {
 		e.stopPropagation();
 		const target = e.target;
 		const cur = target.getAttribute('aria-selected') === 'true';
+		const i = this.options.findIndex((a) => a === target);
 		if (!this.#multiple) {
-			this.options.forEach((a, i) => {
-				if (a.id !== target.id && a.getAttribute('aria-selected')) {
-					a.setAttribute('aria-selected', false);
-				} else {
-					target.setAttribute('aria-selected', true);
-					this.selected = i;
-				}
-			});
+			this.selected = i
 		} else {
-			const i = this.options.findIndex((a) => a === target);
 			const newSelected = this.selected.slice();
 			target.setAttribute('aria-selected', !cur);
 			if (cur) {
