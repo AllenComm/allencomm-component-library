@@ -12,44 +12,10 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<ac-text-area>Hey!</ac-text-area>
-			</section>
-			<section>
-				<ac-card density='cozy'>Lorem ipsum...</ac-card>
-				<br/>
-				<ac-tabs>
-					<ac-tab>First</ac-tab>
-					<ac-tab-panel density='cozy'>Lorem ipsum...</ac-tab-panel>
-				</ac-tabs>
-				<br/>
-				<ac-accordion>
-					<ac-accordion-button selected='true'>First</ac-accordion-button>
-					<ac-accordion-content density='cozy'>Lorem ipsum...</ac-accordion-content>
-				</ac-accordion>
-				<br/>
-				<ac-card density='comfortable'>Lorem ipsum...</ac-card>
-				<br/>
-				<ac-tabs>
-					<ac-tab>First</ac-tab>
-					<ac-tab-panel density='comfortable'>Lorem ipsum...</ac-tab-panel>
-				</ac-tabs>
-				<br/>
-				<ac-accordion>
-					<ac-accordion-button selected='true'>First</ac-accordion-button>
-					<ac-accordion-content density='comfortable'>Lorem ipsum...</ac-accordion-content>
-				</ac-accordion>
-				<br/>
-				<ac-card density='compact'>Lorem ipsum...</ac-card>
-				<br/>
-				<ac-tabs>
-					<ac-tab>First</ac-tab>
-					<ac-tab-panel density='compact'>Lorem ipsum...</ac-tab-panel>
-				</ac-tabs>
-				<br/>
-				<ac-accordion>
-					<ac-accordion-button selected='true'>First</ac-accordion-button>
-					<ac-accordion-content density='compact'>Lorem ipsum...</ac-accordion-content>
-				</ac-accordion>
+				<ac-table
+					columnDefs='[ { "name": "ID", "type": "int", "size": "1" }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ]'
+				>
+				</ac-table>
 			</section>
 		</main>
 	</body>

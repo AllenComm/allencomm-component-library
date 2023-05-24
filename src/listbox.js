@@ -107,14 +107,12 @@ export default class Listbox extends HTMLElement {
 
 	connectedCallback() {
 		const multiple = this.getAttribute('multiple');
-
 		if (multiple != null && multiple) {
 			this.#multiple = multiple;
 			this.selected = [];
 		} else {
 			this.#multiple = false;
 		}
-
 		this.setAttribute('role', 'listbox');
 		this.updateChildren(null, null, true);
 	}
