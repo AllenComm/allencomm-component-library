@@ -1,5 +1,5 @@
 export default class Table extends HTMLElement {
-	static observedAttributes = ['columnDefs', 'data'];
+	static observedAttributes = ['column-defs', 'page', 'page-size', 'rows'];
 
 	constructor() {
 		super();
@@ -35,9 +35,6 @@ export default class Table extends HTMLElement {
 				.row {
 					display: flex;
 				}
-				.row[hidden='true'] {
-					display: none;
-				}
 				.row + .row {
 					border-top: 1px solid black;
 				}
@@ -53,11 +50,12 @@ export default class Table extends HTMLElement {
 			</div>
 		`;
 		this._columnDefs = null;
-		this._data = null;
+		this._initialized = false;
 		this._page = 0;
 		this._pageSize = 100;
-		this._rows = [];
+		this._rows = null;
 		this._selected = null;
+		this._TOTAL = 100000;
 	}
 
 	get #body() { return this.shadowRoot.querySelector('.body'); }
@@ -76,67 +74,83 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	get data() { return this._data; }
-	set data(newVal) {
-		try {
-			this._data = JSON.parse(newVal);
-			if (this._data?.length > 0) {
-				if (this.#body.children.length > 0) {
-					[...this.#body.children].forEach((a) => a.remove());
-				}
-				this.data.forEach((a, i) => {
-					const el = this.buildRow(a, i);
-					this.#body.appendChild(el);
-					this.rows.push(el);
-				});
-				this.updateRender();
-			}
-		} catch(err) {
-			this._data = [];
-			console.error(err);
-		}
-
-	}
-
 	get #footer() { return this.shadowRoot.querySelector('.footer'); }
 
 	get #header() { return this.shadowRoot.querySelector('.header'); }
 
+	get #initialized() { return this._initialized; }
+	set #initialized(newVal) { this._initialized = newVal; }
+
 	get page() { return this._page; }
 	set page(newVal) {
-		this._page = newVal;
-		this.updateRender();
+		if (newVal != this._page) {
+			this._page = newVal;
+			this.updateRender();
+		}
 	}
 
 	get pageSize() { return this._pageSize; }
 	set pageSize(newVal) {
-		this._pageSize = newVal;
-		this.updateRender();
+		if (newVal != this._pageSize) {
+			this._pageSize = newVal;
+			this.updateRender();
+		}
 	}
 
 	get rows() { return this._rows; }
-	set rows(newArr) { this._rows = newArr; }
+	set rows(newVal) {
+		try {
+			this._rows = JSON.parse(newVal);
+			if (this._rows?.length > 0) {
+				if (this.#body.children.length > 0) {
+					[...this.#body.children].forEach((a) => a.remove());
+				}
+				this.updateRender();
+			}
+		} catch(err) {
+			this._rows = [];
+			console.error(err);
+		}
+	}
 
 	get selected() { return this._selected; }
 	set selected(newVal) { this._selected = newVal; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
-		if (attr === 'columnDefs') {
-			this.columnDefs = newVal;
-		} else if (attr === 'data' && this.columnDefs?.length > 0) {
-			this.data = newVal;
+		if (this.#initialized) {
+			switch(attr) {
+				case 'column-defs':
+					this.columnDefs = newVal;
+					break;
+				case 'page':
+					this.page = newVal;
+					break;
+				case 'page-size':
+					this.pageSize = newVal;
+					break;
+				case 'rows':
+					if (this.columnDefs?.length > 0) {
+						this.rows = newVal;
+					}
+					break;
+			}
 		}
 	}
 
 	connectedCallback() {
-		this.columnDefs = this.getAttribute('columnDefs');
-		// this.data = this.getAttribute('data');
-		this.data = this.generateFakeData();
+		this.columnDefs = this.getAttribute('column-defs');
+		const rows = this.getAttribute('rows');
+		if (rows != null) {
+			this.rows = rows;
+		} else {
+			this.rows = this.generateFakeData();
+		}
+		this.#initialized = true;
 	}
 
-	buildCell = (data, index) => {
+	buildCell = (rows, index) => {
 		const element = document.createElement('div');
-		const content = document.createTextNode(`${data}`);
+		const content = document.createTextNode(`${rows}`);
 		element.classList.add('cell');
 		element.classList.add(this.getColumnType(index));
 		element.style.flex = this.getColumnSize(index);
@@ -145,30 +159,44 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = (data, index) => {
+	buildCellHeader = (rows, index) => {
 		const element = document.createElement('div');
-		const content = document.createTextNode(`${data.name}`);
+		const content = document.createTextNode(`${rows.name}`);
 		element.classList.add('cell');
-		element.style.flex = data.size;
+		element.style.flex = rows.size;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		return element;
 	}
 
-	buildRow = (data, index) => {
-		const arr = Object.values(data);
+	buildRow = (rows, index) => {
+		const arr = Object.values(rows);
 		const element = document.createElement('div');
 		element.classList.add('row');
 		element.setAttribute('id', `row-${index}`);
+
+		const selectableCell = document.createElement('span');
+		selectableCell.classList.add('cell');
+		selectableCell.classList.add('selectable');
+		selectableCell.style.flex = '0 0 20px';
+		element.appendChild(selectableCell);
+
 		arr.map((a, i) => element.appendChild(this.buildCell(a, i)) );
 		return element;
 	}
 
-	buildRowHeader = (data) => {
+	buildRowHeader = (rows) => {
 		const element = document.createElement('div');
 		element.classList.add('row');
 		element.setAttribute('id', `row-header`);
-		data.map((a, i) => element.appendChild(this.buildCellHeader(a, i)));
+
+		const selectableCell = document.createElement('span');
+		selectableCell.classList.add('cell');
+		selectableCell.classList.add('selectable');
+		selectableCell.style.flex = '0 0 20px';
+		element.appendChild(selectableCell);
+
+		rows.map((a, i) => element.appendChild(this.buildCellHeader(a, i)));
 		return element;
 	}
 
@@ -179,7 +207,6 @@ export default class Table extends HTMLElement {
 		const offset = this.pageSize;
 		const min = (this.page) * offset;
 		const max = (this.page + 1) * offset;
-		console.log(min, max);
 		return { min, max };
 	}
 
@@ -192,16 +219,16 @@ export default class Table extends HTMLElement {
 	updateRender = () => {
 		this.rows.forEach((a, i) => {
 			if (i >= this.getCurrentRange().min && i < this.getCurrentRange().max) {
-				a.removeAttribute('hidden');
-			} else if (!a.hasAttribute('hidden')) {
-				a.setAttribute('hidden', true);
+				this.#body.appendChild(this.buildRow(a, i));
+			} else {
+				this.shadowRoot.getElementById(`row-${i}`)?.remove();
 			}
 		});
 	}
 
 	generateFakeData = () => {
 		const fake = [];
-		for (let i = 0; i < 10000; i++) {
+		for (let i = 0; i < this._TOTAL; i++) {
 			const newObj = { id: i, name: 'Jon', company: 'based.net' };
 			fake.push(newObj);
 		}
