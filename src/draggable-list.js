@@ -21,10 +21,12 @@ export default class DraggableList extends HTMLElement {
 					display: flex;
 					gap: 5px;
 					position: absolute;
+					transition: top .14s ease;
 					z-index: 1;
 				}
 				::slotted(ac-option[dragging="true"]) {
 					cursor: grabbing;
+					transition: none;
 					z-index: 10;
 				}
 				.targets {
