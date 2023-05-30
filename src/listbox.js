@@ -41,7 +41,6 @@ export default class Listbox extends HTMLElement {
 				<slot name='options'></slot>
 			</div>
 		`;
-		this._initialized = false;
 		this._options = [];
 		this._multiple = false;
 		this._selected = -1;
@@ -50,9 +49,6 @@ export default class Listbox extends HTMLElement {
 		const observer = new MutationObserver(this.updateChildren);
 		observer.observe(this, { childList: true });
 	}
-
-	get #initialized() { return this._initialized; }
-	set #initialized(newVal) { this._initialized = newVal; }
 
 	get options() { return this._options; }
 	set #options(arr) { this._options = arr; }
