@@ -85,7 +85,13 @@ body {
 }
 
 header {
+	align-items: center;
+	display: flex;
 	grid-area: 1/2/1/2;
+}
+
+header > img {
+	margin-right: 30px;
 }
 
 main {
