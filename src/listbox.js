@@ -34,6 +34,7 @@ export default class Listbox extends HTMLElement {
 					display: flex;
 					flex-direction: column;
 					gap: 1px;
+					width: 100%;
 				}
 			</style>
 			<slot></slot>
