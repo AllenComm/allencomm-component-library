@@ -36,6 +36,9 @@ export default class Listbox extends HTMLElement {
 					gap: 1px;
 					width: 100%;
 				}
+				.list * {
+					user-select: none;
+				}
 			</style>
 			<slot></slot>
 			<div class='list'>
