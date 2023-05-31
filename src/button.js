@@ -61,6 +61,9 @@ export default class Button extends HTMLElement {
 		} else {
 			this.disabled = false;
 		}
+		if (this.getAttribute('style') != null) {
+			this.#button.setAttribute('style', this.getAttribute('style'));
+		}
 	}
 }
 

@@ -10,8 +10,9 @@ export default class Select extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					display: flex;
-					gap: 10px;
+					display: block;
+					outline: none;
+					width: 100%;
 				}
 				:host(:focus-visible) {
 					outline: none;
@@ -55,6 +56,11 @@ export default class Select extends HTMLElement {
 					place-items: center;
 					width: 100%;
 				}
+				.component {
+					display: flex;
+					gap: 10px;
+					width: 100%;
+				}
 				.inner {
 					height: 100%;
 				}
@@ -83,6 +89,7 @@ export default class Select extends HTMLElement {
 					border-radius: 3px;
 					cursor: pointer;
 					display: block;
+					flex: 1;
 					height: 24px;
 					outline: none;
 					padding: 1px 2px;
@@ -90,18 +97,20 @@ export default class Select extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<slot></slot>
-			<div class='outer'>
-				<div class='inner'></div>
-				<div class='list'>
-					<slot name='options'></slot>
-				</div>
-				<slot name='expand-btn'></slot>
-				<div class='arrow'>
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-							<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
-						</svg>
+			<div class='component'>
+				<slot></slot>
+				<div class='outer'>
+					<div class='inner'></div>
+					<div class='list'>
+						<slot name='options'></slot>
+					</div>
+					<slot name='expand-btn'></slot>
+					<div class='arrow'>
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+								<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
+							</svg>
+						</div>
 					</div>
 				</div>
 			</div>
