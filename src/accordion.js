@@ -12,6 +12,7 @@ export default class Accordion extends HTMLElement {
 					display: grid;
 					flex-direction: column;
 					justify-items: flex-start;
+					grid-template-columns: 100%;
 					width: 100%;
 				}
 			</style>

@@ -13,6 +13,7 @@ export default class AccordionContent extends HTMLElement {
 					display: inline-block;
 					grid-column: 1;
 					grid-row: 1;
+					width: 100%;
 				}
 				:host([hidden="false"]) {
 					opacity: 1;
