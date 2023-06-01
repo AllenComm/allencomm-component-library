@@ -7,6 +7,7 @@ import Checkbox from './src/checkbox.js';
 import Combobox from './src/combobox.js';
 import DraggableList from './src/draggable-list.js';
 import Divider from './src/divider.js';
+import Files from './src/files.js';
 import Loading from './src/loading.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
@@ -32,6 +33,7 @@ export {
 	Combobox,
 	DraggableList,
 	Divider,
+	Files,
 	Loading,
 	Listbox,
 	Number,
