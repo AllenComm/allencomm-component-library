@@ -1,5 +1,5 @@
 export default class Select extends HTMLElement {
-	static observedAttributes = ['disabled'];
+	static observedAttributes = ['disabled', 'selected'];
 
 	constructor() {
 		super();
@@ -10,8 +10,9 @@ export default class Select extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					display: flex;
-					gap: 10px;
+					display: block;
+					outline: none;
+					width: 100%;
 				}
 				:host(:focus-visible) {
 					outline: none;
@@ -55,6 +56,11 @@ export default class Select extends HTMLElement {
 					place-items: center;
 					width: 100%;
 				}
+				.component {
+					display: flex;
+					gap: 10px;
+					width: 100%;
+				}
 				.inner {
 					height: 100%;
 				}
@@ -83,6 +89,7 @@ export default class Select extends HTMLElement {
 					border-radius: 3px;
 					cursor: pointer;
 					display: block;
+					flex: 1;
 					height: 24px;
 					outline: none;
 					padding: 1px 2px;
@@ -90,18 +97,20 @@ export default class Select extends HTMLElement {
 					width: 100%;
 				}
 			</style>
-			<slot></slot>
-			<div class='outer'>
-				<div class='inner'></div>
-				<div class='list'>
-					<slot name='options'></slot>
-				</div>
-				<slot name='expand-btn'></slot>
-				<div class='arrow'>
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
-							<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
-						</svg>
+			<div class='component'>
+				<slot></slot>
+				<div class='outer'>
+					<div class='inner'></div>
+					<div class='list'>
+						<slot name='options'></slot>
+					</div>
+					<slot name='expand-btn'></slot>
+					<div class='arrow'>
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
+								<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
+							</svg>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -133,7 +142,7 @@ export default class Select extends HTMLElement {
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
 			this.setAttribute('tabindex', -1);
-			this.#options.forEach((a) => {
+			this.options.forEach((a) => {
 				a.removeEventListener('click', this.handleSubmit);
 			});
 		} else {
@@ -145,7 +154,7 @@ export default class Select extends HTMLElement {
 			this.removeAttribute('aria-hidden');
 			this.removeAttribute('aria-hidden');
 			this.setAttribute('tabindex', 0);
-			this.#options.forEach((a) => {
+			this.options.forEach((a) => {
 				a.addEventListener('click', this.handleSubmit);
 			});
 		}
@@ -167,8 +176,8 @@ export default class Select extends HTMLElement {
 
 	get #list() { return this.shadowRoot.querySelector('.list'); }
 
-	get #options() { return this._options; }
-	set #options(arr) { this._options = arr; }
+	get options() { return this._options; }
+	set options(arr) { this._options = arr; }
 
 	get #slotExpand() { return this._slotExpand; }
 	set #slotExpand(newVal) { this._slotExpand = newVal; }
@@ -176,7 +185,7 @@ export default class Select extends HTMLElement {
 	get selected() { return this._selected; }
 	set selected(newVal) {
 		this._selected = newVal;
-		this.#options.map((a, i) => {
+		this.options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
 				this.#inner.innerText = a.innerHTML;
 				this.#expanded = false;
@@ -191,12 +200,20 @@ export default class Select extends HTMLElement {
 
 	get textValue() { return this.#inner.innerText; }
 
-	get value() { return this.#options[this.selected].value; }
+	get value() { return this.options[this.selected].value; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'selected') {
+			console.log(attr, newVal);
+			const ids = this.options.map((a) => a.id);
+			if (ids.indexOf(newVal) > -1) {
+				this.selected = ids.indexOf(newVal);
+			} else if (!isNaN(parseInt(newVal))) {
+				this.selected = parseInt(newVal);
+			}
 		}
 	}
 
@@ -219,7 +236,7 @@ export default class Select extends HTMLElement {
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
-					this.#options.push(a);
+					this.options.push(a);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
 					if (!a.id) {
@@ -246,7 +263,7 @@ export default class Select extends HTMLElement {
 		if (this.getAttribute('anchor') !== null) this.#list.setAttribute('anchor', this.getAttribute('anchor'));
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.setAttribute('role', 'select');
-		this.#options.map((a, i) => {
+		this.options.map((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
 				this.selected = i;
 			}
@@ -266,9 +283,9 @@ export default class Select extends HTMLElement {
 				e.preventDefault();
 				e.stopPropagation();
 				if (e.target.nodeName.toLowerCase() === 'ac-select') {
-					if (this.selected > -1 && this.selected < this.#options.length - 1) {
+					if (this.selected > -1 && this.selected < this.options.length - 1) {
 						this.selected = this.selected + 1;
-					} else if (this.selected > -1 && this.selected === this.#options.length - 1) {
+					} else if (this.selected > -1 && this.selected === this.options.length - 1) {
 						break;
 					} else {
 						this.selected = 0;
@@ -302,7 +319,7 @@ export default class Select extends HTMLElement {
 
 	handleSubmit = (e) => {
 		if (e?.target.nodeName.toLowerCase() === 'ac-option') {
-			this.selected = this.#options.findIndex((a) => a === e.target);
+			this.selected = this.options.findIndex((a) => a === e.target);
 		}
 	}
 }
