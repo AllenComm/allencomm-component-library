@@ -85,12 +85,12 @@ export default class Table extends HTMLElement {
 								</svg>
 							</ac-button>
 						</div>
-						<ac-select id='page-size'>
+						<ac-select anchor='bottom' id='page-size'>
 							<span style='font-size: 11px; place-self: center;'>Rows per page:</span>
 							<ac-option>10</ac-option>
 							<ac-option>25</ac-option>
 							<ac-option>50</ac-option>
-							<ac-option selected='true'>100</ac-option>
+							<ac-option>100</ac-option>
 						</ac-select>
 					</div>
 				</div>
@@ -199,6 +199,20 @@ export default class Table extends HTMLElement {
 		} else {
 			this.rows = this.generateFakeData();
 		}
+		const page = this.getAttribute('page');
+		if (page != null) this.page = parseInt(this.getAttribute('page'));
+		const pageSize = parseInt(this.getAttribute('page-size'));
+		if (pageSize != null) {
+			this.pageSize = parseInt(this.getAttribute('page-size'));
+			const el = this.shadowRoot.querySelector('ac-select');
+			const options = el?.options || [];
+			options.forEach((a, i) => {
+				const val = parseInt(a.innerHTML);
+				if (val === pageSize) {
+					el.setAttribute('selected', a.id);
+				}
+			});
+		}
 		this.shadowRoot.querySelector('#current-page').innerText = this.page + 1;
 		this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
 		this.shadowRoot.querySelector('#next-page').addEventListener('click', this.setNextPage);
@@ -290,7 +304,7 @@ export default class Table extends HTMLElement {
 	generateFakeData = () => {
 		const fake = [];
 		for (let i = 0; i < this._TOTAL; i++) {
-			const newObj = { id: i, name: 'Jon', company: 'based.net' };
+			const newObj = { id: i, name: 'Lorem Ipsum', company: 'AllenComm' };
 			fake.push(newObj);
 		}
 		return JSON.stringify(fake);
