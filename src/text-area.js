@@ -50,6 +50,7 @@ export default class TextArea extends HTMLElement {
 	set value(newVal) {
 		this.#textarea.value = newVal;
 		this.setAttribute('aria-valueNow', newVal);
+		this.resize();
 	}
 
 	get disabled() { return this._disabled; }
@@ -119,6 +120,10 @@ export default class TextArea extends HTMLElement {
 		const target = e.target;
 		this.value = target.value;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
+	}
+
+	resize = () => {
+		const target = this.#textarea;
 		if (target.getAttribute('auto-height')) {
 			target.style.height = 'auto';
 			const styles = getComputedStyle(target);
