@@ -147,6 +147,35 @@ export default class Table extends HTMLElement {
 			if (currentTotal != this.getTotalPages()) {
 				this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
 			}
+			const topEl = [...this.#body.childNodes][0] || {};
+			const topIndex = parseInt(topEl?.id?.match(/\d+/));
+			if (topEl && !isNaN(topIndex)) {
+				if (topIndex < this.getCurrentRange().min) {
+					const findPage = (page) => {
+						const offset = newVal;
+						const min = page * offset;
+						if (topIndex < min) {
+							return findPage(page - 1)
+						} else {
+							return page;
+						}
+					}
+					const newPage = findPage(this.page);
+					this.page = newPage;
+				} else if (topIndex > this.getCurrentRange().max) {
+					const findPage = (page) => {
+						const offset = newVal;
+						const max = (page + 1) * offset;
+						if (topIndex >= max) {
+							return findPage(page + 1)
+						} else {
+							return page;
+						}
+					}
+					const newPage = findPage(this.page);
+					this.page = newPage;
+				}
+			}
 			this.updateRender();
 		}
 	}
@@ -262,7 +291,7 @@ export default class Table extends HTMLElement {
 	
 	getCurrentRange = () => {
 		const offset = this.pageSize;
-		const min = (this.page) * offset;
+		const min = this.page * offset;
 		const max = (this.page + 1) * offset;
 		return { min, max };
 	}
