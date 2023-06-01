@@ -108,7 +108,7 @@ export default class Radio extends HTMLElement {
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
-			const bool = newVal === 'true';
+			const bool = newVal === 'true' || newVal === true;
 			this.#input.checked = bool;
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;

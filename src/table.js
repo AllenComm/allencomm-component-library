@@ -1,4 +1,7 @@
 export default class Table extends HTMLElement {
+	// Depends on:
+	// 		ac-button
+	// 		ac-select
 	static observedAttributes = ['column-defs', 'page', 'page-size', 'rows'];
 
 	constructor() {
@@ -12,6 +15,9 @@ export default class Table extends HTMLElement {
 				:host {
 					display: block;
 					width: 100%;
+				}
+				:host([allow-selection='true']) .row:not(#row-header):not(#row-footer), input {
+					cursor: pointer;
 				}
 				ac-select {
 					flex-basis: 140px;
@@ -44,6 +50,9 @@ export default class Table extends HTMLElement {
 				}
 				.row {
 					display: flex;
+				}
+				.row[aria-selected='true'] {
+					background: #EBEFF9;
 				}
 				.row + .row {
 					border-top: 1px solid black;
@@ -96,15 +105,18 @@ export default class Table extends HTMLElement {
 				</div>
 			</div>
 		`;
+		this._allowSelection = false;
 		this._columnDefs = null;
 		this._initialized = false;
 		this._page = 0;
 		this._pageSize = 0;
 		this._rows = null;
-		this._selected = null;
-		// this._TOTAL = 100000;
-		this._TOTAL = 99999;
+		this._selected = [];
+		this._TOTAL_FAKE = 200;
 	}
+
+	get #allowSelection() { return this._allowSelection; }
+	set #allowSelection(newVal) { this._allowSelection = newVal; }
 
 	get #body() { return this.shadowRoot.querySelector('.body'); }
 
@@ -221,6 +233,8 @@ export default class Table extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const allowSelection = this.getAttribute('allow-selection');
+		if (allowSelection != null) this.#allowSelection = allowSelection;
 		this.columnDefs = this.getAttribute('column-defs');
 		const rows = this.getAttribute('rows');
 		if (rows != null) {
@@ -245,7 +259,13 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.querySelector('#current-page').innerText = this.page + 1;
 		this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
 		this.shadowRoot.querySelector('#next-page').addEventListener('click', this.setNextPage);
+		if (this.page + 1 >= this.getTotalPages()) {
+			this.shadowRoot.querySelector('#next-page').setAttribute('disabled', true);
+		}
 		this.shadowRoot.querySelector('#prev-page').addEventListener('click', this.setPrevPage);
+		if (this.page == 0) {
+			this.shadowRoot.querySelector('#prev-page').setAttribute('disabled', true);
+		}
 		this.shadowRoot.querySelector('#page-size').addEventListener('change', this.setPageSize);
 		this.#initialized = true;
 	}
@@ -277,11 +297,25 @@ export default class Table extends HTMLElement {
 		} else {
 			element.setAttribute('id', `row-${index}`);
 		}
-		const selectableCell = document.createElement('span');
-		selectableCell.classList.add('cell');
-		selectableCell.classList.add('selectable');
-		selectableCell.style.flex = '0 0 20px';
-		element.appendChild(selectableCell);
+
+		if (this.#allowSelection) {
+			const selector = document.createElement('span');
+			selector.classList.add('cell');
+			selector.classList.add('selectable');
+			selector.style.flex = '0 0 20px';
+
+			const inner = document.createElement('input');
+			inner.setAttribute('type', 'checkbox');
+			selector.appendChild(inner);
+			if (isHeader) {
+				inner.style.pointerEvents = 'none';
+				inner.style.visibility = 'hidden';
+			}
+
+			element.appendChild(selector);
+			element.addEventListener('click', this.onRowSelect);
+		}
+
 		arr.map((a, i) => element.appendChild(this.buildCell(a, i, isHeader)));
 		return element;
 	}
@@ -300,11 +334,24 @@ export default class Table extends HTMLElement {
 		return Math.ceil(this.rows.length / this.pageSize);
 	}
 
-	// handleChange = (e) => {
-	// 	e.stopPropagation();
-	// 	const target = e.target;
-	// 	this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-	// }
+	onRowSelect = (e) => {
+		const getRow = (el) => {
+			if (el.classList.contains('row')) {
+				return el;
+			} else {
+				return getRow(el.parentElement);
+			}
+		}
+		const row = getRow(e.target);
+		const selected = row.getAttribute('aria-selected');
+		const bool = selected === 'true' || selected === true;
+		row.setAttribute('aria-selected', !bool)
+		const selector = [...row.children].find((a) => a.classList.contains('selectable'));
+		[...selector.children][0].checked = !bool;
+		const index = parseInt(row?.id?.match(/\d+/));
+		if (!isNaN(index)) this.selected.push(index);
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	}
 
 	setNextPage = () => {
 		if (this.page + 1 < this.getTotalPages()) {
@@ -331,7 +378,7 @@ export default class Table extends HTMLElement {
 
 	generateFakeData = () => {
 		const fake = [];
-		for (let i = 0; i < this._TOTAL; i++) {
+		for (let i = 0; i < this._TOTAL_FAKE; i++) {
 			const newObj = { id: i, name: 'Lorem Ipsum', company: 'AllenComm' };
 			fake.push(newObj);
 		}
