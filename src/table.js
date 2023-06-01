@@ -52,7 +52,7 @@ export default class Table extends HTMLElement {
 					display: flex;
 				}
 				.row[aria-selected='true'] {
-					background: #EBEFF9;
+					background: #D7DFF3;
 				}
 				.row + .row {
 					border-top: 1px solid black;
@@ -105,7 +105,7 @@ export default class Table extends HTMLElement {
 				</div>
 			</div>
 		`;
-		this._allowSelection = false;
+		this._allowSelection = true;
 		this._columnDefs = null;
 		this._initialized = false;
 		this._page = 0;
@@ -234,7 +234,11 @@ export default class Table extends HTMLElement {
 
 	connectedCallback() {
 		const allowSelection = this.getAttribute('allow-selection');
-		if (allowSelection != null) this.#allowSelection = allowSelection;
+		if (allowSelection != null) {
+			this.#allowSelection = allowSelection;
+		} else {
+			this.setAttribute('allow-selection', true);
+		}
 		this.columnDefs = this.getAttribute('column-defs');
 		const rows = this.getAttribute('rows');
 		if (rows != null) {
