@@ -99,7 +99,7 @@ export default class Table extends HTMLElement {
 		this._columnDefs = null;
 		this._initialized = false;
 		this._page = 0;
-		this._pageSize = 100;
+		this._pageSize = 0;
 		this._rows = null;
 		this._selected = null;
 		// this._TOTAL = 100000;
@@ -206,7 +206,7 @@ export default class Table extends HTMLElement {
 			this.pageSize = parseInt(this.getAttribute('page-size'));
 			const el = this.shadowRoot.querySelector('ac-select');
 			const options = el?.options || [];
-			options.forEach((a, i) => {
+			options.forEach((a) => {
 				const val = parseInt(a.innerHTML);
 				if (val === pageSize) {
 					el.setAttribute('selected', a.id);
@@ -271,11 +271,11 @@ export default class Table extends HTMLElement {
 		return Math.ceil(this.rows.length / this.pageSize);
 	}
 
-	handleChange = (e) => {
-		e.stopPropagation();
-		// const target = e.target;
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
-	}
+	// handleChange = (e) => {
+	// 	e.stopPropagation();
+	// 	const target = e.target;
+	// 	this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	// }
 
 	setNextPage = () => {
 		if (this.page + 1 < this.getTotalPages()) {
@@ -293,10 +293,9 @@ export default class Table extends HTMLElement {
 
 	updateRender = () => {
 		this.rows.forEach((a, i) => {
+			this.shadowRoot.getElementById(`row-${i}`)?.remove();
 			if (i >= this.getCurrentRange().min && i < this.getCurrentRange().max) {
 				this.#body.appendChild(this.buildRow(a, i, false));
-			} else {
-				this.shadowRoot.getElementById(`row-${i}`)?.remove();
 			}
 		});
 	}

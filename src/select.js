@@ -207,7 +207,6 @@ export default class Select extends HTMLElement {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
 		} else if (attr === 'selected') {
-			console.log(attr, newVal);
 			const ids = this.options.map((a) => a.id);
 			if (ids.indexOf(newVal) > -1) {
 				this.selected = ids.indexOf(newVal);
