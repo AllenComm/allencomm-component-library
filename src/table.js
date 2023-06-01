@@ -133,6 +133,11 @@ export default class Table extends HTMLElement {
 		}
 	}
 
+	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
+	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
+	get #footerPrevBtn() { return this.shadowRoot.querySelector('#next-page'); }
+	get #footerNextBtn() { return this.shadowRoot.querySelector('#prev-page'); }
+	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
 	get #header() { return this.shadowRoot.querySelector('.header'); }
 
 	get #initialized() { return this._initialized; }
@@ -142,10 +147,10 @@ export default class Table extends HTMLElement {
 	set page(newVal) {
 		if (newVal != this._page) {
 			this._page = newVal;
-			this.shadowRoot.querySelector('#current-page').innerText = newVal + 1;
-			const currentTotal = parseInt(this.shadowRoot.querySelector('#total-pages').innerText);
+			this.#footerCurrentPage.innerText = newVal + 1;
+			const currentTotal = parseInt(this.#footerTotalPages.innerText);
 			if (currentTotal != this.getTotalPages()) {
-				this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
+				this.#footerTotalPages.innerText = this.getTotalPages();
 			}
 			this.updateRender();
 		}
@@ -155,9 +160,9 @@ export default class Table extends HTMLElement {
 	set pageSize(newVal) {
 		if (newVal != this._pageSize) {
 			this._pageSize = newVal;
-			const currentTotal = parseInt(this.shadowRoot.querySelector('#total-pages').innerText);
+			const currentTotal = parseInt(this.#footerTotalPages.innerText);
 			if (currentTotal != this.getTotalPages()) {
-				this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
+				this.#footerTotalPages.innerText = this.getTotalPages();
 			}
 			const topEl = [...this.#body.childNodes][0] || {};
 			const topIndex = parseInt(topEl?.id?.match(/\d+/));
@@ -246,8 +251,7 @@ export default class Table extends HTMLElement {
 		} else {
 			this.rows = this.generateFakeData();
 		}
-		const page = this.getAttribute('page');
-		if (page != null) this.page = parseInt(this.getAttribute('page'));
+		if (this.getAttribute('page')) this.page = parseInt(this.getAttribute('page'));
 		const pageSize = parseInt(this.getAttribute('page-size'));
 		if (pageSize != null) {
 			this.pageSize = parseInt(this.getAttribute('page-size'));
@@ -260,17 +264,17 @@ export default class Table extends HTMLElement {
 				}
 			});
 		}
-		this.shadowRoot.querySelector('#current-page').innerText = this.page + 1;
-		this.shadowRoot.querySelector('#total-pages').innerText = this.getTotalPages();
-		this.shadowRoot.querySelector('#next-page').addEventListener('click', this.setNextPage);
+		this.#footerCurrentPage.innerText = this.page + 1;
+		this.#footerTotalPages.innerText = this.getTotalPages();
+		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		if (this.page + 1 >= this.getTotalPages()) {
-			this.shadowRoot.querySelector('#next-page').setAttribute('disabled', true);
+			this.#footerNextBtn.setAttribute('disabled', true);
 		}
-		this.shadowRoot.querySelector('#prev-page').addEventListener('click', this.setPrevPage);
+		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		if (this.page == 0) {
-			this.shadowRoot.querySelector('#prev-page').setAttribute('disabled', true);
+			this.#footerPrevBtn.setAttribute('disabled', true);
 		}
-		this.shadowRoot.querySelector('#page-size').addEventListener('change', this.setPageSize);
+		this.#footerPageSize.addEventListener('change', this.setPageSize);
 		this.#initialized = true;
 	}
 
