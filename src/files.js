@@ -138,17 +138,20 @@ export default class Files extends HTMLElement {
 		node.innerHTML = `<span>${file.name}</span><button><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAVUlEQVQ4y+WSuREAIAgEtwm6sP+MKixIAwPfUS6WEHZn+ODzSDi2ZQ0nnQWnkBfFyBT8LLTiqOyZq/LEZyiEj0oQ70oYlwWxJXFoca3y4eTXkJ/vm6g9L0LBODY4BgAAAABJRU5ErkJggg=="></img></button>`;
 		node.querySelector('button').addEventListener('click', () => this.removeFile(file, node));
 		this.#list.appendChild(node);	
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
 	clear = () => {
 		this.#list.innerHTML = '';
 		this._files = [];
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
 	removeFile = (file, node) => {
 		const index = this._files.findIndex(f => f.name === file.name && f.lastModified === file.lastModified);
 		this._files.splice(index, 1);
 		this.#list.removeChild(node);
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
 
