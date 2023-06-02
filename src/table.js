@@ -112,7 +112,7 @@ export default class Table extends HTMLElement {
 		this._pageSize = 0;
 		this._rows = null;
 		this._selected = [];
-		this._TOTAL_FAKE = 200;
+		this._TOTAL_GENERATED = 140;
 	}
 
 	get #allowSelection() { return this._allowSelection; }
@@ -156,6 +156,11 @@ export default class Table extends HTMLElement {
 				this.#footerPrevBtn.setAttribute('disabled', false);
 			} else {
 				this.#footerPrevBtn.setAttribute('disabled', true);
+			}
+			if (this._page + 1 >= this.getTotalPages()) {
+				this.#footerNextBtn.setAttribute('disabled', true);
+			} else {
+				this.#footerNextBtn.setAttribute('disabled', false);
 			}
 			this.updateRender();
 		}
@@ -417,7 +422,7 @@ export default class Table extends HTMLElement {
 
 	generateFakeData = () => {
 		const fake = [];
-		for (let i = 0; i < this._TOTAL_FAKE; i++) {
+		for (let i = 0; i < this._TOTAL_GENERATED; i++) {
 			const newObj = { id: i, name: 'Lorem Ipsum', company: 'AllenComm' };
 			fake.push(newObj);
 		}
