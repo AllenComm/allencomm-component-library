@@ -135,8 +135,8 @@ export default class Table extends HTMLElement {
 
 	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
 	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
-	get #footerPrevBtn() { return this.shadowRoot.querySelector('#next-page'); }
-	get #footerNextBtn() { return this.shadowRoot.querySelector('#prev-page'); }
+	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
+	get #footerNextBtn() { return this.shadowRoot.querySelector('#next-page'); }
 	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
 	get #header() { return this.shadowRoot.querySelector('.header'); }
 
@@ -151,6 +151,11 @@ export default class Table extends HTMLElement {
 			const currentTotal = parseInt(this.#footerTotalPages.innerText);
 			if (currentTotal != this.getTotalPages()) {
 				this.#footerTotalPages.innerText = this.getTotalPages();
+			}
+			if (this._page > 0) {
+				this.#footerPrevBtn.setAttribute('disabled', false);
+			} else {
+				this.#footerPrevBtn.setAttribute('disabled', true);
 			}
 			this.updateRender();
 		}
@@ -267,7 +272,7 @@ export default class Table extends HTMLElement {
 		this.#footerCurrentPage.innerText = this.page + 1;
 		this.#footerTotalPages.innerText = this.getTotalPages();
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
-		if (this.page + 1 >= this.getTotalPages()) {
+		if (this.page >= this.getTotalPages()) {
 			this.#footerNextBtn.setAttribute('disabled', true);
 		}
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
@@ -321,7 +326,9 @@ export default class Table extends HTMLElement {
 			}
 
 			element.appendChild(selector);
-			element.addEventListener('click', this.onRowSelect);
+			if (!isHeader) {
+				element.addEventListener('click', this.onRowSelect);
+			}
 		}
 
 		arr.map((a, i) => element.appendChild(this.buildCell(a, i, isHeader)));
@@ -351,13 +358,7 @@ export default class Table extends HTMLElement {
 			}
 		}
 		const row = getRow(e.target);
-		const selected = row.getAttribute('aria-selected');
-		const bool = selected === 'true' || selected === true;
-		row.setAttribute('aria-selected', !bool)
-		const selector = [...row.children].find((a) => a.classList.contains('selectable'));
-		[...selector.children][0].checked = !bool;
-		const index = parseInt(row?.id?.match(/\d+/));
-		if (!isNaN(index)) this.selected.push(index);
+		this.setSelected(row);
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
@@ -375,11 +376,41 @@ export default class Table extends HTMLElement {
 
 	setPageSize = (e) => this.pageSize = e.target.textValue;
 
+	setSelected = (el, override) => {
+		const selector = [...el.children].find((a) => a.classList.contains('selectable'));
+		const selected = el.getAttribute('aria-selected');
+		const input = [...selector.children][0];
+		let bool = false;
+
+		if (override) {
+			bool = override;
+		} else {
+			bool = !(selected === 'true' || selected === true);
+		}
+
+		el.setAttribute('aria-selected', bool);
+		input.checked = bool;
+
+		const index = parseInt(el?.id?.match(/\d+/));
+		if (!isNaN(index)) {
+			const isSelected = this.selected.indexOf(index) > -1;
+			if (isSelected && !bool) {
+				this.selected.splice(this.selected.indexOf(index), 1);
+			} else if (!isSelected && bool) {
+				this.selected.push(index);
+			}
+		}
+	}
+
 	updateRender = () => {
 		this.rows.forEach((a, i) => {
 			this.shadowRoot.getElementById(`row-${i}`)?.remove();
 			if (i >= this.getCurrentRange().min && i < this.getCurrentRange().max) {
-				this.#body.appendChild(this.buildRow(a, i, false));
+				const el = this.buildRow(a, i, false);
+				this.#body.appendChild(el);
+				if (this.selected.indexOf(i) > -1) {
+					this.setSelected(el, true);
+				}
 			}
 		});
 	}

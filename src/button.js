@@ -19,6 +19,7 @@ export default class Button extends HTMLElement {
 				}
 				button[disabled] {
 					cursor: default;
+					pointer-events: none;
 				}
 			</style>
 			<button tabindex='-1'>
