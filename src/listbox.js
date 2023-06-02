@@ -119,7 +119,7 @@ export default class Listbox extends HTMLElement {
 
 	handleChange = (e) => {
 		e.stopPropagation();
-		const target = e.target;
+		const target = e.currentTarget;
 		const cur = target.getAttribute('aria-selected') === 'true';
 		const i = this.options.findIndex((a) => a === target);
 		if (!this.#multiple) {
