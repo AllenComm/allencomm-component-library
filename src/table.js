@@ -345,14 +345,11 @@ export default class Table extends HTMLElement {
 			const inner = document.createElement('input');
 			inner.setAttribute('type', 'checkbox');
 			selector.appendChild(inner);
-			if (isHeader) {
-				inner.style.pointerEvents = 'none';
-				inner.style.visibility = 'hidden';
-			}
-
 			element.appendChild(selector);
-			if (!isHeader) {
-				element.addEventListener('click', this.onRowSelect);
+			if (isHeader) {
+				inner.addEventListener('click', this.onSelectAllRows);
+			} else {
+				element.addEventListener('click', this.onSelectRow);
 			}
 		}
 
@@ -382,11 +379,18 @@ export default class Table extends HTMLElement {
 		return { min, max };
 	}
 
-	getTotalPages = () => {
-		return Math.ceil(this.rows.length / this.pageSize);
+	getTotalPages = () => Math.ceil(this.rows.length / this.pageSize);
+
+	onSelectAllRows = () => {
+		if (this.selected.length === this.rows.length) {
+			this.selected = [];
+		} else {
+			this.selected = this.rows.map((a, i) => i);
+		}
+		[...this.#body.children].forEach((a) => this.updateElement(a));
 	}
 
-	onRowSelect = (e) => {
+	onSelectRow = (e) => {
 		const getRow = (el) => {
 			if (el.classList.contains('row')) {
 				return el;
@@ -425,6 +429,10 @@ export default class Table extends HTMLElement {
 			this.#anchor = null;
 			this.selected = [cur];
 			[...this.#body.children].forEach((a) => this.updateElement(a));
+		}
+		const input = this.#header.querySelector('input')
+		if (input && input.checked) {
+			input.checked = false;
 		}
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
