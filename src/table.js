@@ -1,7 +1,4 @@
 export default class Table extends HTMLElement {
-	// Depends on:
-	// 		ac-button
-	// 		ac-select
 	static observedAttributes = ['column-defs', 'page', 'page-size', 'rows'];
 
 	constructor() {
@@ -18,9 +15,6 @@ export default class Table extends HTMLElement {
 				}
 				:host([allow-selection='true']) .row:not(#row-header):not(#row-footer), input {
 					cursor: pointer;
-				}
-				ac-select {
-					flex-basis: 140px;
 				}
 				.body {
 					display: flex;
@@ -40,7 +34,14 @@ export default class Table extends HTMLElement {
 				}
 				.footer-inner {
 					display: flex;
+					flex: 1;
 					gap: 5px;
+					justify-content: flex-end;
+					user-select: none;
+				}
+				.footer-inner:first-child {
+					flex: 3;
+					justify-content: flex-start;
 				}
 				.header:not(:empty) {
 					border-bottom: 1px solid black;
@@ -50,6 +51,7 @@ export default class Table extends HTMLElement {
 				}
 				.row {
 					display: flex;
+					user-select: none;
 				}
 				.row[aria-selected='true'] {
 					background: #D7DFF3;
@@ -64,10 +66,16 @@ export default class Table extends HTMLElement {
 					padding: 5px;
 					place-items: center;
 				}
-				#row-footer ac-button {
+				#row-footer button {
+					background: none;
 					border: none;
+					cursor: pointer;
 					display: flex;
 					place-self: center;
+				}
+				#row-footer button:disabled {
+					cursor: default;
+					pointer-events: none;
 				}
 				.table {
 					border-bottom: 1px solid black;
@@ -80,32 +88,40 @@ export default class Table extends HTMLElement {
 				<div class='footer'>
 					<div class='row' id='row-footer'>
 						<div class='footer-inner'>
-							<ac-button id='prev-page' style='border: none; padding: 0;'>
-								<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-									<path d="M561-240 320-481l241-241 43 43-198 198 198 198-43 43Z"/>
-								</svg>
-							</ac-button>
+							<span id='selected-number' hidden='true'></span>
+							<span id='selected-single' hidden='true'>row selected</span>
+							<span id='selected-multi' hidden='true'>rows selected</span>
+						</div>
+						<div class='footer-inner'>
+							<span style='font-size: 11px; place-self: center;'>Rows per page:</span>
+							<select id='page-size'>
+								<option>10</option>
+								<option>25</option>
+								<option>50</option>
+								<option>100</option>
+							</select>
+						</div>
+						<div class='footer-inner'>
 							<div id='current-page'>0</div>
 							of
 							<div id='total-pages'>0</div>
-							<ac-button id='next-page' style='border: none; padding: 0;'>
+							<button id='prev-page' style='border: none; padding: 0;'>
+								<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+									<path d="M561-240 320-481l241-241 43 43-198 198 198 198-43 43Z"/>
+								</svg>
+							</button>
+							<button id='next-page' style='border: none; padding: 0;'>
 								<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
 									<path d="m375-240-43-43 198-198-198-198 43-43 241 241-241 241Z"/>
 								</svg>
-							</ac-button>
+							</button>
 						</div>
-						<ac-select anchor='bottom' id='page-size'>
-							<span style='font-size: 11px; place-self: center;'>Rows per page:</span>
-							<ac-option>10</ac-option>
-							<ac-option>25</ac-option>
-							<ac-option>50</ac-option>
-							<ac-option>100</ac-option>
-						</ac-select>
 					</div>
 				</div>
 			</div>
 		`;
 		this._allowSelection = true;
+		this._anchor = null;
 		this._columnDefs = null;
 		this._initialized = false;
 		this._page = 0;
@@ -117,6 +133,9 @@ export default class Table extends HTMLElement {
 
 	get #allowSelection() { return this._allowSelection; }
 	set #allowSelection(newVal) { this._allowSelection = newVal; }
+
+	get #anchor() { return this._anchor; }
+	set #anchor(newVal) { this._anchor = newVal; }
 
 	get #body() { return this.shadowRoot.querySelector('.body'); }
 
@@ -153,16 +172,16 @@ export default class Table extends HTMLElement {
 				this.#footerTotalPages.innerText = this.getTotalPages();
 			}
 			if (this._page > 0) {
-				this.#footerPrevBtn.setAttribute('disabled', false);
+				this.#footerPrevBtn.removeAttribute('disabled');
 			} else {
 				this.#footerPrevBtn.setAttribute('disabled', true);
 			}
 			if (this._page + 1 >= this.getTotalPages()) {
 				this.#footerNextBtn.setAttribute('disabled', true);
 			} else {
-				this.#footerNextBtn.setAttribute('disabled', false);
+				this.#footerNextBtn.removeAttribute('disabled');
 			}
-			this.updateRender();
+			this.forceRender();
 		}
 	}
 
@@ -177,7 +196,8 @@ export default class Table extends HTMLElement {
 			const topEl = [...this.#body.childNodes][0] || {};
 			const topIndex = parseInt(topEl?.id?.match(/\d+/));
 			if (topEl && !isNaN(topIndex)) {
-				if (topIndex < this.getCurrentRange().min) {
+				const range = this.getCurrentRange();
+				if (topIndex < range.min) {
 					const findPage = (page) => {
 						const offset = newVal;
 						const min = page * offset;
@@ -189,7 +209,7 @@ export default class Table extends HTMLElement {
 					}
 					const newPage = findPage(this.page);
 					this.page = newPage;
-				} else if (topIndex > this.getCurrentRange().max) {
+				} else if (topIndex > range.max) {
 					const findPage = (page) => {
 						const offset = newVal;
 						const max = (page + 1) * offset;
@@ -203,7 +223,7 @@ export default class Table extends HTMLElement {
 					this.page = newPage;
 				}
 			}
-			this.updateRender();
+			this.forceRender();
 		}
 	}
 
@@ -215,7 +235,7 @@ export default class Table extends HTMLElement {
 				if (this.#body.children.length > 0) {
 					[...this.#body.children].forEach((a) => a.remove());
 				}
-				this.updateRender();
+				this.forceRender();
 			}
 		} catch(err) {
 			this._rows = [];
@@ -264,10 +284,10 @@ export default class Table extends HTMLElement {
 		if (this.getAttribute('page')) this.page = parseInt(this.getAttribute('page'));
 		const pageSize = parseInt(this.getAttribute('page-size'));
 		if (pageSize != null) {
-			this.pageSize = parseInt(this.getAttribute('page-size'));
-			const el = this.shadowRoot.querySelector('ac-select');
+			this.pageSize = pageSize;
+			const el = this.shadowRoot.querySelector('select');
 			const options = el?.options || [];
-			options.forEach((a) => {
+			[...options].forEach((a) => {
 				const val = parseInt(a.innerHTML);
 				if (val === pageSize) {
 					el.setAttribute('selected', a.id);
@@ -340,6 +360,18 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
+	forceRender = () => {
+		this.rows.forEach((a, i) => {
+			this.shadowRoot.getElementById(`row-${i}`)?.remove();
+			const range = this.getCurrentRange();
+			if (i >= range.min && i < range.max) {
+				const el = this.buildRow(a, i, false);
+				this.updateElement(el);
+				this.#body.appendChild(el);
+			}
+		});
+	}
+
 	getColumnSize = (index) => this.columnDefs[index].size || '1';
 	getColumnType = (index) => this.columnDefs[index].type || 'string';
 	
@@ -363,7 +395,37 @@ export default class Table extends HTMLElement {
 			}
 		}
 		const row = getRow(e.target);
-		this.setSelected(row);
+		const cur = parseInt(row.id.match(/\d+/));
+		if (e.shiftKey) {
+			let other = -1;
+			if (this.#anchor == null) {
+				other = this.selected[this.selected.length - 1];
+				this.#anchor = other;
+			} else {
+				other = this.#anchor;
+			}
+
+			if (!isNaN(cur) && !isNaN(other)) {
+				const up = cur < other;
+				this.rows.forEach((a, i) => {
+					const inRange = (up && i <= other && i >= cur) || (!up && i >= other && i <= cur);
+					if (inRange && this.selected.indexOf(i) == -1) {
+						this.selected.push(i);
+					} else if (!inRange && this.selected.indexOf(i) > -1) {
+						this.selected.splice(this.selected.indexOf(i), 1);
+					}
+
+					const el = this.shadowRoot.querySelector(`#row-${i}`);
+					if (el) {
+						this.updateElement(el);
+					}
+				});
+			}
+		} else {
+			this.#anchor = null;
+			this.selected = [cur];
+			[...this.#body.children].forEach((a) => this.updateElement(a));
+		}
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
@@ -379,12 +441,10 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	setPageSize = (e) => this.pageSize = e.target.textValue;
+	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
 
 	setSelected = (el, override) => {
-		const selector = [...el.children].find((a) => a.classList.contains('selectable'));
 		const selected = el.getAttribute('aria-selected');
-		const input = [...selector.children][0];
 		let bool = false;
 
 		if (override) {
@@ -392,9 +452,6 @@ export default class Table extends HTMLElement {
 		} else {
 			bool = !(selected === 'true' || selected === true);
 		}
-
-		el.setAttribute('aria-selected', bool);
-		input.checked = bool;
 
 		const index = parseInt(el?.id?.match(/\d+/));
 		if (!isNaN(index)) {
@@ -405,19 +462,20 @@ export default class Table extends HTMLElement {
 				this.selected.push(index);
 			}
 		}
+		this.updateElement(el);
 	}
 
-	updateRender = () => {
-		this.rows.forEach((a, i) => {
-			this.shadowRoot.getElementById(`row-${i}`)?.remove();
-			if (i >= this.getCurrentRange().min && i < this.getCurrentRange().max) {
-				const el = this.buildRow(a, i, false);
-				this.#body.appendChild(el);
-				if (this.selected.indexOf(i) > -1) {
-					this.setSelected(el, true);
-				}
-			}
-		});
+	updateElement = (el) => {
+		const i = parseInt(el.id.match(/\d+/));
+		const selector = [...el.children].find((a) => a.classList.contains('selectable'));
+		const input = [...selector.children][0];
+		if (this.selected.indexOf(i) > -1) {
+			el.setAttribute('aria-selected', true);
+			input.checked = true;
+		} else {
+			el.setAttribute('aria-selected', false);
+			input.checked = false;
+		}
 	}
 
 	generateFakeData = () => {
