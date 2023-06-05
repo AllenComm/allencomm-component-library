@@ -388,6 +388,7 @@ export default class Table extends HTMLElement {
 			this.selected = this.rows.map((a, i) => i);
 		}
 		[...this.#body.children].forEach((a) => this.updateElement(a));
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
 	onSelectRow = (e) => {
@@ -415,8 +416,6 @@ export default class Table extends HTMLElement {
 					const inRange = (up && i <= other && i >= cur) || (!up && i >= other && i <= cur);
 					if (inRange && this.selected.indexOf(i) == -1) {
 						this.selected.push(i);
-					} else if (!inRange && this.selected.indexOf(i) > -1) {
-						this.selected.splice(this.selected.indexOf(i), 1);
 					}
 
 					const el = this.shadowRoot.querySelector(`#row-${i}`);
@@ -427,12 +426,20 @@ export default class Table extends HTMLElement {
 			}
 		} else {
 			this.#anchor = null;
-			this.selected = [cur];
+
+			if (this.selected.indexOf(cur) == -1) {
+				this.selected.push(cur);
+			} else if (this.selected.indexOf(cur) > -1) {
+				this.selected.splice(this.selected.indexOf(cur), 1);
+			}
+
 			[...this.#body.children].forEach((a) => this.updateElement(a));
 		}
-		const input = this.#header.querySelector('input')
-		if (input && input.checked) {
-			input.checked = false;
+
+		if (this.selected.length === this.rows.length) {
+			this.#header.querySelector('input').checked = true;
+		} else {
+			this.#header.querySelector('input').checked = false;
 		}
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
