@@ -92,8 +92,8 @@ Unnamed = Slots which allow any child to be placed inside
 
 - Table
     - `allow-selection`
-    - `column-defs`
-    - `rows`
+    - `columns`
+    - Set rows via...
 - Text-Area
     - `auto-height` - Toggles auto expansion by component when text is higher
         than the default. *Default: true*

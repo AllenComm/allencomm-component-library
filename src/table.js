@@ -1,5 +1,5 @@
 export default class Table extends HTMLElement {
-	static observedAttributes = ['column-defs', 'page', 'page-size', 'rows'];
+	static observedAttributes = ['columns', 'page', 'page-size', 'rows'];
 
 	constructor() {
 		super();
@@ -122,13 +122,13 @@ export default class Table extends HTMLElement {
 		`;
 		this._allowSelection = true;
 		this._anchor = null;
-		this._columnDefs = null;
+		this._columns = null;
+		this._furthest = null;
 		this._initialized = false;
 		this._page = 0;
-		this._pageSize = 0;
+		this._pageSize = 10;
 		this._rows = null;
 		this._selected = [];
-		this._TOTAL_GENERATED = 140;
 	}
 
 	get #allowSelection() { return this._allowSelection; }
@@ -139,15 +139,15 @@ export default class Table extends HTMLElement {
 
 	get #body() { return this.shadowRoot.querySelector('.body'); }
 
-	get columnDefs() { return this._columnDefs; }
-	set columnDefs(newVal) {
+	get columns() { return this._columns; }
+	set columns(newVal) {
 		try {
-			this._columnDefs = JSON.parse(newVal);
-			if (this._columnDefs?.length > 0) {
-				this.#header.appendChild(this.buildRow(this._columnDefs, -1, true));
+			this._columns = JSON.parse(newVal);
+			if (this._columns?.length > 0) {
+				this.#header.appendChild(this.buildRow(this._columns, -1, true));
 			}
 		} catch(err) {
-			this._columnDefs = [];
+			this._columns = [];
 			console.error(err);
 		}
 	}
@@ -156,7 +156,14 @@ export default class Table extends HTMLElement {
 	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
 	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
 	get #footerNextBtn() { return this.shadowRoot.querySelector('#next-page'); }
+	get #footerSelectedMulti() { return this.shadowRoot.querySelector('#selected-multi'); }
+	get #footerSelectedNumber() { return this.shadowRoot.querySelector('#selected-number'); }
+	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
 	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
+
+	get #furthest() { return this._furthest; }
+	set #furthest(newVal) { this._furthest = newVal; }
+
 	get #header() { return this.shadowRoot.querySelector('.header'); }
 
 	get #initialized() { return this._initialized; }
@@ -167,20 +174,6 @@ export default class Table extends HTMLElement {
 		if (newVal != this._page) {
 			this._page = newVal;
 			this.#footerCurrentPage.innerText = newVal + 1;
-			const currentTotal = parseInt(this.#footerTotalPages.innerText);
-			if (currentTotal != this.getTotalPages()) {
-				this.#footerTotalPages.innerText = this.getTotalPages();
-			}
-			if (this._page > 0) {
-				this.#footerPrevBtn.removeAttribute('disabled');
-			} else {
-				this.#footerPrevBtn.setAttribute('disabled', true);
-			}
-			if (this._page + 1 >= this.getTotalPages()) {
-				this.#footerNextBtn.setAttribute('disabled', true);
-			} else {
-				this.#footerNextBtn.removeAttribute('disabled');
-			}
 			this.forceRender();
 		}
 	}
@@ -189,10 +182,15 @@ export default class Table extends HTMLElement {
 	set pageSize(newVal) {
 		if (newVal != this._pageSize) {
 			this._pageSize = newVal;
-			const currentTotal = parseInt(this.#footerTotalPages.innerText);
-			if (currentTotal != this.getTotalPages()) {
-				this.#footerTotalPages.innerText = this.getTotalPages();
-			}
+			const el = this.shadowRoot.querySelector('select');
+			const options = el?.options || [];
+			[...options].forEach((a) => {
+				const val = parseInt(a.innerHTML);
+				if (val === this._pageSize) {
+					el.setAttribute('selected', a.id);
+				}
+			});
+
 			const topEl = [...this.#body.childNodes][0] || {};
 			const topIndex = parseInt(topEl?.id?.match(/\d+/));
 			if (topEl && !isNaN(topIndex)) {
@@ -230,7 +228,7 @@ export default class Table extends HTMLElement {
 	get rows() { return this._rows; }
 	set rows(newVal) {
 		try {
-			this._rows = JSON.parse(newVal);
+			this._rows = newVal;
 			if (this._rows?.length > 0) {
 				if (this.#body.children.length > 0) {
 					[...this.#body.children].forEach((a) => a.remove());
@@ -249,8 +247,8 @@ export default class Table extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (this.#initialized) {
 			switch(attr) {
-				case 'column-defs':
-					this.columnDefs = newVal;
+				case 'columns':
+					this.columns = newVal;
 					break;
 				case 'page':
 					this.page = newVal;
@@ -259,8 +257,8 @@ export default class Table extends HTMLElement {
 					this.pageSize = newVal;
 					break;
 				case 'rows':
-					if (this.columnDefs?.length > 0) {
-						this.rows = newVal;
+					if (this.columns?.length > 0) {
+						this.rows = JSON.parse(newVal);
 					}
 					break;
 			}
@@ -269,42 +267,24 @@ export default class Table extends HTMLElement {
 
 	connectedCallback() {
 		const allowSelection = this.getAttribute('allow-selection');
+		const page = this.getAttribute('page');
+		const pageSize = parseInt(this.getAttribute('page-size'));
 		if (allowSelection != null) {
 			this.#allowSelection = allowSelection;
 		} else {
 			this.setAttribute('allow-selection', true);
 		}
-		this.columnDefs = this.getAttribute('column-defs');
-		const rows = this.getAttribute('rows');
-		if (rows != null) {
-			this.rows = rows;
-		} else {
-			this.rows = this.generateFakeData();
+		this.columns = this.getAttribute('columns');
+		if (page != null && !isNaN(page)) {
+			this.page = parseInt(page);
 		}
-		if (this.getAttribute('page')) this.page = parseInt(this.getAttribute('page'));
-		const pageSize = parseInt(this.getAttribute('page-size'));
-		if (pageSize != null) {
+		if (pageSize != null && !isNaN(pageSize)) {
 			this.pageSize = pageSize;
-			const el = this.shadowRoot.querySelector('select');
-			const options = el?.options || [];
-			[...options].forEach((a) => {
-				const val = parseInt(a.innerHTML);
-				if (val === pageSize) {
-					el.setAttribute('selected', a.id);
-				}
-			});
 		}
-		this.#footerCurrentPage.innerText = this.page + 1;
-		this.#footerTotalPages.innerText = this.getTotalPages();
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
-		if (this.page >= this.getTotalPages()) {
-			this.#footerNextBtn.setAttribute('disabled', true);
-		}
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
-		if (this.page == 0) {
-			this.#footerPrevBtn.setAttribute('disabled', true);
-		}
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
+		this.updateFooter();
 		this.#initialized = true;
 	}
 
@@ -358,9 +338,15 @@ export default class Table extends HTMLElement {
 	}
 
 	forceRender = () => {
+		if (!this.#initialized) {
+			return;
+		}
+
+		this.updateTotalPages();
+		this.updateFooter();
+		const range = this.getCurrentRange();
 		this.rows.forEach((a, i) => {
 			this.shadowRoot.getElementById(`row-${i}`)?.remove();
-			const range = this.getCurrentRange();
 			if (i >= range.min && i < range.max) {
 				const el = this.buildRow(a, i, false);
 				this.updateElement(el);
@@ -369,9 +355,9 @@ export default class Table extends HTMLElement {
 		});
 	}
 
-	getColumnSize = (index) => this.columnDefs[index].size || '1';
-	getColumnType = (index) => this.columnDefs[index].type || 'string';
-	
+	getColumnSize = (index) => this.columns[index].size || '1';
+	getColumnType = (index) => this.columns[index].type || 'string';
+
 	getCurrentRange = () => {
 		const offset = this.pageSize;
 		const min = this.page * offset;
@@ -379,15 +365,23 @@ export default class Table extends HTMLElement {
 		return { min, max };
 	}
 
-	getTotalPages = () => Math.ceil(this.rows.length / this.pageSize);
+	getTotalPages = () => {
+		if (this.rows?.length) {
+			return Math.ceil(this.rows.length / this.pageSize);
+		}
+		return 0;
+	}
 
 	onSelectAllRows = () => {
 		if (this.selected.length === this.rows.length) {
 			this.selected = [];
+			this.#header.querySelector('input').checked = false;
 		} else {
 			this.selected = this.rows.map((a, i) => i);
+			this.#header.querySelector('input').checked = true;
 		}
 		[...this.#body.children].forEach((a) => this.updateElement(a));
+		this.updateFooter();
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
@@ -400,22 +394,42 @@ export default class Table extends HTMLElement {
 			}
 		}
 		const row = getRow(e.target);
-		const cur = parseInt(row.id.match(/\d+/));
+		const current = parseInt(row.id.match(/\d+/));
 		if (e.shiftKey) {
-			let other = -1;
+			console.log('shiftKey');
+			// TODO Selecting self + ascending doesn't seem to deselect all other
+			// items
+			let anchor = -1;
 			if (this.#anchor == null) {
-				other = this.selected[this.selected.length - 1];
-				this.#anchor = other;
+				anchor = this.selected[this.selected.length - 1];
+				this.#anchor = anchor;
 			} else {
-				other = this.#anchor;
+				anchor = this.#anchor;
 			}
 
-			if (!isNaN(cur) && !isNaN(other)) {
-				const up = cur < other;
+			const ascending = current < anchor;
+			let furthest = this.#furthest;
+			if (this.#furthest == null || (ascending && current < furthest) || (!ascending && current > furthest)) {
+				furthest = current;
+				this.#furthest = current;
+			}
+
+			if (!isNaN(current) && !isNaN(anchor) && !isNaN(furthest)) {
+				console.log('ascending', ascending);
+				console.log('current', current);
+				console.log('anchor', anchor);
+				console.log('furthest', furthest);
 				this.rows.forEach((a, i) => {
-					const inRange = (up && i <= other && i >= cur) || (!up && i >= other && i <= cur);
-					if (inRange && this.selected.indexOf(i) == -1) {
-						this.selected.push(i);
+					const inCurrentRange = (ascending && i <= anchor && i >= current) || (!ascending && i >= anchor && i <= current);
+					const inFurthestRange = (ascending && i <= anchor && i >= furthest) || (!ascending && i >= anchor && i <= furthest);
+					if (inCurrentRange) {
+						if (this.selected.indexOf(i) == -1) {
+							this.selected.push(i);
+							this.updateFooter();
+						}
+					} else if (inFurthestRange && this.selected.indexOf(i) != -1) {
+						this.selected.splice(this.selected.indexOf(i), 1);
+						this.updateFooter();
 					}
 
 					const el = this.shadowRoot.querySelector(`#row-${i}`);
@@ -425,12 +439,14 @@ export default class Table extends HTMLElement {
 				});
 			}
 		} else {
-			this.#anchor = null;
-
-			if (this.selected.indexOf(cur) == -1) {
-				this.selected.push(cur);
-			} else if (this.selected.indexOf(cur) > -1) {
-				this.selected.splice(this.selected.indexOf(cur), 1);
+			if (this.selected.indexOf(current) == -1) {
+				this.selected.push(current);
+				this.updateFooter();
+				this.#anchor = current;
+			} else if (this.selected.indexOf(current) > -1) {
+				this.selected.splice(this.selected.indexOf(current), 1);
+				this.updateFooter();
+				this.#anchor = null;
 			}
 
 			[...this.#body.children].forEach((a) => this.updateElement(a));
@@ -458,28 +474,6 @@ export default class Table extends HTMLElement {
 
 	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
 
-	setSelected = (el, override) => {
-		const selected = el.getAttribute('aria-selected');
-		let bool = false;
-
-		if (override) {
-			bool = override;
-		} else {
-			bool = !(selected === 'true' || selected === true);
-		}
-
-		const index = parseInt(el?.id?.match(/\d+/));
-		if (!isNaN(index)) {
-			const isSelected = this.selected.indexOf(index) > -1;
-			if (isSelected && !bool) {
-				this.selected.splice(this.selected.indexOf(index), 1);
-			} else if (!isSelected && bool) {
-				this.selected.push(index);
-			}
-		}
-		this.updateElement(el);
-	}
-
 	updateElement = (el) => {
 		const i = parseInt(el.id.match(/\d+/));
 		const selector = [...el.children].find((a) => a.classList.contains('selectable'));
@@ -493,13 +487,42 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	generateFakeData = () => {
-		const fake = [];
-		for (let i = 0; i < this._TOTAL_GENERATED; i++) {
-			const newObj = { id: i, name: 'Lorem Ipsum', company: 'AllenComm' };
-			fake.push(newObj);
+	updateFooter = () => {
+		if (parseInt(this.#footerCurrentPage.innerText) != this.page + 1) {
+			this.#footerCurrentPage.innerText = this.page + 1;
 		}
-		return JSON.stringify(fake);
+		if (this.page > 0 && this.#footerPrevBtn.hasAttribute('disabled')) {
+			this.#footerPrevBtn.removeAttribute('disabled');
+		} else {
+			this.#footerPrevBtn.setAttribute('disabled', true);
+		}
+		if (this.page + 1 >= this.getTotalPages() && !this.#footerNextBtn.hasAttribute('disabled')) {
+			this.#footerNextBtn.setAttribute('disabled', true);
+		} else {
+			this.#footerNextBtn.removeAttribute('disabled');
+		}
+		if (this.selected.length > 0) {
+			this.#footerSelectedNumber.innerText = this.selected.length;
+			this.#footerSelectedNumber.removeAttribute('hidden');
+			if (this.selected.length > 1) {
+				this.#footerSelectedMulti.removeAttribute('hidden');
+				this.#footerSelectedSingle.setAttribute('hidden', true);
+			} else {
+				this.#footerSelectedSingle.removeAttribute('hidden');
+				this.#footerSelectedMulti.setAttribute('hidden', true);
+			}
+		} else {
+			this.#footerSelectedMulti.setAttribute('hidden', true);
+			this.#footerSelectedNumber.setAttribute('hidden', true);
+			this.#footerSelectedSingle.setAttribute('hidden', true);
+		}
+	}
+
+	updateTotalPages = () => {
+		const currentTotal = parseInt(this.#footerTotalPages.innerText);
+		if (currentTotal != this.getTotalPages()) {
+			this.#footerTotalPages.innerText = this.getTotalPages();
+		}
 	}
 }
 
