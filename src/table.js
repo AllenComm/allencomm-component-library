@@ -386,6 +386,16 @@ export default class Table extends HTMLElement {
 	}
 
 	onSelectRow = (e) => {
+		const inRange = (i, x, y) => {
+			let min = x;
+			let max = y;
+			if (min > max) {
+				min = y;
+				max = x;
+			}
+			return i >= min && i <= max;
+		}
+
 		const getRow = (el) => {
 			if (el.classList.contains('row')) {
 				return el;
@@ -396,40 +406,23 @@ export default class Table extends HTMLElement {
 		const row = getRow(e.target);
 		const current = parseInt(row.id.match(/\d+/));
 		if (e.shiftKey) {
-			console.log('shiftKey');
-			// TODO Selecting self + ascending doesn't seem to deselect all other
-			// items
-			let anchor = -1;
-			if (this.#anchor == null) {
-				anchor = this.selected[this.selected.length - 1];
-				this.#anchor = anchor;
-			} else {
-				anchor = this.#anchor;
-			}
-
-			const ascending = current < anchor;
+			const anchor = this.#anchor;
 			let furthest = this.#furthest;
-			if (this.#furthest == null || (ascending && current < furthest) || (!ascending && current > furthest)) {
+			if (((furthest == null || furthest < current) && current > anchor) || ((furthest == null || furthest > current) && current < anchor)) {
 				furthest = current;
 				this.#furthest = current;
 			}
 
 			if (!isNaN(current) && !isNaN(anchor) && !isNaN(furthest)) {
-				console.log('ascending', ascending);
-				console.log('current', current);
-				console.log('anchor', anchor);
-				console.log('furthest', furthest);
 				this.rows.forEach((a, i) => {
-					const inCurrentRange = (ascending && i <= anchor && i >= current) || (!ascending && i >= anchor && i <= current);
-					const inFurthestRange = (ascending && i <= anchor && i >= furthest) || (!ascending && i >= anchor && i <= furthest);
+					const inCurrentRange = inRange(i, anchor, current);
+					const inFurthestRange  = inRange(i, furthest, current);
 					if (inCurrentRange) {
 						if (this.selected.indexOf(i) == -1) {
 							this.selected.push(i);
-							this.updateFooter();
 						}
 					} else if (inFurthestRange && this.selected.indexOf(i) != -1) {
 						this.selected.splice(this.selected.indexOf(i), 1);
-						this.updateFooter();
 					}
 
 					const el = this.shadowRoot.querySelector(`#row-${i}`);
@@ -441,14 +434,11 @@ export default class Table extends HTMLElement {
 		} else {
 			if (this.selected.indexOf(current) == -1) {
 				this.selected.push(current);
-				this.updateFooter();
-				this.#anchor = current;
 			} else if (this.selected.indexOf(current) > -1) {
 				this.selected.splice(this.selected.indexOf(current), 1);
-				this.updateFooter();
-				this.#anchor = null;
 			}
-
+			this.#anchor = current;
+			this.#furthest = null;
 			[...this.#body.children].forEach((a) => this.updateElement(a));
 		}
 
@@ -457,6 +447,7 @@ export default class Table extends HTMLElement {
 		} else {
 			this.#header.querySelector('input').checked = false;
 		}
+		this.updateFooter();
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 
