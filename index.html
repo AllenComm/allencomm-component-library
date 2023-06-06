@@ -244,7 +244,7 @@
 				<h3>Table</h3>
 				<ac-table
 					page-size="10"
-					column-defs='[ { "name": "ID", "type": "int", "size": "1" }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ]'
+					columns='[ { "name": "ID", "type": "int", "size": "1" }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ]'
 				>
 				</ac-table>
 			</section>
@@ -275,5 +275,13 @@
 				<ac-text-field search='true' style="margin-top: 30px;">Label</ac-text-field>
 			</section>
 		</main>
+		<script>
+			const init = async () => {
+				const dummyData = await fetch('./generated.json');
+				const jsonData = await dummyData.json();
+				document.querySelector('ac-table').rows = jsonData;
+			};
+			document.addEventListener("DOMContentLoaded", function() { init(); });
+		</script>
 	</body>
 </html>
