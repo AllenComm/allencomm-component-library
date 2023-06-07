@@ -142,7 +142,7 @@ export default class Table extends HTMLElement {
 	get columns() { return this._columns; }
 	set columns(newVal) {
 		try {
-			this._columns = JSON.parse(newVal);
+			this._columns = newVal;
 			if (this._columns?.length > 0) {
 				this.#header.appendChild(this.buildRow(this._columns, -1, true));
 			}
@@ -248,7 +248,7 @@ export default class Table extends HTMLElement {
 		if (this.#initialized) {
 			switch(attr) {
 				case 'columns':
-					this.columns = newVal;
+					this.columns = JSON.parse(newVal);
 					break;
 				case 'page':
 					this.page = newVal;
@@ -257,9 +257,7 @@ export default class Table extends HTMLElement {
 					this.pageSize = newVal;
 					break;
 				case 'rows':
-					if (this.columns?.length > 0) {
-						this.rows = JSON.parse(newVal);
-					}
+					this.rows = JSON.parse(newVal);
 					break;
 			}
 		}
@@ -288,26 +286,29 @@ export default class Table extends HTMLElement {
 		this.#initialized = true;
 	}
 
-	buildCell = (row, index, isHeader) => {
+	buildCell = (data, index) => {
 		const element = document.createElement('div');
-		let content = document.createTextNode(row);
-		if (isHeader) {
-			content = document.createTextNode(`${row.name}`);
-		}
 		element.classList.add('cell');
-		if (isHeader) {
-			element.style.flex = row.size;
-		} else {
-			element.classList.add(this.getColumnType(index));
-			element.style.flex = this.getColumnSize(index);
-		}
+		element.classList.add(this.getColumnType(index));
+		element.style.flex = this.getColumnSize(index);
+		element.setAttribute('id', `cell-${index}`);
+		const render = this.getColumnRender(index);
+		element.innerHTML = render ? render(data) : data;
+		return element;
+	}
+
+	buildCellHeader = ({ name, size }, index) => {
+		const element = document.createElement('div');
+		const content = document.createTextNode(`${name}`);
+		element.classList.add('cell');
+		element.style.flex = size;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		return element;
 	}
 
 	buildRow = (row, index, isHeader) => {
-		const arr = Object.values(row);
+		const rowData = Object.values(row);
 		const element = document.createElement('div');
 		element.classList.add('row');
 		if (isHeader) {
@@ -333,7 +334,7 @@ export default class Table extends HTMLElement {
 			}
 		}
 
-		arr.map((a, i) => element.appendChild(this.buildCell(a, i, isHeader)));
+		rowData.map((a, i) => element.appendChild(isHeader ? this.buildCellHeader(a, i) : this.buildCell(a, i)));
 		return element;
 	}
 
@@ -355,8 +356,10 @@ export default class Table extends HTMLElement {
 		});
 	}
 
-	getColumnSize = (index) => this.columns[index].size || '1';
-	getColumnType = (index) => this.columns[index].type || 'string';
+	getColumn = (index) => this.columns[index];
+	getColumnRender = (index) => this.getColumn(index).render;
+	getColumnSize = (index) => this.getColumn(index).size || '1';
+	getColumnType = (index) => this.getColumn(index).type || 'string';
 
 	getCurrentRange = () => {
 		const offset = this.pageSize;
