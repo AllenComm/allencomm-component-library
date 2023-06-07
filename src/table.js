@@ -144,6 +144,7 @@ export default class Table extends HTMLElement {
 		try {
 			this._columns = newVal;
 			if (this._columns?.length > 0) {
+				this.#header.innerHTML = '';
 				this.#header.appendChild(this.buildRow(this._columns, -1, true));
 			}
 		} catch(err) {
@@ -272,7 +273,8 @@ export default class Table extends HTMLElement {
 		} else {
 			this.setAttribute('allow-selection', true);
 		}
-		this.columns = this.getAttribute('columns');
+		const columns = this.getAttribute('columns');
+		this.columns = columns ? JSON.parse(columns) : null;
 		if (page != null && !isNaN(page)) {
 			this.page = parseInt(page);
 		}
@@ -482,19 +484,9 @@ export default class Table extends HTMLElement {
 	}
 
 	updateFooter = () => {
-		if (parseInt(this.#footerCurrentPage.innerText) != this.page + 1) {
-			this.#footerCurrentPage.innerText = this.page + 1;
-		}
-		if (this.page > 0 && this.#footerPrevBtn.hasAttribute('disabled')) {
-			this.#footerPrevBtn.removeAttribute('disabled');
-		} else {
-			this.#footerPrevBtn.setAttribute('disabled', true);
-		}
-		if (this.page + 1 >= this.getTotalPages() && !this.#footerNextBtn.hasAttribute('disabled')) {
-			this.#footerNextBtn.setAttribute('disabled', true);
-		} else {
-			this.#footerNextBtn.removeAttribute('disabled');
-		}
+		this.#footerCurrentPage.innerText = this.page + 1;
+		this.#footerPrevBtn.disabled = this.page <= 0;
+		this.#footerNextBtn.disabled = this.page + 1 >= this.getTotalPages();
 		if (this.selected.length > 0) {
 			this.#footerSelectedNumber.innerText = this.selected.length;
 			this.#footerSelectedNumber.removeAttribute('hidden');
