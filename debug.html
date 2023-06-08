@@ -12,16 +12,20 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<ac-table
-					columns='[ { "name": "ID", "type": "int", "size": "1" }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ]'
-				>
-				</ac-table>
+				<ac-table></ac-table>
 			</section>
 		</main>
 		<script>
+			const handleIdClick = (e, data) => {
+				e.preventDefault(); 
+				e.stopPropagation();
+				console.log(e, data);
+			};
 			const init = async () => {
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
+				const columns = [ { "name": "ID", "type": "int", "size": "1", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ];
+				document.querySelector('ac-table').columns = columns; 
 				document.querySelector('ac-table').rows = jsonData;
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });
