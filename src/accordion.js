@@ -124,8 +124,12 @@ export default class Accordion extends HTMLElement {
 		const cur = target.getAttribute('aria-selected') === 'true';
 		if (!multiple) {
 			this.#buttons.forEach((a, i) => {
+				console.log('acc-id', a.id, 'target-id', target.id, 'a-get-attr', a.getAttribute('aria-selected'));
 				if (a.id !== target.id && a.getAttribute('aria-selected')) {
 					a.setAttribute('aria-selected', false);
+					this.#content[i].setAttribute('hidden', true);
+				} else if (a.id === target.id && a.getAttribute('aria-selected') === 'true') {
+					a.setAttribute('aria-selected', 'false');
 					this.#content[i].setAttribute('hidden', true);
 				} else {
 					target.setAttribute('aria-selected', true);
