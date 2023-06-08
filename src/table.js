@@ -317,9 +317,9 @@ export default class Table extends HTMLElement {
 
 		if (render) {
 			const el = document.createElement('span');
-			el.slot = `${rowIndex}-${cellIndex}`;
 			el.innerHTML = render(data);
-			this.shadowRoot.host.appendChild(el);
+			el.firstElementChild.slot = `${rowIndex}-${cellIndex}`;
+			this.shadowRoot.host.appendChild(el.firstElementChild);
 		}
 
 		return element;
@@ -373,6 +373,7 @@ export default class Table extends HTMLElement {
 
 		this.updateTotalPages();
 		this.updateFooter();
+		this.shadowRoot.host.innerHTML = '';
 		const range = this.getCurrentRange();
 		this.visibleRows.forEach((a, i) => {
 			this.shadowRoot.getElementById(`row-${i}`)?.remove();
