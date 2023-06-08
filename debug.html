@@ -17,15 +17,15 @@
 		</main>
 		<script>
 			const handleIdClick = (e, data) => {
-				e.preventDefault(); 
+				e.preventDefault();
 				e.stopPropagation();
 				console.log(e, data);
 			};
 			const init = async () => {
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
-				const columns = [ { "name": "ID", "type": "int", "size": "1", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ];
-				document.querySelector('ac-table').columns = columns; 
+				const columns = [ { "name": "ID", "type": "number", "flex": "0 0 40px", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "flex": "1 0 80%" }, { "name": "Company", "type": "string", "flex": "1 1" } ];
+				document.querySelector('ac-table').columns = columns;
 				document.querySelector('ac-table').rows = jsonData;
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });

@@ -1,3 +1,16 @@
+// TODO:
+// 	hide/show columns
+// 		columns need to support hidden by default
+// 		hide/show each column as a checkbox
+// 		menu to manage columns
+// 			can be built later
+// 		need at least one column visible
+// 	sorting
+// 		track sorting via columns
+// 		'descending' or 'ascending' or none
+// 	filtering
+// 		array of filters
+// 		each column has a filter array + sort info
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'page', 'page-size', 'rows'];
 
@@ -297,7 +310,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(this.getColumnType(index));
-		element.style.flex = this.getColumnSize(index);
+		element.style.flex = this.getColumnFlex(index);
 		element.setAttribute('id', `cell-${index}`);
 		const render = this.getColumnRender(index);
 		element.innerHTML = render ? render(data) : data;
@@ -365,7 +378,7 @@ export default class Table extends HTMLElement {
 
 	getColumn = (index) => this.columns[index];
 	getColumnRender = (index) => this.getColumn(index).render;
-	getColumnSize = (index) => this.getColumn(index).size || '1';
+	getColumnFlex = (index) => this.getColumn(index).flex || '1';
 	getColumnType = (index) => this.getColumn(index).type || 'string';
 
 	getCurrentRange = () => {
