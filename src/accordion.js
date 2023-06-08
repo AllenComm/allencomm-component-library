@@ -127,6 +127,9 @@ export default class Accordion extends HTMLElement {
 				if (a.id !== target.id && a.getAttribute('aria-selected')) {
 					a.setAttribute('aria-selected', false);
 					this.#content[i].setAttribute('hidden', true);
+				} else if (a.id === target.id && a.getAttribute('aria-selected') === 'true') {
+					a.setAttribute('aria-selected', 'false');
+					this.#content[i].setAttribute('hidden', true);
 				} else {
 					target.setAttribute('aria-selected', true);
 					this.#selected = i;
