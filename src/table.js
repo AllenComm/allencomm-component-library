@@ -288,14 +288,22 @@ export default class Table extends HTMLElement {
 		this.#initialized = true;
 	}
 
-	buildCell = (data, index) => {
+	buildCell = (data, cellIndex, rowIndex) => {
 		const element = document.createElement('div');
 		element.classList.add('cell');
-		element.classList.add(this.getColumnType(index));
-		element.style.flex = this.getColumnSize(index);
-		element.setAttribute('id', `cell-${index}`);
-		const render = this.getColumnRender(index);
-		element.innerHTML = render ? render(data) : data;
+		element.classList.add(this.getColumnType(cellIndex));
+		element.style.flex = this.getColumnSize(cellIndex);
+		element.setAttribute('id', `cell-${cellIndex}`);
+		const render = this.getColumnRender(cellIndex);
+		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : data;
+
+		if (render) {
+			const el = document.createElement('span');
+			el.slot = `${rowIndex}-${cellIndex}`;
+			el.innerHTML = render(data);
+			this.shadowRoot.host.appendChild(el);
+		}
+
 		return element;
 	}
 
@@ -336,7 +344,7 @@ export default class Table extends HTMLElement {
 			}
 		}
 
-		rowData.map((a, i) => element.appendChild(isHeader ? this.buildCellHeader(a, i) : this.buildCell(a, i)));
+		rowData.map((a, i) => element.appendChild(isHeader ? this.buildCellHeader(a, i, index) : this.buildCell(a, i, index)));
 		return element;
 	}
 

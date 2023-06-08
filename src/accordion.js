@@ -34,7 +34,6 @@ export default class Accordion extends HTMLElement {
 	get #content() { return this._content; }
 	get #multiple() { return this.getAttribute('multiple') === 'true' }
 
-
 	set #buttons(arr) { this._buttons = arr; }
 	set #content(arr) { this._content = arr; }
 	set #selected(newVal) {
