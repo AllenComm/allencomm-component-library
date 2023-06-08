@@ -129,6 +129,7 @@ export default class Table extends HTMLElement {
 		this._pageSize = 10;
 		this._rows = null;
 		this._selected = [];
+		this._visibleRows = null; // FYI: visible rows != rows rendered on page
 	}
 
 	get #allowSelection() { return this._allowSelection; }
@@ -230,6 +231,7 @@ export default class Table extends HTMLElement {
 		try {
 			this._rows = newVal;
 			if (this._rows?.length > 0) {
+				this.visibleRows = this.rowsFilter(this.rowsSort(this._rows));
 				if (this.#body.children.length > 0) {
 					[...this.#body.children].forEach((a) => a.remove());
 				}
@@ -243,6 +245,9 @@ export default class Table extends HTMLElement {
 
 	get selected() { return this._selected; }
 	set selected(newVal) { this._selected = newVal; }
+
+	get visibleRows() { return this._visibleRows; }
+	set visibleRows(newVal) { this._visibleRows = newVal; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (this.#initialized) {
@@ -345,7 +350,7 @@ export default class Table extends HTMLElement {
 		this.updateTotalPages();
 		this.updateFooter();
 		const range = this.getCurrentRange();
-		this.rows.forEach((a, i) => {
+		this.visibleRows.forEach((a, i) => {
 			this.shadowRoot.getElementById(`row-${i}`)?.remove();
 			if (i >= range.min && i < range.max) {
 				const el = this.buildRow(a, i, false);
@@ -449,6 +454,14 @@ export default class Table extends HTMLElement {
 		}
 		this.updateFooter();
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	}
+
+	rowsSort = (arr) => {
+		return arr;
+	}
+
+	rowsFilter = (arr) => {
+		return arr;
 	}
 
 	setNextPage = () => {
