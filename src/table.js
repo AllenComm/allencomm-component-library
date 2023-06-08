@@ -317,11 +317,11 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ name, size }, index) => {
+	buildCellHeader = ({ name, flex }, index) => {
 		const element = document.createElement('div');
 		const content = document.createTextNode(`${name}`);
 		element.classList.add('cell');
-		element.style.flex = size;
+		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		return element;

@@ -24,7 +24,7 @@
 			const init = async () => {
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
-				const columns = [ { "name": "ID", "type": "number", "flex": "0 0 40px", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "flex": "1 0 80%" }, { "name": "Company", "type": "string", "flex": "1 1" } ];
+				const columns = [ { "name": "ID", "type": "number", "flex": "0 0 40px", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "flex": "1 0 50%" }, { "name": "Company", "type": "string", "flex": "1 1" } ];
 				document.querySelector('ac-table').columns = columns;
 				document.querySelector('ac-table').rows = jsonData;
 			};
