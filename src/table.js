@@ -58,6 +58,18 @@ export default class Table extends HTMLElement {
 				.header:not(:empty) {
 					border-bottom: 1px solid black;
 				}
+				.header .cell[class*="sort"] {
+					justify-content: space-between;
+				}
+				.header .cell.sort-none:after {
+					content: '';
+				}
+				.header .cell.sort-ascending:after {
+					content: '\\2193';
+				}
+				.header .cell.sort-descending:after {
+					content: '\\2191';
+				}
 				.pages {
 					display: flex;
 				}
@@ -327,10 +339,11 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ display, flex }, index) => {
+	buildCellHeader = ({ display, flex, sort }, index) => {
 		const element = document.createElement('div');
 		const content = document.createTextNode(`${display}`);
 		element.classList.add('cell');
+		element.classList.add(`sort-${sort}`);
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
@@ -528,8 +541,9 @@ export default class Table extends HTMLElement {
 							return 1;
 						} else if (bb === null || !bb) {
 							return -1;
+						} else {
+							return 0;
 						}
-						return 0;
 					}
 				});
 			}
@@ -557,13 +571,17 @@ export default class Table extends HTMLElement {
 
 	toggleSort = (index) => {
 		const column = this.columns[index];
+		const el = [...this.#header.querySelector('.row').children][index + 1];
 		const currentSort = column.sort;
 		if (currentSort == this.ASC) {
 			column.sort = this.DES;
+			el.classList.replace(`sort-${this.ASC}`, `sort-${this.DES}`);
 		} else if (currentSort == this.DES) {
 			column.sort = this.NONE;
+			el.classList.replace(`sort-${this.DES}`, `sort-${this.NONE}`);
 		} else if (currentSort == this.NONE) {
 			column.sort = this.ASC;
+			el.classList.replace(`sort-${this.NONE}`, `sort-${this.ASC}`);
 		}
 		this.rows = this.rows.slice();
 	}
