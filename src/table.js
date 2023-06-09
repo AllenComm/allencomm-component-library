@@ -6,8 +6,7 @@
 // 			can be built later
 // 		need at least one column visible
 // 	sorting
-// 		track sorting via columns
-// 		'descending' or 'ascending' or none
+// 		which column takes prescedense?
 // 	filtering
 // 		array of filters
 // 		each column has a filter array + sort info
@@ -133,6 +132,9 @@ export default class Table extends HTMLElement {
 				</div>
 			</div>
 		`;
+		this.ASC = 'ascending';
+		this.DES = 'descending';
+		this.NONE = 'none';
 		this._allowSelection = true;
 		this._anchor = null;
 		this._columns = null;
@@ -325,13 +327,14 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ display = '', flex }, index) => {
+	buildCellHeader = ({ display, flex }, index) => {
 		const element = document.createElement('div');
 		const content = document.createTextNode(`${display}`);
 		element.classList.add('cell');
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
+		element.addEventListener('click', () => this.toggleSort(index));
 		return element;
 	}
 
@@ -492,7 +495,46 @@ export default class Table extends HTMLElement {
 	}
 
 	rowsSort = (arr) => {
-		return arr;
+		const newArr = arr.slice();
+		const sorts = this.columns.map((a) => a.sort);
+		sorts.forEach((sort, i) => {
+			if (sort != this.NONE) {
+				const type = this.columns[i].type;
+				const property = this.columns[i].property;
+				newArr.sort((a, b) => {
+					const aa = a[property];
+					const bb = b[property];
+					if (type === 'number') {
+						if (aa && bb) {
+							if (sort == this.ASC) {
+								return aa < bb ? -1 : 1;
+							}
+							return aa < bb ? 1 : -1;
+						} else if (!aa && !bb) {
+							return 0;
+						} else {
+							if (sort == this.ASC) {
+								return !aa ? -1 : 1;
+							}
+							return !aa ? 1 : -1;
+						}
+					} else if (type === 'string') {
+						if (aa && bb) {
+							if (sort == this.ASC) {
+								return aa.toLowerCase().localeCompare(bb.toLowerCase());
+							}
+							return bb.toLowerCase().localeCompare(aa.toLowerCase());
+						} else if (aa === null || !aa) {
+							return 1;
+						} else if (bb === null || !bb) {
+							return -1;
+						}
+						return 0;
+					}
+				});
+			}
+		});
+		return newArr;
 	}
 
 	rowsFilter = (arr) => {
@@ -512,6 +554,19 @@ export default class Table extends HTMLElement {
 	}
 
 	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
+
+	toggleSort = (index) => {
+		const column = this.columns[index];
+		const currentSort = column.sort;
+		if (currentSort == this.ASC) {
+			column.sort = this.DES;
+		} else if (currentSort == this.DES) {
+			column.sort = this.NONE;
+		} else if (currentSort == this.NONE) {
+			column.sort = this.ASC;
+		}
+		this.rows = this.rows.slice();
+	}
 
 	updateElement = (el) => {
 		const i = parseInt(el.id.match(/\d+/));
