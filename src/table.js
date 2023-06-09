@@ -1,12 +1,9 @@
 // TODO:
 // 	hide/show columns
-// 		columns need to support hidden by default
 // 		hide/show each column as a checkbox
 // 		menu to manage columns
 // 			can be built later
 // 		need at least one column visible
-// 	sorting
-// 		which column takes prescedense?
 // 	filtering
 // 		array of filters
 // 		each column has a filter array + sort info
@@ -150,13 +147,11 @@ export default class Table extends HTMLElement {
 		this._allowSelection = true;
 		this._anchor = null;
 		this._columns = null;
-		this._furthest = null;
 		this._initialized = false;
 		this._page = 0;
 		this._pageSize = 10;
 		this._rows = null;
 		this._selected = [];
-		this._visibleRows = null; // FYI: visible rows != rows rendered on page
 	}
 
 	get #allowSelection() { return this._allowSelection; }
@@ -190,9 +185,6 @@ export default class Table extends HTMLElement {
 	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
 	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
 
-	get #furthest() { return this._furthest; }
-	set #furthest(newVal) { this._furthest = newVal; }
-
 	get #header() { return this.shadowRoot.querySelector('.header'); }
 
 	get #initialized() { return this._initialized; }
@@ -208,50 +200,30 @@ export default class Table extends HTMLElement {
 	}
 
 	get pageSize() { return this._pageSize; }
+	
 	set pageSize(newVal) {
-		if (newVal != this._pageSize) {
-			this._pageSize = newVal;
-			const el = this.shadowRoot.querySelector('select');
-			const options = el?.options || [];
-			[...options].forEach((a) => {
-				const val = parseInt(a.innerHTML);
-				if (val === this._pageSize) {
-					el.setAttribute('selected', a.id);
-				}
-			});
-
-			const topEl = [...this.#body.childNodes][0] || {};
-			const topIndex = parseInt(topEl?.id?.match(/\d+/));
-			if (topEl && !isNaN(topIndex)) {
-				const range = this.getCurrentRange();
-				if (topIndex < range.min) {
-					const findPage = (page) => {
-						const offset = newVal;
-						const min = page * offset;
-						if (topIndex < min) {
-							return findPage(page - 1)
-						} else {
-							return page;
-						}
-					}
-					const newPage = findPage(this.page);
-					this.page = newPage;
-				} else if (topIndex > range.max) {
-					const findPage = (page) => {
-						const offset = newVal;
-						const max = (page + 1) * offset;
-						if (topIndex >= max) {
-							return findPage(page + 1)
-						} else {
-							return page;
-						}
-					}
-					const newPage = findPage(this.page);
-					this.page = newPage;
-				}
+		if (newVal === this._pageSize) return;
+		this._pageSize = newVal;
+		const el = this.shadowRoot.querySelector('select');
+		[...el?.options || []].forEach((a) => {
+			if (parseInt(a.innerHTML) === this._pageSize) {
+				el.setAttribute('selected', a.id);
 			}
-			this.forceRender();
+		});
+
+		const topEl = [...this.#body.childNodes][0] || {};
+		const topIndex = parseInt(topEl?.id?.match(/\d+/));
+		if (!topEl || isNaN(topIndex)) return;
+		const range = this.getCurrentRange();
+
+		if (topIndex < range.min || topIndex > range.max) {
+			const findPage = (page) => {
+				const border = topIndex < range.min ? page * newVal : (page + 1) * newVal;
+				return topIndex < border ? findPage(topIndex < range.min ? page - 1 : page + 1) : page;
+			}
+			this.page = findPage(this.page);
 		}
+		this.forceRender();
 	}
 
 	get rows() { return this._rows; }
@@ -259,10 +231,8 @@ export default class Table extends HTMLElement {
 		try {
 			this._rows = newVal;
 			if (this._rows?.length > 0) {
-				this.visibleRows = this.rowsFilter(this.rowsSort(this._rows));
-				if (this.#body.children.length > 0) {
-					[...this.#body.children].forEach((a) => a.remove());
-				}
+				this._rows = this.rowsFilter(this.rowsSort(this._rows));
+				this.#body.innerHTML = '';
 				this.forceRender();
 			}
 		} catch(err) {
@@ -274,25 +244,22 @@ export default class Table extends HTMLElement {
 	get selected() { return this._selected; }
 	set selected(newVal) { this._selected = newVal; }
 
-	get visibleRows() { return this._visibleRows; }
-	set visibleRows(newVal) { this._visibleRows = newVal; }
-
 	attributeChangedCallback(attr, oldVal, newVal) {
-		if (this.#initialized) {
-			switch(attr) {
-				case 'columns':
-					this.columns = JSON.parse(newVal);
-					break;
-				case 'page':
-					this.page = newVal;
-					break;
-				case 'page-size':
-					this.pageSize = newVal;
-					break;
-				case 'rows':
-					this.rows = JSON.parse(newVal);
-					break;
-			}
+		if (!this.#initialized) return;
+
+		switch(attr) {
+			case 'columns':
+				this.columns = JSON.parse(newVal);
+				break;
+			case 'page':
+				this.page = newVal;
+				break;
+			case 'page-size':
+				this.pageSize = newVal;
+				break;
+			case 'rows':
+				this.rows = JSON.parse(newVal);
+				break;
 		}
 	}
 
@@ -320,13 +287,16 @@ export default class Table extends HTMLElement {
 		this.#initialized = true;
 	}
 
-	buildCell = (data, cellIndex, rowIndex) => {
+	buildCell = (data, cellIndex, rowIndex, column) => {
+		if (column.hidden) return null;
+
 		const element = document.createElement('div');
 		element.classList.add('cell');
-		element.classList.add(this.getColumnType(cellIndex));
-		element.style.flex = this.getColumnFlex(cellIndex);
+		element.classList.add(column.type);
+		element.style.flex = column.flex || '1 1 100%';
+
 		element.setAttribute('id', `cell-${cellIndex}`);
-		const render = this.getColumnRender(cellIndex);
+		const render = column.render;
 		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : data;
 
 		if (render) {
@@ -339,80 +309,69 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ display, flex, sort }, index) => {
+	buildCellHeader = ({ display, flex, sort }, index, column) => {
+		if (column.hidden) return null;
+
 		const element = document.createElement('div');
 		const content = document.createTextNode(`${display}`);
-		element.classList.add('cell');
-		element.classList.add(`sort-${sort}`);
+		element.className = `cell sort-${sort}`;
+		element.setAttribute('data-property', column.property);
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
-		element.addEventListener('click', () => this.toggleSort(index));
+		element.addEventListener('click', () => this.toggleSort(column));
 		return element;
 	}
-
+	
 	buildRow = (row, index, isHeader) => {
-		let rowData = Object.values(row);
-		if (!isHeader) {
-			rowData = this.columns.map((a) => {
-				if (a?.property && row[a.property] != null) {
-					return row[a.property];
-				}
-				return null;
-			});
-		}
 		const element = document.createElement('div');
 		element.classList.add('row');
-		if (isHeader) {
-			element.setAttribute('id', 'row-header');
-		} else {
-			element.setAttribute('id', `row-${index}`);
-		}
+		element.id = isHeader ? 'row-header' : `row-${index}`;
 
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
-			selector.classList.add('cell');
-			selector.classList.add('selectable');
+			selector.className = 'cell selectable';
 			selector.style.flex = '0 0 20px';
 
 			const inner = document.createElement('input');
-			inner.setAttribute('type', 'checkbox');
-			selector.appendChild(inner);
-			element.appendChild(selector);
-			if (isHeader) {
-				inner.addEventListener('click', this.onSelectAllRows);
+			inner.type = 'checkbox';
+			inner.checked = row._selected;
+			element.ariaSelected = row._selected;
+
+			selector.append(inner);
+			element.append(selector);
+
+			if (!isHeader) {
+				element.addEventListener('click', (e) => this.onSelectRow(e, index));
 			} else {
-				element.addEventListener('click', this.onSelectRow);
+				inner.addEventListener('click', this.onSelectAllRows);
 			}
 		}
+		
+		const rowData = isHeader ? Object.values(row) : this.columns.map((a) => row[a?.property] ?? null);
+		const rowElements = rowData.map((data, i) => isHeader ? this.buildCellHeader(data, i, this.columns[i]) : this.buildCell(data, i, index, this.columns[i]));
+		rowElements.filter(Boolean).forEach(el => element.append(el));
 
-		rowData.map((a, i) => element.appendChild(isHeader ? this.buildCellHeader(a, i, index) : this.buildCell(a, i, index)));
 		return element;
 	}
 
 	forceRender = () => {
-		if (!this.#initialized) {
-			return;
-		}
+		if (!this.#initialized) return;
 
 		this.updateTotalPages();
 		this.updateFooter();
 		this.shadowRoot.host.innerHTML = '';
+		const isAllSelected = this._rows.every(a => a._selected);
+		this.#header.querySelector('input').checked = isAllSelected;
 		const range = this.getCurrentRange();
-		this.visibleRows.forEach((a, i) => {
-			this.shadowRoot.getElementById(`row-${i}`)?.remove();
-			if (i >= range.min && i < range.max) {
-				const el = this.buildRow(a, i, false);
-				this.updateElement(el);
+		this._rows.forEach((row, index) => {
+			this.shadowRoot.getElementById(`row-${index}`)?.remove();
+			if (index >= range.min && index < range.max) {
+				const el = this.buildRow(row, index, false);
 				this.#body.appendChild(el);
 			}
 		});
 	}
-
-	getColumn = (index) => this.columns[index];
-	getColumnRender = (index) => this.getColumn(index).render;
-	getColumnFlex = (index) => this.getColumn(index).flex || '1';
-	getColumnType = (index) => this.getColumn(index).type || 'string';
 
 	getCurrentRange = () => {
 		const offset = this.pageSize;
@@ -427,132 +386,54 @@ export default class Table extends HTMLElement {
 		}
 		return 0;
 	}
-
+	
 	onSelectAllRows = () => {
-		if (this.selected.length === this.rows.length) {
-			this.selected = [];
-			this.#header.querySelector('input').checked = false;
-		} else {
-			this.selected = this.rows.map((a, i) => i);
-			this.#header.querySelector('input').checked = true;
-		}
-		[...this.#body.children].forEach((a) => this.updateElement(a));
-		this.updateFooter();
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+		const isAllSelected = this._rows.every(a => a._selected);
+		this._rows.forEach(a => a._selected = !isAllSelected);
+		this.forceRender();
+		this.fireChangeEvent();
 	}
-
-	onSelectRow = (e) => {
-		const inRange = (i, x, y) => {
-			let min = x;
-			let max = y;
-			if (min > max) {
-				min = y;
-				max = x;
-			}
-			return i >= min && i <= max;
-		}
-
-		const getRow = (el) => {
-			if (el.classList.contains('row')) {
-				return el;
-			} else {
-				return getRow(el.parentElement);
-			}
-		}
-		const row = getRow(e.target);
-		const current = parseInt(row.id.match(/\d+/));
+	
+	onSelectRow = (e, index) => {
 		if (e.shiftKey) {
-			const anchor = this.#anchor;
-			let furthest = this.#furthest;
-			if (((furthest == null || furthest < current) && current > anchor) || ((furthest == null || furthest > current) && current < anchor)) {
-				furthest = current;
-				this.#furthest = current;
-			}
-
-			if (!isNaN(current) && !isNaN(anchor) && !isNaN(furthest)) {
-				this.rows.forEach((a, i) => {
-					const inCurrentRange = inRange(i, anchor, current);
-					const inFurthestRange  = inRange(i, furthest, current);
-					if (inCurrentRange) {
-						if (this.selected.indexOf(i) == -1) {
-							this.selected.push(i);
-						}
-					} else if (inFurthestRange && this.selected.indexOf(i) != -1) {
-						this.selected.splice(this.selected.indexOf(i), 1);
-					}
-
-					const el = this.shadowRoot.querySelector(`#row-${i}`);
-					if (el) {
-						this.updateElement(el);
-					}
-				});
-			}
+			const createRange = (start, end) => Array.from({length: end - start + 1}, (v, k) => k + start);
+			const selections = createRange(this.#anchor > index ? index : this.#anchor, this.#anchor > index ? this.#anchor : index);
+			selections.forEach(i => this._rows[i]._selected = true);
 		} else {
-			if (this.selected.indexOf(current) == -1) {
-				this.selected.push(current);
-			} else if (this.selected.indexOf(current) > -1) {
-				this.selected.splice(this.selected.indexOf(current), 1);
-			}
-			this.#anchor = current;
-			this.#furthest = null;
-			[...this.#body.children].forEach((a) => this.updateElement(a));
+			const row = this._rows[index];
+			this.#anchor = index;
+			row._selected = !row._selected;
 		}
-
-		if (this.selected.length === this.rows.length) {
-			this.#header.querySelector('input').checked = true;
-		} else {
-			this.#header.querySelector('input').checked = false;
-		}
-		this.updateFooter();
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+		this.forceRender();
+		this.fireChangeEvent();
 	}
+	
+	rowsSort = (r) => {
+		const rows = [...r];
+		this.columns.map((col) => col.sort).forEach((sort, i) => {
+			if (sort == this.NONE) return;
 
-	rowsSort = (arr) => {
-		const newArr = arr.slice();
-		const sorts = this.columns.map((a) => a.sort);
-		sorts.forEach((sort, i) => {
-			if (sort != this.NONE) {
-				const type = this.columns[i].type;
-				const property = this.columns[i].property;
-				newArr.sort((a, b) => {
-					const aa = a[property];
-					const bb = b[property];
-					if (type === 'number') {
-						if (aa && bb) {
-							if (sort == this.ASC) {
-								return aa < bb ? -1 : 1;
-							}
-							return aa < bb ? 1 : -1;
-						} else if (!aa && !bb) {
-							return 0;
-						} else {
-							if (sort == this.ASC) {
-								return !aa ? -1 : 1;
-							}
-							return !aa ? 1 : -1;
-						}
-					} else if (type === 'string') {
-						if (aa && bb) {
-							if (sort == this.ASC) {
-								return aa.toLowerCase().localeCompare(bb.toLowerCase());
-							}
-							return bb.toLowerCase().localeCompare(aa.toLowerCase());
-						} else if (aa === null || !aa) {
-							return 1;
-						} else if (bb === null || !bb) {
-							return -1;
-						} else {
-							return 0;
-						}
-					}
-				});
-			}
+			const { type, property } = this.columns[i];
+			rows.sort((a, b) => {
+				const aa = a[property]; 
+				const bb = b[property];
+				if (aa == null && bb == null) return 0;
+				if (aa == null || bb == null) return aa == null ? -1 : 1;
+
+				let result = 0;
+				if (type === 'number') {
+					result = aa < bb ? -1 : 1;
+				} else if (type === 'string') {
+					result = aa.toLowerCase().localeCompare(bb.toLowerCase());
+				}
+				return sort == this.ASC ? result : -result;
+			});
 		});
-		return newArr;
+		return rows;
 	}
 
-	rowsFilter = (arr) => {
-		return arr;
+	rowsFilter = (rows) => {
+		return rows;
 	}
 
 	setNextPage = () => {
@@ -568,56 +449,35 @@ export default class Table extends HTMLElement {
 	}
 
 	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
-
-	toggleSort = (index) => {
-		const column = this.columns[index];
-		const el = [...this.#header.querySelector('.row').children][index + 1];
-		const currentSort = column.sort;
-		if (currentSort == this.ASC) {
-			column.sort = this.DES;
-			el.classList.replace(`sort-${this.ASC}`, `sort-${this.DES}`);
-		} else if (currentSort == this.DES) {
-			column.sort = this.NONE;
-			el.classList.replace(`sort-${this.DES}`, `sort-${this.NONE}`);
-		} else if (currentSort == this.NONE) {
-			column.sort = this.ASC;
-			el.classList.replace(`sort-${this.NONE}`, `sort-${this.ASC}`);
-		}
-		this.rows = this.rows.slice();
+	
+	toggleSort = (column) => {
+		const headerCell = this.#header.querySelector(`.row > .cell[data-property="${column.property}"]`);
+		const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
+		const sortCycle = { [this.NONE]: this.ASC, [this.ASC]: this.DES, [this.DES]: this.NONE };
+		
+		this.#anchor = null;
+		cells.forEach(a => a.className = `cell`);
+		const newSort = sortCycle[column.sort];
+		this.columns.forEach(a => a.sort = this.NONE);
+		column.sort = newSort;
+		headerCell.classList.add(`sort-${newSort}`);
+		this.rows = [...this._rows];
+		this.fireChangeEvent();
 	}
-
-	updateElement = (el) => {
-		const i = parseInt(el.id.match(/\d+/));
-		const selector = [...el.children].find((a) => a.classList.contains('selectable'));
-		const input = [...selector.children][0];
-		if (this.selected.indexOf(i) > -1) {
-			el.setAttribute('aria-selected', true);
-			input.checked = true;
-		} else {
-			el.setAttribute('aria-selected', false);
-			input.checked = false;
-		}
-	}
-
+	
 	updateFooter = () => {
+		const selectedCount = this.selected.length;
+		const totalPages = this.getTotalPages();
+
 		this.#footerCurrentPage.innerText = this.page + 1;
 		this.#footerPrevBtn.disabled = this.page <= 0;
-		this.#footerNextBtn.disabled = this.page + 1 >= this.getTotalPages();
-		if (this.selected.length > 0) {
-			this.#footerSelectedNumber.innerText = this.selected.length;
-			this.#footerSelectedNumber.removeAttribute('hidden');
-			if (this.selected.length > 1) {
-				this.#footerSelectedMulti.removeAttribute('hidden');
-				this.#footerSelectedSingle.setAttribute('hidden', true);
-			} else {
-				this.#footerSelectedSingle.removeAttribute('hidden');
-				this.#footerSelectedMulti.setAttribute('hidden', true);
-			}
-		} else {
-			this.#footerSelectedMulti.setAttribute('hidden', true);
-			this.#footerSelectedNumber.setAttribute('hidden', true);
-			this.#footerSelectedSingle.setAttribute('hidden', true);
-		}
+		this.#footerNextBtn.disabled = this.page + 1 >= totalPages;
+
+		const hidden = selectedCount === 0;
+		this.#footerSelectedNumber.innerText = hidden ? '' : selectedCount;
+		this.#footerSelectedNumber.hidden = hidden;
+		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
+		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
 	}
 
 	updateTotalPages = () => {
@@ -625,6 +485,10 @@ export default class Table extends HTMLElement {
 		if (currentTotal != this.getTotalPages()) {
 			this.#footerTotalPages.innerText = this.getTotalPages();
 		}
+	}
+
+	fireChangeEvent = () => {
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 	}
 }
 
