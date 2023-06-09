@@ -310,7 +310,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(this.getColumnType(cellIndex));
-		element.style.flex = this.getColumnSize(cellIndex);
+		element.style.flex = this.getColumnFlex(cellIndex);
 		element.setAttribute('id', `cell-${cellIndex}`);
 		const render = this.getColumnRender(cellIndex);
 		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : data;
@@ -325,9 +325,9 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ name, flex }, index) => {
+	buildCellHeader = ({ display = '', flex }, index) => {
 		const element = document.createElement('div');
-		const content = document.createTextNode(`${name}`);
+		const content = document.createTextNode(`${display}`);
 		element.classList.add('cell');
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
@@ -336,7 +336,15 @@ export default class Table extends HTMLElement {
 	}
 
 	buildRow = (row, index, isHeader) => {
-		const rowData = Object.values(row);
+		let rowData = Object.values(row);
+		if (!isHeader) {
+			rowData = this.columns.map((a) => {
+				if (a?.property && row[a.property] != null) {
+					return row[a.property];
+				}
+				return null;
+			});
+		}
 		const element = document.createElement('div');
 		element.classList.add('row');
 		if (isHeader) {

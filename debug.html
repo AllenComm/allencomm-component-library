@@ -29,13 +29,8 @@
 			const init = async () => {
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
-<<<<<<< HEAD
-				const columns = [ { "name": "ID", "type": "number", "flex": "0 0 40px", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "flex": "1 0 50%" }, { "name": "Company", "type": "string", "flex": "1 1" } ];
+				const columns = [ { "display": "ID", "property": "id", "type": "number", "flex": "0 0 40px", render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "display": "Name", "property": "name", "type": "string", "flex": "1 0 50%" }, { "display": "Company", "property": "company", "type": "string", "flex": "1 1" } ];
 				document.querySelector('ac-table').columns = columns;
-=======
-				const columns = [ { "name": "ID", "type": "int", "size": "1", render: (data) => `<a class="id-btn" href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` }, { "name": "Name", "type": "string", "size": "2" }, { "name": "Company", "type": "string", "size": "3" } ];
-				document.querySelector('ac-table').columns = columns; 
->>>>>>> 31c1f6d16faf11a2d6adcc82cb10d913c4c84f7d
 				document.querySelector('ac-table').rows = jsonData;
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });
