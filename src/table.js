@@ -1,9 +1,4 @@
 // TODO:
-// 	hide/show columns
-// 		hide/show each column as a checkbox
-// 		menu to manage columns
-// 			can be built later
-// 		need at least one column visible
 // 	filtering
 // 		array of filters
 // 		each column has a filter array + sort info
@@ -30,13 +25,12 @@ export default class Table extends HTMLElement {
 					flex-direction: column;
 				}
 				.cell {
-					border-left: 1px solid black;
 					display: flex;
 					flex: 1;
 					padding: 5px;
 				}
-				.cell:last-child {
-					border-right: 1px solid black;
+				.cell:not(:first-child) {
+					border-left: 1px solid black;
 				}
 				.footer:not(:empty) {
 					border-top: 1px solid black;
@@ -51,6 +45,9 @@ export default class Table extends HTMLElement {
 				.footer-inner:first-child {
 					flex: 3;
 					justify-content: flex-start;
+				}
+				.header {
+					font-weight: bold;
 				}
 				.header:not(:empty) {
 					border-bottom: 1px solid black;
@@ -81,8 +78,6 @@ export default class Table extends HTMLElement {
 					border-top: 1px solid black;
 				}
 				#row-footer {
-					border-left: 1px solid black;
-					border-right: 1px solid black;
 					justify-content: space-between;
 					padding: 5px;
 					place-items: center;
@@ -99,8 +94,7 @@ export default class Table extends HTMLElement {
 					pointer-events: none;
 				}
 				.table {
-					border-bottom: 1px solid black;
-					border-top: 1px solid black;
+					border: 1px solid black;
 				}
 			</style>
 			<div class='table'>
@@ -116,10 +110,10 @@ export default class Table extends HTMLElement {
 						<div class='footer-inner'>
 							<span style='font-size: 11px; place-self: center;'>Rows per page:</span>
 							<select id='page-size'>
-								<option>10</option>
-								<option>25</option>
-								<option>50</option>
-								<option>100</option>
+								<option value='10'>10</option>
+								<option value='25'>25</option>
+								<option value='50'>50</option>
+								<option value='100'>100</option>
 							</select>
 						</div>
 						<div class='footer-inner'>
@@ -139,6 +133,7 @@ export default class Table extends HTMLElement {
 						</div>
 					</div>
 				</div>
+				<div id='column-visibility-popup'></div>
 			</div>
 		`;
 		this.ASC = 'ascending';
@@ -151,7 +146,6 @@ export default class Table extends HTMLElement {
 		this._page = 0;
 		this._pageSize = 10;
 		this._rows = null;
-		this._selected = [];
 	}
 
 	get #allowSelection() { return this._allowSelection; }
@@ -176,6 +170,7 @@ export default class Table extends HTMLElement {
 		}
 	}
 
+	get #columnVisibilityPopup() { return this.shadowRoot.querySelector('#column-visibility-popup'); }
 	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
 	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
 	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
@@ -241,8 +236,7 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	get selected() { return this._selected; }
-	set selected(newVal) { this._selected = newVal; }
+	get selected() { return this._rows?.filter(a => a._selected ) || []; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (!this.#initialized) return;
@@ -360,6 +354,7 @@ export default class Table extends HTMLElement {
 
 		this.updateTotalPages();
 		this.updateFooter();
+		this.updateVisibilityPopup();
 		this.shadowRoot.host.innerHTML = '';
 		const isAllSelected = this._rows.every(a => a._selected);
 		this.#header.querySelector('input').checked = isAllSelected;
@@ -464,6 +459,26 @@ export default class Table extends HTMLElement {
 		this.rows = [...this._rows];
 		this.fireChangeEvent();
 	}
+
+	updateVisibilityPopup = () => {
+		this.#columnVisibilityPopup.innerHTML = '';
+		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
+
+		this.columns.forEach((col, index) => {
+			const wrapper = document.createElement('div');
+			wrapper.innerHTML = `
+				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
+				<label for='vis-${col.property}'>${col.display}</label>
+			`;
+			wrapper.querySelector('input').addEventListener('change', (e) => {
+				const columns = [ ...this.columns ];
+				columns[index].hidden = !e.target.checked;
+				this.columns = columns;
+				this.forceRender();
+			});
+			this.#columnVisibilityPopup.appendChild(wrapper);
+		});
+	}
 	
 	updateFooter = () => {
 		const selectedCount = this.selected.length;
@@ -478,6 +493,8 @@ export default class Table extends HTMLElement {
 		this.#footerSelectedNumber.hidden = hidden;
 		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
 		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
+
+		this.#footerPageSize.value = this.pageSize;
 	}
 
 	updateTotalPages = () => {
