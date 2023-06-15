@@ -52,19 +52,38 @@ export default class Table extends HTMLElement {
 				.header:not(:empty) {
 					border-bottom: 1px solid black;
 				}
+				.header .cell {
+					position: relative;
+				}
 				.header .cell[class*="sort"] {
 					justify-content: space-between;
 				}
 				.header .cell.sort-none:after {
 					content: '';
 				}
-				.header .cell.sort-ascending:after {
+				.header .cell.sort-ascending > span:after {
 					content: '\\2193';
 				}
-				.header .cell.sort-descending:after {
+				.header .cell.sort-descending > span:after {
 					content: '\\2191';
 				}
+				.header .cell > button {
+					position: absolute;
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+				}
 				.pages {
+					display: flex;
+				}
+				.popup {
+					background-color: white;
+					display: none;
+					left: 0;
+					position: absolute;
+					top: 0;
+				}
+				.popup.visible {
 					display: flex;
 				}
 				.row {
@@ -95,6 +114,7 @@ export default class Table extends HTMLElement {
 				}
 				.table {
 					border: 1px solid black;
+					position: relative;
 				}
 			</style>
 			<div class='table'>
@@ -133,7 +153,14 @@ export default class Table extends HTMLElement {
 						</div>
 					</div>
 				</div>
-				<div id='column-visibility-popup'></div>
+				<div id='popup' class='popup'>
+					<button id='sort-asc-btn'>Sort ASC</button>
+					<button id='sort-desc-btn'>Sort DESC</button>
+					<button id='filter-btn'>Filter</button>
+					<button id='manage-columns-btn'>Manage Columns</button>
+				</div>
+				<div id='visibility-popup' class='popup'></div>
+				<div id='filter-popup' class='popup'></div>
 			</div>
 		`;
 		this.ASC = 'ascending';
@@ -170,7 +197,9 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	get #columnVisibilityPopup() { return this.shadowRoot.querySelector('#column-visibility-popup'); }
+	get #popup() { return this.shadowRoot.querySelector('#popup'); }
+	get #visibilityPopup() { return this.shadowRoot.querySelector('#visibility-popup'); }
+	get #filterPopup() { return this.shadowRoot.querySelector('#filter-popup'); }
 	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
 	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
 	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
@@ -277,8 +306,18 @@ export default class Table extends HTMLElement {
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
+		this.#popup.addEventListener('click', (e) => e.stopPropagation());
+		this.#visibilityPopup.addEventListener('click', (e) => e.stopPropagation());
+		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onManageColumnsClick);
+		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
+		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
+		document.addEventListener('click', this.onClickOutside);
 		this.updateFooter();
 		this.#initialized = true;
+	}
+
+	disconnectedCallback() {
+		document.removeEventListener('click', this.onClickOutside);
 	}
 
 	buildCell = (data, cellIndex, rowIndex, column) => {
@@ -303,17 +342,22 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ display, flex, sort }, index, column) => {
+	buildCellHeader = ({ display, flex, sort, type }, index, column) => {
 		if (column.hidden) return null;
 
 		const element = document.createElement('div');
-		const content = document.createTextNode(`${display}`);
+		const content = document.createElement('span');
+		content.textContent = display;
 		element.className = `cell sort-${sort}`;
 		element.setAttribute('data-property', column.property);
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
+		const button = document.createElement('button');
+		button.textContent = '\u1392';
+		button.addEventListener('click', (e) => this.onSelectHeaderButton(e, column));
+		element.appendChild(button);
 		return element;
 	}
 	
@@ -381,6 +425,30 @@ export default class Table extends HTMLElement {
 		}
 		return 0;
 	}
+
+	onClickOutside = (e) => {
+		const checkClick = (el) => {
+			const isPopupVisible = el.classList.contains('visible');
+			const isClickedOutside = !el.contains(e.target);
+			if (isPopupVisible && isClickedOutside) {
+				el.classList.remove('visible');
+			}
+		};
+		checkClick(this.#popup);
+		checkClick(this.#visibilityPopup);
+	}
+
+	onManageColumnsClick = (e) => {
+		this.#popup.classList.remove('visible');
+		this.#visibilityPopup.classList.add('visible');
+	}
+
+	onSelectHeaderButton = (e, col) => {
+		e.stopPropagation();
+		this.currentColumn = col;
+		this.hidePopups();
+		this.#popup.classList.add('visible');
+	}
 	
 	onSelectAllRows = () => {
 		const isAllSelected = this._rows.every(a => a._selected);
@@ -402,6 +470,8 @@ export default class Table extends HTMLElement {
 		this.forceRender();
 		this.fireChangeEvent();
 	}
+
+	hidePopups = () =>	this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
 	
 	rowsSort = (r) => {
 		const rows = [...r];
@@ -445,6 +515,22 @@ export default class Table extends HTMLElement {
 
 	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
 	
+	sortColumn = (dir) => {
+		if (this.currentColumn) {
+			const headerCell = this.#header.querySelector(`.row > .cell[data-property="${this.currentColumn.property}"]`);
+			const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
+			
+			this.#anchor = null;
+			cells.forEach(a => a.className = `cell`);
+			this.columns.forEach(a => a.sort = this.NONE);
+			this.currentColumn.sort = dir;
+			headerCell.classList.add(`sort-${dir}`);
+			this.rows = [...this._rows];
+			this.fireChangeEvent();
+			this.hidePopups();
+		}
+	}
+
 	toggleSort = (column) => {
 		const headerCell = this.#header.querySelector(`.row > .cell[data-property="${column.property}"]`);
 		const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
@@ -460,8 +546,14 @@ export default class Table extends HTMLElement {
 		this.fireChangeEvent();
 	}
 
+	updateFilterPopup = (e, type) => {
+		e.stopPropagation();
+		this.#filterPopup.innerHTML = '';
+		console.log(type);
+	}
+
 	updateVisibilityPopup = () => {
-		this.#columnVisibilityPopup.innerHTML = '';
+		this.#visibilityPopup.innerHTML = '';
 		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
 
 		this.columns.forEach((col, index) => {
@@ -476,7 +568,7 @@ export default class Table extends HTMLElement {
 				this.columns = columns;
 				this.forceRender();
 			});
-			this.#columnVisibilityPopup.appendChild(wrapper);
+			this.#visibilityPopup.appendChild(wrapper);
 		});
 	}
 	
