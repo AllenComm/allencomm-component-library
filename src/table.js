@@ -79,9 +79,11 @@ export default class Table extends HTMLElement {
 				.popup {
 					background-color: white;
 					display: none;
+					flex-direction: column;
 					left: 0;
 					position: absolute;
-					top: 0;
+					top: 32px;
+					transform: translateX(-100%);
 				}
 				.popup.visible {
 					display: flex;
@@ -114,7 +116,6 @@ export default class Table extends HTMLElement {
 				}
 				.table {
 					border: 1px solid black;
-					position: relative;
 				}
 			</style>
 			<div class='table'>
@@ -447,6 +448,11 @@ export default class Table extends HTMLElement {
 		e.stopPropagation();
 		this.currentColumn = col;
 		this.hidePopups();
+		const rect = e.target.getBoundingClientRect();
+		this.#popup.style.left = `${rect.left + rect.width}px`;
+		this.#popup.style.top = `${rect.top + rect.height}px`;
+		this.#visibilityPopup.style.left = `${rect.left + rect.width}px`;
+		this.#visibilityPopup.style.top = `${rect.top + rect.height}px`;
 		this.#popup.classList.add('visible');
 	}
 	
