@@ -1,9 +1,8 @@
-// TODO:
-// 	filtering
-// 		array of filters
-// 		each column has a filter array + sort info
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'page', 'page-size', 'rows'];
+
+	#anchor = null;
+	#initialized = false;
 
 	constructor() {
 		super();
@@ -31,6 +30,18 @@ export default class Table extends HTMLElement {
 				}
 				.cell:not(:first-child) {
 					border-left: 1px solid black;
+				}
+				.filter {
+					display: flex;
+				}
+				.filter[data-type="string"] .number {
+					display: none;
+				}
+				.filter[data-type="number"] .string {
+					display: none;
+				}
+				#filter-popup .filter:first-child .filter-and-or {
+					visibility: hidden;
 				}
 				.footer:not(:empty) {
 					border-top: 1px solid black;
@@ -67,11 +78,16 @@ export default class Table extends HTMLElement {
 				.header .cell.sort-descending > span:after {
 					content: '\\2193';
 				}
+				.header .cell:hover > button {
+					opacity: 1;
+				}
 				.header .cell > button {
+					opacity: 0;
 					position: absolute;
 					right: 0;
 					top: 50%;
 					transform: translateY(-50%);
+					transition: opacity .2s ease;
 				}
 				.pages {
 					display: flex;
@@ -163,25 +179,47 @@ export default class Table extends HTMLElement {
 				<div id='visibility-popup' class='popup'></div>
 				<div id='filter-popup' class='popup'></div>
 			</div>
+			<template id='filter-template'>
+				<div class='filter'>
+					<button class='filter-remove-btn'>X</button>
+					<select class='filter-and-or'>
+						<option value='&&'>And</option>
+						<option value='||'>Or</option>
+					</select>
+					<select class='filter-column'></select>
+					<select class='filter-operator number'>
+						<option value='='>=</option>
+						<option value='!='>!=</option>
+						<option value='>'>&gt;</option>
+						<option value='>='>&gt;=</option>
+						<option value='<'>&lt;</option>
+						<option value='<='>&lt;=</option>
+						<option value='empty'>Is Empty</option>
+						<option value='not_empty'>Is Not Empty</option>
+					</select>
+					<select class='filter-operator string'>
+						<option value='contains'>contains</option>
+						<option value='equals'>equals</option>
+						<option value='starts_with'>starts with</option>
+						<option value='ends_with'>ends with</option>
+						<option value='empty'>Is Empty</option>
+						<option value='not_empty'>Is Not Empty</option>
+					</select>
+					<input class='filter-input number' type='number'></input>
+					<input class='filter-input string' type='text'></input>
+				</filter>
+			</template>
 		`;
 		this.ASC = 'ascending';
 		this.DES = 'descending';
 		this.NONE = 'none';
-		this._allowSelection = true;
-		this._anchor = null;
 		this._columns = null;
-		this._initialized = false;
 		this._page = 0;
 		this._pageSize = 10;
 		this._rows = null;
 	}
 
-	get #allowSelection() { return this._allowSelection; }
-	set #allowSelection(newVal) { this._allowSelection = newVal; }
-
-	get #anchor() { return this._anchor; }
-	set #anchor(newVal) { this._anchor = newVal; }
-
+	get #allowSelection() { return this.getAttribute('allow-selection') === 'true'; }
 	get #body() { return this.shadowRoot.querySelector('.body'); }
 
 	get columns() { return this._columns; }
@@ -209,11 +247,7 @@ export default class Table extends HTMLElement {
 	get #footerSelectedNumber() { return this.shadowRoot.querySelector('#selected-number'); }
 	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
 	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
-
 	get #header() { return this.shadowRoot.querySelector('.header'); }
-
-	get #initialized() { return this._initialized; }
-	set #initialized(newVal) { this._initialized = newVal; }
 
 	get page() { return this._page; }
 	set page(newVal) {
@@ -225,7 +259,6 @@ export default class Table extends HTMLElement {
 	}
 
 	get pageSize() { return this._pageSize; }
-	
 	set pageSize(newVal) {
 		if (newVal === this._pageSize) return;
 		this._pageSize = newVal;
@@ -288,14 +321,8 @@ export default class Table extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const allowSelection = this.getAttribute('allow-selection');
 		const page = this.getAttribute('page');
 		const pageSize = parseInt(this.getAttribute('page-size'));
-		if (allowSelection != null) {
-			this.#allowSelection = allowSelection;
-		} else {
-			this.setAttribute('allow-selection', true);
-		}
 		const columns = this.getAttribute('columns');
 		this.columns = columns ? JSON.parse(columns) : null;
 		if (page != null && !isNaN(page)) {
@@ -309,12 +336,14 @@ export default class Table extends HTMLElement {
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
 		this.#popup.addEventListener('click', (e) => e.stopPropagation());
 		this.#visibilityPopup.addEventListener('click', (e) => e.stopPropagation());
+		this.#filterPopup.addEventListener('click', (e) => e.stopPropagation());
 		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onManageColumnsClick);
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
+		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
 		document.addEventListener('click', this.onClickOutside);
-		this.updateFooter();
 		this.#initialized = true;
+		this.forceRender();
 	}
 
 	disconnectedCallback() {
@@ -343,12 +372,12 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ display, flex, sort, type }, index, column) => {
+	buildCellHeader = ({ name, flex, sort, type }, index, column) => {
 		if (column.hidden) return null;
 
 		const element = document.createElement('div');
 		const content = document.createElement('span');
-		content.textContent = display;
+		content.textContent = name;
 		element.className = `cell sort-${sort}`;
 		element.setAttribute('data-property', column.property);
 		element.style.flex = flex;
@@ -394,16 +423,20 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
+	fireChangeEvent = () => this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+
 	forceRender = () => {
-		if (!this.#initialized) return;
+		if (!this.#initialized || !this._rows || !this._columns) return;
 
 		this.updateTotalPages();
 		this.updateFooter();
 		this.updateVisibilityPopup();
 		this.shadowRoot.host.innerHTML = '';
 		const isAllSelected = this._rows.every(a => a._selected);
-		this.#header.querySelector('input').checked = isAllSelected;
 		const range = this.getCurrentRange();
+		if (this.#allowSelection) {
+			this.#header.querySelector('input').checked = isAllSelected;
+		}
 		this._rows.forEach((row, index) => {
 			this.shadowRoot.getElementById(`row-${index}`)?.remove();
 			if (index >= range.min && index < range.max) {
@@ -427,6 +460,8 @@ export default class Table extends HTMLElement {
 		return 0;
 	}
 
+	hidePopups = () =>	this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
+
 	onClickOutside = (e) => {
 		const checkClick = (el) => {
 			const isPopupVisible = el.classList.contains('visible');
@@ -437,6 +472,13 @@ export default class Table extends HTMLElement {
 		};
 		checkClick(this.#popup);
 		checkClick(this.#visibilityPopup);
+		checkClick(this.#filterPopup);
+	}
+
+	onFilterClick = () => {
+		this.#popup.classList.remove('visible');
+		this.updateFilterPopup();
+		this.#filterPopup.classList.add('visible');
 	}
 
 	onManageColumnsClick = (e) => {
@@ -453,6 +495,8 @@ export default class Table extends HTMLElement {
 		this.#popup.style.top = `${rect.top + rect.height}px`;
 		this.#visibilityPopup.style.left = `${rect.left + rect.width}px`;
 		this.#visibilityPopup.style.top = `${rect.top + rect.height}px`;
+		this.#filterPopup.style.left = `${rect.left + rect.width}px`;
+		this.#filterPopup.style.top = `${rect.top + rect.height}px`;
 		this.#popup.classList.add('visible');
 	}
 	
@@ -476,8 +520,6 @@ export default class Table extends HTMLElement {
 		this.forceRender();
 		this.fireChangeEvent();
 	}
-
-	hidePopups = () =>	this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
 	
 	rowsSort = (r) => {
 		const rows = [...r];
@@ -544,30 +586,33 @@ export default class Table extends HTMLElement {
 		this.sortColumn(newSort);
 	}
 
-	updateFilterPopup = (e, type) => {
-		e.stopPropagation();
-		this.#filterPopup.innerHTML = '';
-		console.log(type);
-	}
+	updateFilterPopup = () => {
+		const addFilter = () => {
+			const template = this.shadowRoot.querySelector('#filter-template');
+			const clone = template.content.cloneNode(true);
+			const columnSelect = clone.querySelector('.filter-column');
+			const onColumnChange = (el, type) => el.setAttribute('data-type', type);
+			columnSelect.innerHTML = '';
 
-	updateVisibilityPopup = () => {
-		this.#visibilityPopup.innerHTML = '';
-		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
-
-		this.columns.forEach((col, index) => {
-			const wrapper = document.createElement('div');
-			wrapper.innerHTML = `
-				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
-				<label for='vis-${col.property}'>${col.display}</label>
-			`;
-			wrapper.querySelector('input').addEventListener('change', (e) => {
-				const columns = [ ...this.columns ];
-				columns[index].hidden = !e.target.checked;
-				this.columns = columns;
-				this.forceRender();
+			this._columns.forEach(col => {
+				const option = document.createElement('option');
+				option.textContent = col.name;
+				option.value = col.type;
+				columnSelect.appendChild(option);
 			});
-			this.#visibilityPopup.appendChild(wrapper);
-		});
+
+			columnSelect.addEventListener('change', (e) => {
+				const target = e.target;
+				const type = target.value;
+				const parent = target.parentElement;
+				onColumnChange(parent, type);
+			});
+
+			onColumnChange(clone.querySelector('.filter'), columnSelect.value);
+			this.#filterPopup.appendChild(clone);
+		};
+		addFilter();
+		console.log(`TODO: setup filters object, add filters based on filter object`);
 	}
 	
 	updateFooter = () => {
@@ -594,8 +639,26 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	fireChangeEvent = () => {
-		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	updateVisibilityPopup = () => {
+		if (!this.columns) return;
+
+		this.#visibilityPopup.innerHTML = '';
+		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
+
+		this.columns.forEach((col, index) => {
+			const wrapper = document.createElement('div');
+			wrapper.innerHTML = `
+				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
+				<label for='vis-${col.property}'>${col.name}</label>
+			`;
+			wrapper.querySelector('input').addEventListener('change', (e) => {
+				const columns = [ ...this.columns ];
+				columns[index].hidden = !e.target.checked;
+				this.columns = columns;
+				this.forceRender();
+			});
+			this.#visibilityPopup.appendChild(wrapper);
+		});
 	}
 }
 

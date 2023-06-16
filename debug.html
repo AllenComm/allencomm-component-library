@@ -17,7 +17,7 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<ac-table page-size="25"></ac-table>
+				<ac-table page-size="10" allow-selection="true"></ac-table>
 			</section>
 		</main>
 		<script>
@@ -30,9 +30,9 @@
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
 				const columns = [
-					{ "display": "ID", "property": "id", "type": "number", "flex": "0 0 40px", "sort": "descending", "filter": [], "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
-					{ "display": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "filter": [], "hidden": false },
-					{ "display": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "filter": [], "hidden": false }
+					{ "name": "ID", "property": "id", "type": "number", "flex": "0 0 40px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
+					{ "name": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false },
+					{ "name": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false }
 				];
 				document.querySelector('ac-table').columns = columns;
 				document.querySelector('ac-table').rows = jsonData;
