@@ -62,10 +62,10 @@ export default class Table extends HTMLElement {
 					content: '';
 				}
 				.header .cell.sort-ascending > span:after {
-					content: '\\2193';
+					content: '\\2191';
 				}
 				.header .cell.sort-descending > span:after {
-					content: '\\2191';
+					content: '\\2193';
 				}
 				.header .cell > button {
 					position: absolute;
@@ -497,7 +497,7 @@ export default class Table extends HTMLElement {
 				} else if (type === 'string') {
 					result = aa.toLowerCase().localeCompare(bb.toLowerCase());
 				}
-				return sort == this.ASC ? result : -result;
+				return sort == this.DES ? result : -result;
 			});
 		});
 		return rows;
@@ -538,18 +538,10 @@ export default class Table extends HTMLElement {
 	}
 
 	toggleSort = (column) => {
-		const headerCell = this.#header.querySelector(`.row > .cell[data-property="${column.property}"]`);
-		const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
-		const sortCycle = { [this.NONE]: this.ASC, [this.ASC]: this.DES, [this.DES]: this.NONE };
-		
-		this.#anchor = null;
-		cells.forEach(a => a.className = `cell`);
+		this.currentColumn = column;
+		const sortCycle = { [this.NONE]: this.DES, [this.DES]: this.ASC, [this.ASC]: this.NONE };
 		const newSort = sortCycle[column.sort];
-		this.columns.forEach(a => a.sort = this.NONE);
-		column.sort = newSort;
-		headerCell.classList.add(`sort-${newSort}`);
-		this.rows = [...this._rows];
-		this.fireChangeEvent();
+		this.sortColumn(newSort);
 	}
 
 	updateFilterPopup = (e, type) => {
