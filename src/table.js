@@ -1,8 +1,11 @@
 export default class Table extends HTMLElement {
-	static observedAttributes = ['columns', 'page', 'page-size', 'rows'];
+	static observedAttributes = ['columns', 'filters', 'page', 'page-size', 'rows'];
 
+	#allowSelection = false;
 	#anchor = null;
 	#initialized = false;
+	#multiFilterOperator = 'AND'; 
+	#rowsUnfiltered = null;
 
 	constructor() {
 		super();
@@ -185,8 +188,8 @@ export default class Table extends HTMLElement {
 				<div class='filter'>
 					<button class='filter-remove-btn'>X</button>
 					<select class='filter-and-or'>
-						<option value='&&'>And</option>
-						<option value='||'>Or</option>
+						<option value='AND'>AND</option>
+						<option value='OR'>OR</option>
 					</select>
 					<select class='filter-column'></select>
 					<select class='filter-operator number'>
@@ -204,8 +207,8 @@ export default class Table extends HTMLElement {
 						<option value='equals'>equals</option>
 						<option value='starts_with'>starts with</option>
 						<option value='ends_with'>ends with</option>
-						<option value='empty'>Is Empty</option>
-						<option value='not_empty'>Is Not Empty</option>
+						<option value='empty'>is empty</option>
+						<option value='not_empty'>is not empty</option>
 					</select>
 					<input class='filter-input number' type='number'></input>
 					<input class='filter-input string' type='text'></input>
@@ -219,37 +222,8 @@ export default class Table extends HTMLElement {
 		this._page = 0;
 		this._pageSize = 10;
 		this._rows = null;
+		this._filters = null;
 	}
-
-	get #allowSelection() { return this.getAttribute('allow-selection') === 'true'; }
-	get #body() { return this.shadowRoot.querySelector('.body'); }
-
-	get columns() { return this._columns; }
-	set columns(newVal) {
-		try {
-			this._columns = newVal;
-			if (this._columns?.length > 0) {
-				this.#header.innerHTML = '';
-				this.#header.appendChild(this.buildRow(this._columns, -1, true));
-			}
-		} catch(err) {
-			this._columns = [];
-			console.error(err);
-		}
-	}
-
-	get #popup() { return this.shadowRoot.querySelector('#popup'); }
-	get #visibilityPopup() { return this.shadowRoot.querySelector('#visibility-popup'); }
-	get #filterPopup() { return this.shadowRoot.querySelector('#filter-popup'); }
-	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
-	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
-	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
-	get #footerNextBtn() { return this.shadowRoot.querySelector('#next-page'); }
-	get #footerSelectedMulti() { return this.shadowRoot.querySelector('#selected-multi'); }
-	get #footerSelectedNumber() { return this.shadowRoot.querySelector('#selected-number'); }
-	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
-	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
-	get #header() { return this.shadowRoot.querySelector('.header'); }
 
 	get page() { return this._page; }
 	set page(newVal) {
@@ -288,19 +262,38 @@ export default class Table extends HTMLElement {
 
 	get rows() { return this._rows; }
 	set rows(newVal) {
-		try {
-			this._rows = newVal;
-			if (this._rows?.length > 0) {
-				this._rows = this.rowsFilter(this.rowsSort(this._rows));
-				this.#body.innerHTML = '';
-				this.forceRender();
-			}
-		} catch(err) {
-			this._rows = [];
-			console.error(err);
+		this.#rowsUnfiltered = newVal;
+		this._rows = this.rowsFilter(this.rowsSort(newVal));
+		this.forceRender();
+	}
+
+	get columns() { return this._columns; }
+	set columns(newVal) {
+		this._columns = newVal;
+		this.forceRender();
+	}
+
+	get filters() { return this._filters || []; }
+	set filters(newVal) {
+		this._filters = newVal;
+		if (this.#rowsUnfiltered) {
+			this.rows = this.#rowsUnfiltered;
 		}
 	}
 
+	get #body() { return this.shadowRoot.querySelector('.body'); }
+	get #popup() { return this.shadowRoot.querySelector('#popup'); }
+	get #visibilityPopup() { return this.shadowRoot.querySelector('#visibility-popup'); }
+	get #filterPopup() { return this.shadowRoot.querySelector('#filter-popup'); }
+	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
+	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
+	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
+	get #footerNextBtn() { return this.shadowRoot.querySelector('#next-page'); }
+	get #footerSelectedMulti() { return this.shadowRoot.querySelector('#selected-multi'); }
+	get #footerSelectedNumber() { return this.shadowRoot.querySelector('#selected-number'); }
+	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
+	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
+	get #header() { return this.shadowRoot.querySelector('.header'); }
 	get selected() { return this._rows?.filter(a => a._selected ) || []; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -309,6 +302,9 @@ export default class Table extends HTMLElement {
 		switch(attr) {
 			case 'columns':
 				this.columns = JSON.parse(newVal);
+				break;
+			case 'filters':
+				this.filters = JSON.parse(newVal);
 				break;
 			case 'page':
 				this.page = newVal;
@@ -323,16 +319,21 @@ export default class Table extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const page = this.getAttribute('page');
-		const pageSize = parseInt(this.getAttribute('page-size'));
 		const columns = this.getAttribute('columns');
 		this.columns = columns ? JSON.parse(columns) : null;
+		const filters = this.getAttribute('filters');
+		this.filters = filters ? JSON.parse(filters) : null;
+		const page = this.getAttribute('page');
 		if (page != null && !isNaN(page)) {
 			this.page = parseInt(page);
 		}
+		const pageSize = parseInt(this.getAttribute('page-size'));
 		if (pageSize != null && !isNaN(pageSize)) {
 			this.pageSize = pageSize;
 		}
+		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
+		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'AND' ? 'AND' : 'OR';
+		
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
@@ -431,9 +432,12 @@ export default class Table extends HTMLElement {
 		if (!this.#initialized || !this._rows || !this._columns) return;
 
 		this.updateTotalPages();
+		this.updateHeader();
 		this.updateFooter();
 		this.updateVisibilityPopup();
+		this.updateFilterPopup();
 		this.shadowRoot.host.innerHTML = '';
+		this.#body.innerHTML = '';
 		const isAllSelected = this._rows.every(a => a._selected);
 		const range = this.getCurrentRange();
 		if (this.#allowSelection) {
@@ -451,10 +455,8 @@ export default class Table extends HTMLElement {
 	getElementPositionRelativeToOtherElement = (element, otherElement) => {
 		const elementRect = element.getBoundingClientRect();
 		const otherElementRect = otherElement.getBoundingClientRect();
-
 		const positionTop = elementRect.top - otherElementRect.top;
 		const positionLeft = elementRect.left - otherElementRect.left;
-
 		return { top: positionTop, left: positionLeft };
 	}
 
@@ -559,7 +561,31 @@ export default class Table extends HTMLElement {
 	}
 
 	rowsFilter = (rows) => {
-		return rows;
+		const operators = {
+			'=': (a, b) => Number(a) === Number(b),
+			'!=': (a, b) => Number(a) !== Number(b),
+			'>': (a, b) => Number(a) > Number(b),
+			'>=': (a, b) => Number(a) >= Number(b),
+			'<': (a, b) => Number(a) < Number(b),
+			'<=': (a, b) => Number(a) <= Number(b),
+			'empty': (a) => `${a}`.length === 0,
+			'not_empty': (a) => `${a}`.length > 0,
+			'contains': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) >= 0,
+			'equals': (a, b) => a.toLowerCase() === b.toLowerCase(),
+			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
+			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
+			'AND': (arr) => arr.every(a => a),
+			'OR': (arr) => arr.some(a => a)
+		};
+		
+		const fitleredRows = rows.filter(row => {
+			const results = this.filters.map(({ column, operator, value }) => {
+				const result = operators[operator](row[column], value);
+				return result;
+			});	
+			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
+		});
+		return fitleredRows;
 	}
 
 	setNextPage = () => {
@@ -600,32 +626,55 @@ export default class Table extends HTMLElement {
 	}
 
 	updateFilterPopup = () => {
-		const addFilter = () => {
+		const addFilter = (property, operator, value, index) => {
 			const template = this.shadowRoot.querySelector('#filter-template');
 			const clone = template.content.cloneNode(true);
-			const columnSelect = clone.querySelector('.filter-column');
-			const onColumnChange = (el, type) => el.setAttribute('data-type', type);
-			columnSelect.innerHTML = '';
+			const container = clone.querySelector('.filter');
+			const column = this.columns.find(a => a.property === property);
+			const filterMulti = clone.querySelector('.filter-and-or');
+			const filterProperty = clone.querySelector('.filter-column');
+			const filterOperator = clone.querySelector(`.filter-operator.${column.type}`);
+			const filterInput = clone.querySelector(`.filter-input.${column.type}`);
+			const filterRemove = clone.querySelector('.filter-remove-btn');
+			const onFilterUpdate = (e) => {
+				const container = e.target.closest('.filter');
+				const prop = container.querySelector('.filter-column');
+				const col = this.columns.find(a => a.property === prop.value);
+				const filter = { column: prop.value, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`).value };
+				const filters = [...this.filters];
+				filters[index] = filter;
+				this.filters = filters;
+			};
 
 			this._columns.forEach(col => {
 				const option = document.createElement('option');
 				option.textContent = col.name;
-				option.value = col.type;
-				columnSelect.appendChild(option);
+				option.value = col.property;
+				filterProperty.appendChild(option);
+			});
+			
+			filterProperty.value = property;
+			filterMulti.value = this.#multiFilterOperator;
+			filterOperator.value = operator;
+			filterInput.value = value;
+			container.setAttribute('data-type', column.type);
+
+			filterMulti.addEventListener('change', (e) => {
+				this.#multiFilterOperator = e.target.value; 
+				onFilterUpdate(e);
+			});
+			filterProperty.addEventListener('change', onFilterUpdate);
+			filterOperator.addEventListener('change', onFilterUpdate);
+			filterInput.addEventListener('change', onFilterUpdate);
+			filterRemove.addEventListener('click', () => {
+				this.filters = this.filters.filter((a, i) => i !== index);
 			});
 
-			columnSelect.addEventListener('change', (e) => {
-				const target = e.target;
-				const type = target.value;
-				const parent = target.parentElement;
-				onColumnChange(parent, type);
-			});
-
-			onColumnChange(clone.querySelector('.filter'), columnSelect.value);
 			this.#filterPopup.appendChild(clone);
 		};
-		addFilter();
-		console.log(`TODO: setup filters object, add filters based on filter object`);
+		
+		this.#filterPopup.innerHTML = '';
+		this.filters.forEach((filter, index) => addFilter(filter.column, filter.operator, filter.value, index));
 	}
 	
 	updateFooter = () => {
@@ -643,6 +692,11 @@ export default class Table extends HTMLElement {
 		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
 
 		this.#footerPageSize.value = this.pageSize;
+	}
+
+	updateHeader = () => {
+		this.#header.innerHTML = '';
+		this.#header.appendChild(this.buildRow(this._columns, -1, true));
 	}
 
 	updateTotalPages = () => {

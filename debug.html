@@ -17,7 +17,7 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<ac-table page-size="10" allow-selection="true"></ac-table>
+				<ac-table page-size="10" allow-selection="true" multi-filter-operator="or"></ac-table>
 			</section>
 		</main>
 		<script>
@@ -34,7 +34,15 @@
 					{ "name": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false },
 					{ "name": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false }
 				];
+
+				const filters = [
+					{ column: 'id', operator: '>', value: '10' },
+					{ column: 'name', operator: 'not_empty', value: '' },
+					{ column: 'company', operator: 'contains', value: 'a' }
+				];
+
 				document.querySelector('ac-table').columns = columns;
+				document.querySelector('ac-table').filters = filters;
 				document.querySelector('ac-table').rows = jsonData;
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });
