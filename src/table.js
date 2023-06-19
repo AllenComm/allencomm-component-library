@@ -100,6 +100,7 @@ export default class Table extends HTMLElement {
 					position: absolute;
 					top: 32px;
 					transform: translateX(-100%);
+					white-space: nowrap;
 				}
 				.popup.visible {
 					display: flex;
@@ -132,6 +133,7 @@ export default class Table extends HTMLElement {
 				}
 				.table {
 					border: 1px solid black;
+					position: relative;
 				}
 			</style>
 			<div class='table'>
@@ -446,6 +448,16 @@ export default class Table extends HTMLElement {
 		});
 	}
 
+	getElementPositionRelativeToOtherElement = (element, otherElement) => {
+		const elementRect = element.getBoundingClientRect();
+		const otherElementRect = otherElement.getBoundingClientRect();
+
+		const positionTop = elementRect.top - otherElementRect.top;
+		const positionLeft = elementRect.left - otherElementRect.left;
+
+		return { top: positionTop, left: positionLeft };
+	}
+
 	getCurrentRange = () => {
 		const offset = this.pageSize;
 		const min = this.page * offset;
@@ -490,13 +502,14 @@ export default class Table extends HTMLElement {
 		e.stopPropagation();
 		this.currentColumn = col;
 		this.hidePopups();
-		const rect = e.target.getBoundingClientRect();
-		this.#popup.style.left = `${rect.left + rect.width}px`;
-		this.#popup.style.top = `${rect.top + rect.height}px`;
-		this.#visibilityPopup.style.left = `${rect.left + rect.width}px`;
-		this.#visibilityPopup.style.top = `${rect.top + rect.height}px`;
-		this.#filterPopup.style.left = `${rect.left + rect.width}px`;
-		this.#filterPopup.style.top = `${rect.top + rect.height}px`;
+		const { width, height } = e.target.getBoundingClientRect();
+		const { left, top } = this.getElementPositionRelativeToOtherElement(e.target, this.shadowRoot.querySelector('.table'));
+		this.#popup.style.left = `${left + width}px`;
+		this.#popup.style.top = `${top + height}px`;
+		this.#visibilityPopup.style.left = `${left + width}px`;
+		this.#visibilityPopup.style.top = `${top + height}px`;
+		this.#filterPopup.style.left = `${left + width}px`;
+		this.#filterPopup.style.top = `${top + height}px`;
 		this.#popup.classList.add('visible');
 	}
 	
