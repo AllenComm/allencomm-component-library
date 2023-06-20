@@ -106,16 +106,20 @@ export default class Table extends HTMLElement {
 				}
 				.popup {
 					background-color: white;
-					display: none;
+					display: flex;
 					flex-direction: column;
 					left: 0;
+					opacity: 0;
+					pointer-events: none;
 					position: absolute;
 					top: 32px;
 					transform: translateX(-100%);
+					transition: opacity .1s ease;
 					white-space: nowrap;
 				}
 				.popup.visible {
-					display: flex;
+					opacity: 1;
+					pointer-events: all;
 				}
 				.row {
 					display: flex;
@@ -498,7 +502,12 @@ export default class Table extends HTMLElement {
 		return 0;
 	}
 
-	hidePopups = () =>	this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
+	hidePopups = () => {
+		this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
+		this.#popup.style.transform = '';
+		this.#visibilityPopup.style.transform = '';
+		this.#filterPopup.style.transform = '';
+	}
 
 	onClickOutside = (e) => {
 		const checkClick = (el) => {
@@ -528,14 +537,20 @@ export default class Table extends HTMLElement {
 		e.stopPropagation();
 		this.currentColumn = col;
 		this.hidePopups();
-		const { width, height } = e.target.getBoundingClientRect();
+		const { width, height } = e.target.getBoundingClientRect(); 
 		const { left, top } = this.getElementPositionRelativeToOtherElement(e.target, this.shadowRoot.querySelector('.table'));
+
 		this.#popup.style.left = `${left + width}px`;
 		this.#popup.style.top = `${top + height}px`;
 		this.#visibilityPopup.style.left = `${left + width}px`;
 		this.#visibilityPopup.style.top = `${top + height}px`;
 		this.#filterPopup.style.left = `${left + width}px`;
 		this.#filterPopup.style.top = `${top + height}px`;
+
+		const [ x1, x2, x3 ] = [this.#popup.getBoundingClientRect().left, this.#visibilityPopup.getBoundingClientRect().left, this.#filterPopup.getBoundingClientRect().left];
+		this.#popup.style.transform = x1 < 0 ? `translateX(calc(-100% - ${x1}px))` : 'translateX(-100%)';
+		this.#visibilityPopup.style.transform = x2 < 0 ? `translateX(calc(-100% - ${x2}px))` : 'translateX(-100%)';
+		this.#filterPopup.style.transform = x3 < 0 ? `translateX(calc(-100% - ${x3}px))` : 'translateX(-100%)';
 		this.#popup.classList.add('visible');
 	}
 	
