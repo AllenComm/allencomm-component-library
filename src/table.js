@@ -36,6 +36,7 @@ export default class Table extends HTMLElement {
 				}
 				.cell-filter-btn {
 					flex-shrink: 0;
+					margin-left: 5px;
 					padding: 0;
 					width: 16px;
 				}
@@ -90,10 +91,12 @@ export default class Table extends HTMLElement {
 					overflow: visible;
 				}
 				.header .cell.sort-ascending > span:after {
-					content: '\\2191';
+					content: '\\1F817';
+					margin-left: 5px;
 				}
 				.header .cell.sort-descending > span:after {
-					content: '\\2193';
+					content: '\\1F815';
+					margin-left: 5px;
 				}
 				.header .cell:hover > .cell-menu-btn {
 					opacity: 1;
