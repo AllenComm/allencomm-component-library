@@ -34,22 +34,6 @@ export default class Table extends HTMLElement {
 				.cell:not(:first-child) {
 					border-left: 1px solid black;
 				}
-				.cell-filter-btn {
-					flex-shrink: 0;
-					padding: 0;
-					width: 16px;
-				}
-				.cell-filter-btn > img {
-					width: 100%;
-				}
-				.cell-menu-btn {
-					opacity: 0;
-					position: absolute;
-					right: 0;
-					top: 50%;
-					transform: translateY(-50%);
-					transition: opacity .2s ease;
-				}
 				.filter {
 					display: flex;
 				}
@@ -83,11 +67,27 @@ export default class Table extends HTMLElement {
 					border-bottom: 1px solid black;
 				}
 				.header .cell {
-					overflow: hidden;
 					position: relative;
 				}
-				.header .cell.selectable {
-					overflow: visible;
+				.header .cell > span {
+					position: relative;
+				}
+				.header .cell.has-filter > span:before {
+					background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAbUlEQVQ4y2NgGE5gK8N/PHATpoZDeDUcwNSgwPAWp/I3DHLYHOXJ8Ber8r8Mbrj8UY9VQy1ujzMxbMNQvoWBEV9YCTHcQ1F+j0GQUPAaMXyHK/8O5BEBkuEakoiNRJgGhlENeMARsPIjDMMUAABg/nwFPtIxLAAAAABJRU5ErkJggg==');
+					background-size: cover;
+					content: '';
+					height: 15px;
+					left: calc(100% + 10px);
+					position: absolute;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 15px;
+				}
+				.header .cell[class*="sort"] {
+					justify-content: space-between;
+				}
+				.header .cell.sort-none:after {
+					content: '';
 				}
 				.header .cell.sort-ascending > span:after {
 					content: '\\2191';
@@ -95,8 +95,16 @@ export default class Table extends HTMLElement {
 				.header .cell.sort-descending > span:after {
 					content: '\\2193';
 				}
-				.header .cell:hover > .cell-menu-btn {
+				.header .cell:hover > button {
 					opacity: 1;
+				}
+				.header .cell > button {
+					opacity: 0;
+					position: absolute;
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					transition: opacity .2s ease;
 				}
 				.pages {
 					display: flex;
@@ -384,34 +392,20 @@ export default class Table extends HTMLElement {
 	buildCellHeader = ({ name, flex, sort, type }, index, column) => {
 		if (column.hidden) return null;
 
+		const hasFilter = this.filters && this.filters.find(a => a.column === column.property);
 		const element = document.createElement('div');
 		const content = document.createElement('span');
 		content.textContent = name;
-		element.className = `cell sort-${sort}`;
+		element.className = `cell ${hasFilter ? 'has-filter' : ''} sort-${sort}`;
 		element.setAttribute('data-property', column.property);
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
-
-		const hasFilter = this.filters && this.filters.find(a => a.column === column.property);
-		if (hasFilter) {
-			const filterBtn = document.createElement('button');
-			filterBtn.className = 'cell-filter-btn';
-			filterBtn.innerHTML = `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAbUlEQVQ4y2NgGE5gK8N/PHATpoZDeDUcwNSgwPAWp/I3DHLYHOXJ8Ber8r8Mbrj8UY9VQy1ujzMxbMNQvoWBEV9YCTHcQ1F+j0GQUPAaMXyHK/8O5BEBkuEakoiNRJgGhlENeMARsPIjDMMUAABg/nwFPtIxLAAAAABJRU5ErkJggg=="></img>`
-			filterBtn.addEventListener('click', (e) => { 
-				this.onSelectHeaderButton(e, column);
-				this.onFilterClick();
-			});
-			element.appendChild(filterBtn);
-		}
-
 		const menuBtn = document.createElement('button');
-		menuBtn.className = 'cell-menu-btn';
 		menuBtn.textContent = '\u1392';
 		menuBtn.addEventListener('click', (e) => this.onSelectHeaderButton(e, column));
 		element.appendChild(menuBtn);
-
 		return element;
 	}
 	
