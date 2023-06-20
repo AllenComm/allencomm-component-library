@@ -31,8 +31,8 @@
 				const jsonData = await dummyData.json();
 				const columns = [
 					{ "name": "ID", "property": "id", "type": "number", "flex": "0 0 40px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
-					{ "name": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false },
-					{ "name": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false }
+					{ "name": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false, maxChar: 40 },
+					{ "name": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false, maxChar: 100 }
 				];
 
 				const filters = [

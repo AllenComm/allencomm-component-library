@@ -376,7 +376,8 @@ export default class Table extends HTMLElement {
 
 		element.setAttribute('id', `cell-${cellIndex}`);
 		const render = column.render;
-		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : data;
+		const text = column.type === 'string' && column.maxChar && data.length > column.maxChar ? data.substring(0, column.maxChar) + '...' : data;
+		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : text;
 
 		if (render) {
 			const el = document.createElement('span');
