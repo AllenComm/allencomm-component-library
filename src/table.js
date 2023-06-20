@@ -649,7 +649,17 @@ export default class Table extends HTMLElement {
 		this.sortColumn(newSort);
 	}
 
-	updateFilterPopup = () => {
+	updateFilterPopup = () => {		
+		this.#filterPopup.innerHTML = '';
+		const addBtn = document.createElement('button');
+		addBtn.textContent = '+ Add Filter';
+		addBtn.addEventListener('click', () => {
+			const filters = [...this.filters];
+			filters.push({ column: this.columns[0].property, operator: 'not_empty', value: '' });
+			this.filters = filters;
+		});
+		this.#filterPopup.appendChild(addBtn);
+
 		const addFilter = (property, operator, value, index) => {
 			const template = this.shadowRoot.querySelector('#filter-template');
 			const clone = template.content.cloneNode(true);
@@ -694,10 +704,9 @@ export default class Table extends HTMLElement {
 				this.filters = this.filters.filter((a, i) => i !== index);
 			});
 
-			this.#filterPopup.appendChild(clone);
+			this.#filterPopup.insertBefore(clone, addBtn);
 		};
-		
-		this.#filterPopup.innerHTML = '';
+
 		this.filters.forEach((filter, index) => addFilter(filter.column, filter.operator, filter.value, index));
 	}
 	
