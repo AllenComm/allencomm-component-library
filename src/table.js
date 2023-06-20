@@ -91,11 +91,11 @@ export default class Table extends HTMLElement {
 					overflow: visible;
 				}
 				.header .cell.sort-ascending > span:after {
-					content: '\\1F817';
+					content: '\\1F815';
 					margin-left: 5px;
 				}
 				.header .cell.sort-descending > span:after {
-					content: '\\1F815';
+					content: '\\1F817';
 					margin-left: 5px;
 				}
 				.header .cell:hover > .cell-menu-btn {
