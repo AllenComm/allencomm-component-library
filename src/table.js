@@ -671,7 +671,7 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
-			filters.push({ column: this.columns[0].property, operator: 'not_empty', value: '' });
+			filters.push({ column: this.currentColumn.property, operator: 'not_empty', value: '' });
 			this.filters = filters;
 		});
 		this.#filterPopup.appendChild(addBtn);
