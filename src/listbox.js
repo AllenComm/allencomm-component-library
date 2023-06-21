@@ -20,6 +20,7 @@ export default class Listbox extends HTMLElement {
 				:host([aria-activedescendant]:not([aria-activedescendant=''])) .list {
 					border-radius: 3px;
 					outline: 2px solid #000;
+					background-color: #D46027;
 					outline-offset: 2px;
 				}
 				:host([orientation='horizontal']) {
