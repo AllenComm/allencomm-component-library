@@ -276,7 +276,11 @@ export default class Table extends HTMLElement {
 	get rows() { return this._rows; }
 	set rows(newVal) {
 		this.#rowsUnfiltered = newVal;
-		this._rows = this.rowsFilter(this.rowsSort(newVal));
+		this.onRowsUpdate(newVal);
+	}
+
+	onRowsUpdate = (rows) => {
+		this._rows = this.rowsFilter(this.rowsSort(rows));
 		this.forceRender();
 	}
 
@@ -376,7 +380,7 @@ export default class Table extends HTMLElement {
 
 		element.setAttribute('id', `cell-${cellIndex}`);
 		const render = column.render;
-		const text = column.type === 'string' && column.maxChar && data.length > column.maxChar ? data.substring(0, column.maxChar) + '...' : data;
+		const text = column.type === 'string' && column.maxChar && data.length > column.maxChar ? data.substring(0, column.maxChar - 3) + '...' : data;
 		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : text;
 
 		if (render) {
@@ -652,7 +656,8 @@ export default class Table extends HTMLElement {
 			this.columns.forEach(a => a.sort = this.NONE);
 			this.currentColumn.sort = dir;
 			headerCell.classList.add(`sort-${dir}`);
-			this.rows = [...this._rows];
+			this.onRowsUpdate([...this._rows]);
+			this.forceRender();
 			this.fireChangeEvent();
 			this.hidePopups();
 		}
