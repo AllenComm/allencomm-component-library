@@ -17,7 +17,7 @@
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
 			<section>
-				<ac-table page-size="10" allow-selection="true" multi-filter-operator="or"></ac-table>
+				<ac-table height="400px" page-size="10" allow-selection="true" multi-filter-operator="or"></ac-table>
 			</section>
 		</main>
 		<script>
@@ -30,19 +30,27 @@
 				const dummyData = await fetch('./generated.json');
 				const jsonData = await dummyData.json();
 				const columns = [
-					{ "name": "ID", "property": "id", "type": "number", "flex": "0 0 40px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
-					{ "name": "Name", "property": "name", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false, maxChar: 40 },
-					{ "name": "Company", "property": "company", "type": "string", "flex": "1 1 50%", "sort": "none", "hidden": false, maxChar: 100 }
-				];
-
-				const filters = [
-					{ column: 'id', operator: '>', value: '10' },
-					{ column: 'name', operator: 'not_empty', value: '' },
-					{ column: 'company', operator: 'contains', value: 'a' }
+					{ "name": "ID", "property": "index", "type": "number", "flex": "0 0 60px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
+					{ "name": "Age", "property": "age", "type": "number", "flex": "0 0 40px" },
+					{ "name": "First Name", "property": "firstName", "type": "string", "flex": "1 0 100px" },
+					{ "name": "Last Name", "property": "lastName", "type": "string", "flex": "1 0 100px" },
+					{ "name": "About", "property": "about", "type": "string", "flex": "1 0 50%"  },
+					{ "name": "GUID", "property": "guid", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Is Active?", "property": "isActive", "type": "boolean", "flex": "1 0 50%" },
+					{ "name": "Balance", "property": "balance", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Eye Color", "property": "eyeColor", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Name", "property": "name", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Gender", "property": "gender", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Company", "property": "company", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Email", "property": "email", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Phone", "property": "phone", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Address", "property": "address", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Registered", "property": "registered", "type": "string", "flex": "1 0 50%" },
+					{ "name": "Latitude", "property": "latitude", "type": "number", "flex": "1 0 50%" },
+					{ "name": "Longitude", "property": "longitude", "type": "number", "flex": "1 0 50%" },
 				];
 
 				document.querySelector('ac-table').columns = columns;
-				document.querySelector('ac-table').filters = filters;
 				document.querySelector('ac-table').rows = jsonData;
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });

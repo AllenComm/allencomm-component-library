@@ -306,8 +306,12 @@ export default class Table extends HTMLElement {
 	}
 
 	onRowsUpdate = (rows) => {
+		console.time('sort and filter');
 		this._rows = this.rowsFilter(this.rowsSort(rows));
+		console.timeEnd('sort and filter');
+		console.time('render');
 		this.forceRender();
+		console.timeEnd('render');
 	}
 
 	get columns() { return this._columns; }
@@ -598,37 +602,42 @@ export default class Table extends HTMLElement {
 		this.fireChangeEvent();
 	}
 	
-	
-	
 	rowsSort = (r) => {
 		const rows = [...r];
-		this.columns.map((col) => col.sort).forEach((sort, i) => {
-			if (sort === this.NONE) return;
+		const colDetails = this.columns.map((col, i) => ({
+			sort: col.sort,
+			type: this.columns[i].type,
+			property: this.columns[i].property
+		})).filter(colDetail => colDetail.sort !== this.NONE);
 
-			const { type, property } = this.columns[i];
-			rows.sort((a, b) => {
-				const aa = a[property]; 
+		const compare = (a, b) => {
+			for (let i = 0; i < colDetails.length; i++) {
+				const { type, property, sort } = colDetails[i];
+				const aa = a[property];
 				const bb = b[property];
-				if (aa == null && bb == null) return 0;
-				if (aa == null || bb == null) return aa == null ? -1 : 1;
+				if (aa == null) return -1;
+				if (bb == null) return 1;
 
 				let result = 0;
 				if (type === 'number') {
-					result = aa < bb ? -1 : 1;
+					result = aa - bb;
 				} else if (type === 'string') {
 					if (typeof aa === 'string' && typeof bb === 'string') {
-						result = aa.toLowerCase().localeCompare(bb.toLowerCase());
-					} else {
-						console.error('Expected string but received:', aa, bb);
+						result = aa.localeCompare(bb);
 					}
 				} else if (type === 'boolean') {
-					result = aa === bb ? 0 : aa ? -1 : 1;
+					result = aa === bb ? 0 : (aa ? -1 : 1);
 				}
 
-				return sort === this.DES ? result : -result;
-			});
-		});
+				if (result !== 0) {
+					return sort === this.DES ? result : -result;
+				}
+			}
 
+			return 0;
+		}
+
+		rows.sort(compare);
 		return rows;
 	}
 	
