@@ -688,6 +688,7 @@ export default class Table extends HTMLElement {
 				const filter = { column: prop.value, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`).value };
 				const filters = [...this.filters];
 				filters[index] = filter;
+				this.page = 0;
 				this.filters = filters;
 			};
 
