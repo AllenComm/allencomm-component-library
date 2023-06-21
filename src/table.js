@@ -1,8 +1,13 @@
+// TODO:
+//   Sorting has a bug when trying to sort something further on the right...
+//   Adding filters is inefficient...
+
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'page-size', 'rows'];
 
 	#allowSelection = false;
 	#anchor = null;
+	#height = null;
 	#initialized = false;
 	#multiFilterOperator = 'AND'; 
 	#prevHeaderBtnRect = null;
@@ -28,6 +33,7 @@ export default class Table extends HTMLElement {
 					flex-direction: column;
 				}
 				.cell {
+					border-bottom: 1px solid black;
 					display: flex;
 					flex: 1;
 					padding: 5px;
@@ -55,10 +61,16 @@ export default class Table extends HTMLElement {
 				.filter {
 					display: flex;
 				}
-				.filter[data-type="string"] .number {
+				.filter[data-type="string"] .number,
+				.filter[data-type="string"] .boolean {
 					display: none;
 				}
-				.filter[data-type="number"] .string {
+				.filter[data-type="boolean"] .number,
+				.filter[data-type="boolean"] .string {
+					display: none;
+				}
+				.filter[data-type="number"] .string,
+				.filter[data-type="number"] .boolean {
 					display: none;
 				}
 				#filter-popup .filter:first-child .filter-and-or {
@@ -80,11 +92,11 @@ export default class Table extends HTMLElement {
 				}
 				.header {
 					font-weight: bold;
-				}
-				.header:not(:empty) {
-					border-bottom: 1px solid black;
+					position: sticky;
+					top: 0;
 				}
 				.header .cell {
+					background-color: white;
 					overflow: hidden;
 					position: relative;
 				}
@@ -104,6 +116,10 @@ export default class Table extends HTMLElement {
 				}
 				.pages {
 					display: flex;
+				}
+				#prev-page:disabled,
+				#next-page:disabled {
+					opacity: .2;
 				}
 				.popup {
 					background-color: white;
@@ -129,9 +145,6 @@ export default class Table extends HTMLElement {
 				.row[aria-selected='true'] {
 					background: #D7DFF3;
 				}
-				.row + .row {
-					border-top: 1px solid black;
-				}
 				#row-footer {
 					justify-content: space-between;
 					padding: 5px;
@@ -152,10 +165,15 @@ export default class Table extends HTMLElement {
 					border: 1px solid black;
 					position: relative;
 				}
+				.table-scrollable {
+					overflow: auto;
+				}
 			</style>
 			<div class='table'>
-				<div class='header'></div>
-				<div class='body'></div>
+				<div class='table-scrollable'>
+					<div class='header'></div>
+					<div class='body'></div>
+				</div>
 				<div class='footer'>
 					<div class='row' id='row-footer'>
 						<div class='footer-inner'>
@@ -170,6 +188,7 @@ export default class Table extends HTMLElement {
 								<option value='25'>25</option>
 								<option value='50'>50</option>
 								<option value='100'>100</option>
+								<option value='1000'>1000</option>
 							</select>
 						</div>
 						<div class='footer-inner'>
@@ -221,6 +240,12 @@ export default class Table extends HTMLElement {
 						<option value='equals'>equals</option>
 						<option value='starts_with'>starts with</option>
 						<option value='ends_with'>ends with</option>
+						<option value='empty'>is empty</option>
+						<option value='not_empty'>is not empty</option>
+					</select>
+					<select class='filter-operator boolean'>
+						<option value='is_true'>is true</option>
+						<option value='is_false'>is false</option>
 						<option value='empty'>is empty</option>
 						<option value='not_empty'>is not empty</option>
 					</select>
@@ -350,7 +375,11 @@ export default class Table extends HTMLElement {
 			this.pageSize = pageSize;
 		}
 		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
-		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'AND' ? 'AND' : 'OR';
+		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
+		this.#height = this.getAttribute('height');
+		if (this.#height) {
+			this.shadowRoot.querySelector('.table-scrollable').style.height = `${this.#height}`;
+		}
 		
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
@@ -400,7 +429,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		const content = document.createElement('span');
 		content.textContent = name;
-		element.className = `cell sort-${sort}`;
+		element.className = `cell sort-${sort || 'none'}`;
 		element.setAttribute('data-property', column.property);
 		element.style.flex = flex;
 		element.setAttribute('id', `cell-${index}`);
@@ -569,10 +598,12 @@ export default class Table extends HTMLElement {
 		this.fireChangeEvent();
 	}
 	
+	
+	
 	rowsSort = (r) => {
 		const rows = [...r];
 		this.columns.map((col) => col.sort).forEach((sort, i) => {
-			if (sort == this.NONE) return;
+			if (sort === this.NONE) return;
 
 			const { type, property } = this.columns[i];
 			rows.sort((a, b) => {
@@ -585,14 +616,22 @@ export default class Table extends HTMLElement {
 				if (type === 'number') {
 					result = aa < bb ? -1 : 1;
 				} else if (type === 'string') {
-					result = aa.toLowerCase().localeCompare(bb.toLowerCase());
+					if (typeof aa === 'string' && typeof bb === 'string') {
+						result = aa.toLowerCase().localeCompare(bb.toLowerCase());
+					} else {
+						console.error('Expected string but received:', aa, bb);
+					}
+				} else if (type === 'boolean') {
+					result = aa === bb ? 0 : aa ? -1 : 1;
 				}
-				return sort == this.DES ? result : -result;
+
+				return sort === this.DES ? result : -result;
 			});
 		});
+
 		return rows;
 	}
-
+	
 	rowsFilter = (rows) => {
 		const operators = {
 			'=': (a, b) => Number(a) === Number(b),
@@ -608,7 +647,9 @@ export default class Table extends HTMLElement {
 			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
 			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
 			'AND': (arr) => arr.every(a => a),
-			'OR': (arr) => arr.some(a => a)
+			'OR': (arr) => arr.some(a => a),
+			'is_true': (a) => a === true || a === 'true',
+			'is_false': (a) => a === false || a === 'false'
 		};
 		
 		const fitleredRows = rows.filter(row => {
@@ -685,7 +726,7 @@ export default class Table extends HTMLElement {
 				const container = e.target.closest('.filter');
 				const prop = container.querySelector('.filter-column');
 				const col = this.columns.find(a => a.property === prop.value);
-				const filter = { column: prop.value, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`).value };
+				const filter = { column: prop.value, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''};
 				const filters = [...this.filters];
 				filters[index] = filter;
 				this.page = 0;
@@ -702,7 +743,9 @@ export default class Table extends HTMLElement {
 			filterProperty.value = property;
 			filterMulti.value = this.#multiFilterOperator;
 			filterOperator.value = operator;
-			filterInput.value = value;
+			if (filterInput) { 
+				filterInput.value = value;
+			}
 			container.setAttribute('data-type', column.type);
 
 			filterMulti.addEventListener('change', (e) => {
@@ -711,7 +754,9 @@ export default class Table extends HTMLElement {
 			});
 			filterProperty.addEventListener('change', onFilterUpdate);
 			filterOperator.addEventListener('change', onFilterUpdate);
-			filterInput.addEventListener('change', onFilterUpdate);
+			if (filterInput) {
+				filterInput.addEventListener('change', onFilterUpdate);
+			}
 			filterRemove.addEventListener('click', () => {
 				this.filters = this.filters.filter((a, i) => i !== index);
 				this.updatePopupPosition(this.#prevHeaderBtnRect);
