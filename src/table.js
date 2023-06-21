@@ -5,6 +5,7 @@ export default class Table extends HTMLElement {
 	#anchor = null;
 	#initialized = false;
 	#multiFilterOperator = 'AND'; 
+	#prevHeaderBtnRect = null;
 	#rowsUnfiltered = null;
 
 	constructor() {
@@ -485,8 +486,7 @@ export default class Table extends HTMLElement {
 		});
 	}
 
-	getElementPositionRelativeToOtherElement = (element, otherElement) => {
-		const elementRect = element.getBoundingClientRect();
+	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
 		const otherElementRect = otherElement.getBoundingClientRect();
 		const positionTop = elementRect.top - otherElementRect.top;
 		const positionLeft = elementRect.left - otherElementRect.left;
@@ -542,20 +542,9 @@ export default class Table extends HTMLElement {
 		e.stopPropagation();
 		this.currentColumn = col;
 		this.hidePopups();
-		const { width, height } = e.target.getBoundingClientRect(); 
-		const { left, top } = this.getElementPositionRelativeToOtherElement(e.target, this.shadowRoot.querySelector('.table'));
-
-		this.#popup.style.left = `${left + width}px`;
-		this.#popup.style.top = `${top + height}px`;
-		this.#visibilityPopup.style.left = `${left + width}px`;
-		this.#visibilityPopup.style.top = `${top + height}px`;
-		this.#filterPopup.style.left = `${left + width}px`;
-		this.#filterPopup.style.top = `${top + height}px`;
-
-		const [ x1, x2, x3 ] = [this.#popup.getBoundingClientRect().left, this.#visibilityPopup.getBoundingClientRect().left, this.#filterPopup.getBoundingClientRect().left];
-		this.#popup.style.transform = x1 < 0 ? `translateX(calc(-100% - ${x1}px))` : 'translateX(-100%)';
-		this.#visibilityPopup.style.transform = x2 < 0 ? `translateX(calc(-100% - ${x2}px))` : 'translateX(-100%)';
-		this.#filterPopup.style.transform = x3 < 0 ? `translateX(calc(-100% - ${x3}px))` : 'translateX(-100%)';
+		const rect = e.target.getBoundingClientRect();
+		this.#prevHeaderBtnRect = rect;
+		this.updatePopupPosition(rect);
 		this.#popup.classList.add('visible');
 	}
 	
@@ -678,6 +667,7 @@ export default class Table extends HTMLElement {
 			const filters = [...this.filters];
 			filters.push({ column: this.currentColumn.property, operator: 'not_empty', value: '' });
 			this.filters = filters;
+			this.updatePopupPosition(this.#prevHeaderBtnRect);
 		});
 		this.#filterPopup.appendChild(addBtn);
 
@@ -723,6 +713,7 @@ export default class Table extends HTMLElement {
 			filterInput.addEventListener('change', onFilterUpdate);
 			filterRemove.addEventListener('click', () => {
 				this.filters = this.filters.filter((a, i) => i !== index);
+				this.updatePopupPosition(this.#prevHeaderBtnRect);
 			});
 
 			this.#filterPopup.insertBefore(clone, addBtn);
@@ -751,6 +742,27 @@ export default class Table extends HTMLElement {
 	updateHeader = () => {
 		this.#header.innerHTML = '';
 		this.#header.appendChild(this.buildRow(this._columns, -1, true));
+	}
+
+	updatePopupPosition = (rect) => {
+		const { width, height } = rect;
+		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, this.shadowRoot.querySelector('.table'));
+
+		this.#popup.style.left = `${left + width}px`;
+		this.#popup.style.top = `${top + height}px`;
+		this.#visibilityPopup.style.left = `${left + width}px`;
+		this.#visibilityPopup.style.top = `${top + height}px`;
+		this.#filterPopup.style.left = `${left + width}px`;
+		this.#filterPopup.style.top = `${top + height}px`;
+
+		this.#popup.style.transform = 'translateX(-100%)';
+		this.#visibilityPopup.style.transform = 'translateX(-100%)';
+		this.#filterPopup.style.transform = 'translateX(-100%)';
+
+		const [ x1, x2, x3 ] = [this.#popup.getBoundingClientRect().left, this.#visibilityPopup.getBoundingClientRect().left, this.#filterPopup.getBoundingClientRect().left];
+		this.#popup.style.transform = x1 < 0 ? `translateX(calc(-100% - ${x1}px))` : 'translateX(-100%)';
+		this.#visibilityPopup.style.transform = x2 < 0 ? `translateX(calc(-100% - ${x2}px))` : 'translateX(-100%)';
+		this.#filterPopup.style.transform = x3 < 0 ? `translateX(calc(-100% - ${x3}px))` : 'translateX(-100%)';
 	}
 
 	updateTotalPages = () => {
