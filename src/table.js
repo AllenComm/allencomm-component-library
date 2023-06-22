@@ -25,6 +25,18 @@ export default class Table extends HTMLElement {
 					display: block;
 					width: 100%;
 				}
+				:host([density='cozy']) .cell,
+				:host([density='cozy']) #row-footer {
+					padding: 24px 6px;
+				}
+				:host([density='comfortable']) .cell,
+				:host([density='comfortable']) #row-footer {
+					padding: 12px 6px
+				}
+				:host([density='compact']) .cell,
+				:host([density='compact']) #row-footer {
+					padding: 6px;
+				}
 				.body {
 					display: flex;
 					flex-direction: column;
@@ -33,7 +45,7 @@ export default class Table extends HTMLElement {
 					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					flex: 1 0 100px;
 					overflow: hidden;
-					padding: 5px;
+					padding: 6px;
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}
@@ -97,6 +109,7 @@ export default class Table extends HTMLElement {
 					cursor: pointer;
 					overflow: hidden;
 					position: relative;
+					text-overflow: clip;
 					user-select: none;
 				}
 				.header .cell:not(:first-child) {
@@ -151,8 +164,8 @@ export default class Table extends HTMLElement {
 				}
 				#row-footer {
 					justify-content: space-between;
-					padding: 5px;
 					place-items: center;
+					padding: 6px;
 				}
 				#row-footer button {
 					background: none;
