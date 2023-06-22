@@ -66,6 +66,15 @@ export default class Table extends HTMLElement {
 					transform: translateY(-50%);
 					transition: opacity .2s ease;
 				}
+				.cell.selectable {
+					align-items: center;
+					display: flex;
+					justify-content: center;
+					overflow: visible;
+				}
+				.cell.selectable * {
+					margin: 0;
+				}
 				.filter {
 					display: flex;
 				}
@@ -117,9 +126,6 @@ export default class Table extends HTMLElement {
 				}
 				.header:hover .cell:not(:first-child) {
 					border-color: rgba(0, 0, 0, .1);
-				}
-				.header .cell.selectable {
-					overflow: visible;
 				}
 				.header .cell.sort-ascending > span:after {
 					content: '\\1F815';
