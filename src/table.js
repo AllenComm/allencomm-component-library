@@ -42,6 +42,7 @@ export default class Table extends HTMLElement {
 					flex-direction: column;
 				}
 				.cell {
+					background-color: white;
 					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					flex: 1 0 100px;
 					overflow: hidden;
@@ -164,6 +165,9 @@ export default class Table extends HTMLElement {
 				}
 				.row {
 					display: flex;
+				}
+				.row:not(#row-header):last-child .cell {
+					border-color: transparent;
 				}
 				.row[aria-selected='true'] .cell {
 					background: #D7DFF3;
