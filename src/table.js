@@ -201,7 +201,7 @@ export default class Table extends HTMLElement {
 					overflow: auto;
 				}
 			</style>
-			<div class='table'>
+			<div class='table' tabindex="-1">
 				<div class='table-scrollable'>
 					<div class='header'></div>
 					<div class='body'></div>
@@ -425,13 +425,16 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
 		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
+		this.shadowRoot.addEventListener('click', this.onClickInside)
 		document.addEventListener('click', this.onClickOutside);
+		document.addEventListener('keydown', this.onKeyDown);
 		this.#initialized = true;
 		this.forceRender();
 	}
 
 	disconnectedCallback() {
 		document.removeEventListener('click', this.onClickOutside);
+		document.removeEventListener('keydown', this.onKeyDown);
 	}
 
 	buildCell = (data, cellIndex, rowIndex, column) => {
@@ -591,6 +594,10 @@ export default class Table extends HTMLElement {
 		this.#filterPopup.style.transform = '';
 	}
 
+	onClickInside = (e) => {
+		this.shadowRoot.querySelector('.table').focus();
+	}
+
 	onClickOutside = (e) => {
 		const checkClick = (el) => {
 			const isPopupVisible = el.classList.contains('visible');
@@ -608,6 +615,15 @@ export default class Table extends HTMLElement {
 		this.#popup.classList.remove('visible');
 		this.updateFilterPopup();
 		this.#filterPopup.classList.add('visible');
+	}
+
+	onKeyDown = (e) => {
+		const isCtrlA = e.ctrlKey && e.key === 'a' || e.key === 'A';
+		const isFocusedOn = this.shadowRoot.contains(this.shadowRoot.activeElement);
+		if (isCtrlA && isFocusedOn) {
+			e.preventDefault();
+			this.onSelectAllRows();
+		}
 	}
 
 	onManageColumnsClick = (e) => {
