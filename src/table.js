@@ -24,9 +24,6 @@ export default class Table extends HTMLElement {
 					display: block;
 					width: 100%;
 				}
-				:host([allow-selection='true']) .row:not(#row-header):not(#row-footer), input {
-					cursor: pointer;
-				}
 				.body {
 					display: flex;
 					flex-direction: column;
@@ -96,8 +93,10 @@ export default class Table extends HTMLElement {
 				}
 				.header .cell {
 					background-color: white;
+					cursor: pointer;
 					overflow: hidden;
 					position: relative;
+					user-select: none;
 				}
 				.header .cell:not(:first-child) {
 					border-left: 1px solid transparent;
@@ -145,7 +144,6 @@ export default class Table extends HTMLElement {
 				}
 				.row {
 					display: flex;
-					user-select: none;
 				}
 				.row[aria-selected='true'] .cell {
 					background: #D7DFF3;
@@ -483,14 +481,11 @@ export default class Table extends HTMLElement {
 			inner.checked = row._selected;
 			element.ariaSelected = row._selected;
 
+			const handleClick = isHeader ? this.onSelectAllRows : (e) => this.onSelectRow(e, index);
+			inner.addEventListener('click', handleClick);
+
 			selector.append(inner);
 			element.append(selector);
-
-			if (!isHeader) {
-				element.addEventListener('click', (e) => this.onSelectRow(e, index));
-			} else {
-				inner.addEventListener('click', this.onSelectAllRows);
-			}
 		}
 		
 		const rowData = isHeader ? Object.values(row) : this.columns.map((a) => row[a?.property] ?? null);
