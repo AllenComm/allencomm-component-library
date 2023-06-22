@@ -189,6 +189,7 @@ export default class Table extends HTMLElement {
 					pointer-events: none;
 				}
 				.table {
+					background-color: white;
 					border: 1px solid rgba(0, 0, 0, .1);
 					display: flex;
 					flex-direction: column;
