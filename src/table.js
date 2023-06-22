@@ -7,7 +7,6 @@ export default class Table extends HTMLElement {
 
 	#allowSelection = false;
 	#anchor = null;
-	#height = null;
 	#initialized = false;
 	#multiFilterOperator = 'AND'; 
 	#prevHeaderBtnRect = null;
@@ -34,9 +33,11 @@ export default class Table extends HTMLElement {
 				}
 				.cell {
 					border-bottom: 1px solid black;
-					display: flex;
-					flex: 1;
+					flex: 1 0 100px;
+					overflow: hidden;
 					padding: 5px;
+					text-overflow: ellipsis;
+					white-space: nowrap;
 				}
 				.cell:not(:first-child) {
 					border-left: 1px solid black;
@@ -142,7 +143,7 @@ export default class Table extends HTMLElement {
 					display: flex;
 					user-select: none;
 				}
-				.row[aria-selected='true'] {
+				.row[aria-selected='true'] .cell {
 					background: #D7DFF3;
 				}
 				#row-footer {
@@ -163,9 +164,13 @@ export default class Table extends HTMLElement {
 				}
 				.table {
 					border: 1px solid black;
+					display: flex;
+					flex-direction: column;
+					height: 100%;
 					position: relative;
 				}
 				.table-scrollable {
+					flex: 1 1 auto;
 					overflow: auto;
 				}
 			</style>
@@ -380,10 +385,6 @@ export default class Table extends HTMLElement {
 		}
 		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
 		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
-		this.#height = this.getAttribute('height');
-		if (this.#height) {
-			this.shadowRoot.querySelector('.table-scrollable').style.height = `${this.#height}`;
-		}
 		
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
@@ -410,9 +411,11 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(column.type);
-		element.style.flex = column.flex || '1 1 100%';
-
+		element.style.flex = `0 0 ${column.width}`;
+		element.style.whiteSpace = column.wrap ? 'normal' : null;
+		element.title = data;
 		element.setAttribute('id', `cell-${cellIndex}`);
+
 		const render = column.render;
 		const text = column.type === 'string' && column.maxChar && data.length > column.maxChar ? data.substring(0, column.maxChar - 3) + '...' : data;
 		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : text;
@@ -427,7 +430,7 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ name, flex, sort, type }, index, column) => {
+	buildCellHeader = ({ name, width, sort, type }, index, column) => {
 		if (column.hidden) return null;
 
 		const element = document.createElement('div');
@@ -435,7 +438,7 @@ export default class Table extends HTMLElement {
 		content.textContent = name;
 		element.className = `cell sort-${sort || 'none'}`;
 		element.setAttribute('data-property', column.property);
-		element.style.flex = flex;
+		element.style.flex = `0 0 ${width}`;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
@@ -469,7 +472,7 @@ export default class Table extends HTMLElement {
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
 			selector.className = 'cell selectable';
-			selector.style.flex = '0 0 20px';
+			selector.style.flex = '0 0 30px';
 
 			const inner = document.createElement('input');
 			inner.type = 'checkbox';
