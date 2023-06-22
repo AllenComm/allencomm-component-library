@@ -34,7 +34,7 @@
 				const jsonData = await dummyData.json();
 				const columns = [
 					{ "name": "Index", "property": "index", "type": "number", "width": "60px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data})'>${data}</a>` },
-					{ "name": "ID", "property": "_id", "type": "number", "width": "220px" },
+					{ "name": "ID", "property": "_id", "type": "string", "width": "220px" },
 					{ "name": "Name", "property": "name", "type": "string" },
 					{ "name": "Age", "property": "age", "type": "number", "width": "40px" },
 					{ "name": "About", "property": "about", "type": "string" },

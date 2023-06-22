@@ -100,10 +100,10 @@ export default class Table extends HTMLElement {
 					overflow: hidden;
 					position: relative;
 				}
-				.header .cell:not(:first-child):not(:last-child) {
-					border-right: 1px solid transparent;
+				.header .cell:not(:first-child) {
+					border-left: 1px solid transparent;
 				}
-				.header:hover .cell:not(:first-child):not(:last-child) {
+				.header:hover .cell:not(:first-child) {
 					border-color: rgba(0, 0, 0, .1);
 				}
 				.header .cell.selectable {
