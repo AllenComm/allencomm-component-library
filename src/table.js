@@ -11,6 +11,7 @@ export default class Table extends HTMLElement {
 	#multiFilterOperator = 'AND'; 
 	#prevHeaderBtnRect = null;
 	#rowsUnfiltered = null;
+	#RESERVED_SELECTED = '~~SELECTED~~';
 
 	constructor() {
 		super();
@@ -220,6 +221,7 @@ export default class Table extends HTMLElement {
 					<button id='sort-desc-btn'>Sort DESC</button>
 					<button id='filter-btn'>Filter</button>
 					<button id='manage-columns-btn'>Manage Columns</button>
+					<button id='export-csv'>Export To CSV</button>
 				</div>
 				<div id='visibility-popup' class='popup'></div>
 				<div id='filter-popup' class='popup'></div>
@@ -348,7 +350,7 @@ export default class Table extends HTMLElement {
 	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
 	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
 	get #header() { return this.shadowRoot.querySelector('.header'); }
-	get selected() { return this._rows?.filter(a => a._selected ) || []; }
+	get selected() { return this._rows?.filter(a => a[this.#RESERVED_SELECTED] ) || []; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (!this.#initialized) return;
@@ -395,6 +397,7 @@ export default class Table extends HTMLElement {
 		this.#visibilityPopup.addEventListener('click', (e) => e.stopPropagation());
 		this.#filterPopup.addEventListener('click', (e) => e.stopPropagation());
 		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onManageColumnsClick);
+		this.shadowRoot.querySelector('#export-csv').addEventListener('click', this.exportToCsv);
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
 		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
@@ -431,7 +434,7 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
-	buildCellHeader = ({ name, width, sort, type }, index, column) => {
+	buildCellHeader = ({ name, width, sort }, index, column) => {
 		if (column.hidden) return null;
 
 		const element = document.createElement('div');
@@ -477,8 +480,8 @@ export default class Table extends HTMLElement {
 
 			const inner = document.createElement('input');
 			inner.type = 'checkbox';
-			inner.checked = row._selected;
-			element.ariaSelected = row._selected;
+			inner.checked = row[this.#RESERVED_SELECTED];
+			element.ariaSelected = row[this.#RESERVED_SELECTED];
 
 			const handleClick = isHeader ? this.onSelectAllRows : (e) => this.onSelectRow(e, index);
 			inner.addEventListener('click', handleClick);
@@ -494,6 +497,22 @@ export default class Table extends HTMLElement {
 		return element;
 	}
 
+	exportToCsv = () => {
+		const replacer = (key, value) => value === null ? '' : value;
+		const columns = this.columns.map(col => col.name);
+		const sortedRows = this.rows.map(row => this.columns.map(col => row[col.property]));
+		const rows = sortedRows.map(row => Object.entries(row).map(([key, value]) => key === this.#RESERVED_SELECTED ? null : typeof value === 'string' ? JSON.stringify(value, replacer) : value ).filter(a => a !== null));
+		const data = [columns, ...rows];
+		const csvContent = "data:text/csv;charset=utf-8," + data.map(row => row.join(",")).join("\n");
+		const link = document.createElement('a');
+		link.href = encodeURI(csvContent);
+		link.target = '_blank';
+		link.download = 'export.csv';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+
 	fireChangeEvent = () => this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 
 	forceRender = () => {
@@ -506,7 +525,7 @@ export default class Table extends HTMLElement {
 		this.updateFilterPopup();
 		this.shadowRoot.host.innerHTML = '';
 		this.#body.innerHTML = '';
-		const isAllSelected = this._rows.every(a => a._selected);
+		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
 		const range = this.getCurrentRange();
 		if (this.#allowSelection) {
 			this.#header.querySelector('input').checked = isAllSelected;
@@ -583,8 +602,8 @@ export default class Table extends HTMLElement {
 	}
 	
 	onSelectAllRows = () => {
-		const isAllSelected = this._rows.every(a => a._selected);
-		this._rows.forEach(a => a._selected = !isAllSelected);
+		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
+		this._rows.forEach(a => a[this.#RESERVED_SELECTED] = !isAllSelected);
 		this.forceRender();
 		this.fireChangeEvent();
 	}
@@ -593,11 +612,11 @@ export default class Table extends HTMLElement {
 		if (e.shiftKey) {
 			const createRange = (start, end) => Array.from({length: end - start + 1}, (v, k) => k + start);
 			const selections = createRange(this.#anchor > index ? index : this.#anchor, this.#anchor > index ? this.#anchor : index);
-			selections.forEach(i => this._rows[i]._selected = true);
+			selections.forEach(i => this._rows[i][this.#RESERVED_SELECTED] = true);
 		} else {
 			const row = this._rows[index];
 			this.#anchor = index;
-			row._selected = !row._selected;
+			row[this.#RESERVED_SELECTED] = !row[this.#RESERVED_SELECTED];
 		}
 		this.forceRender();
 		this.fireChangeEvent();
