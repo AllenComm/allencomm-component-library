@@ -1,6 +1,7 @@
 // TODO:
 //   Sorting has a bug when trying to sort something further on the right...
 //   Adding filters is inefficient...
+//   Sorting is inefficient when there are 1000 rows...
 
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'page-size', 'rows'];
@@ -39,9 +40,6 @@ export default class Table extends HTMLElement {
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}
-				.cell:not(:first-child) {
-					border-left: 1px solid rgba(0, 0, 0, .1);
-				}
 				.cell-filter-btn {
 					flex-shrink: 0;
 					margin-left: 5px;
@@ -78,7 +76,8 @@ export default class Table extends HTMLElement {
 					visibility: hidden;
 				}
 				.footer:not(:empty) {
-					border-top: 1px solid black;
+					background-color: white;
+					border-top: 1px solid rgba(0, 0, 0, .1);
 				}
 				.footer-inner {
 					display: flex;
@@ -100,6 +99,12 @@ export default class Table extends HTMLElement {
 					background-color: white;
 					overflow: hidden;
 					position: relative;
+				}
+				.header .cell:not(:first-child):not(:last-child) {
+					border-right: 1px solid transparent;
+				}
+				.header:hover .cell:not(:first-child):not(:last-child) {
+					border-color: rgba(0, 0, 0, .1);
 				}
 				.header .cell.selectable {
 					overflow: visible;
@@ -163,7 +168,7 @@ export default class Table extends HTMLElement {
 					pointer-events: none;
 				}
 				.table {
-					border: 1px solid black;
+					border: 1px solid rgba(0, 0, 0, .1);
 					display: flex;
 					flex-direction: column;
 					height: 100%;
