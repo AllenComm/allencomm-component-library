@@ -73,6 +73,10 @@ select {
 	}
 }
 
+ac-table {
+	height: 400px;
+}
+
 body {
 	align-items: center;
 	background-color: #eee;

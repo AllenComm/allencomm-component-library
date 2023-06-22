@@ -32,7 +32,7 @@ export default class Table extends HTMLElement {
 					flex-direction: column;
 				}
 				.cell {
-					border-bottom: 1px solid black;
+					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					flex: 1 0 100px;
 					overflow: hidden;
 					padding: 5px;
@@ -40,7 +40,7 @@ export default class Table extends HTMLElement {
 					white-space: nowrap;
 				}
 				.cell:not(:first-child) {
-					border-left: 1px solid black;
+					border-left: 1px solid rgba(0, 0, 0, .1);
 				}
 				.cell-filter-btn {
 					flex-shrink: 0;
