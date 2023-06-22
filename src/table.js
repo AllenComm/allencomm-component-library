@@ -1,5 +1,4 @@
 // TODO:
-//   Sorting has a bug when trying to sort something further on the right...
 //   Adding filters is inefficient...
 //   Sorting is inefficient when there are 1000 rows...
 
@@ -713,7 +712,7 @@ export default class Table extends HTMLElement {
 	toggleSort = (column) => {
 		this.currentColumn = column;
 		const sortCycle = { [this.NONE]: this.DES, [this.DES]: this.ASC, [this.ASC]: this.NONE };
-		const newSort = sortCycle[column.sort];
+		const newSort = sortCycle[column.sort || 'none'];
 		this.sortColumn(newSort);
 	}
 
