@@ -846,7 +846,7 @@ export default class Table extends HTMLElement {
 		this.#footerNextBtn.disabled = this.page + 1 >= totalPages;
 
 		const hidden = selectedCount === 0;
-		this.#footerSelectedNumber.innerText = hidden ? '' : selectedCount;
+		this.#footerSelectedNumber.innerText = hidden ? '' : selectedCount.toLocaleString();
 		this.#footerSelectedNumber.hidden = hidden;
 		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
 		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
