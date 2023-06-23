@@ -3,11 +3,12 @@
 //   Sorting is inefficient when there are 1000 rows...
 
 export default class Table extends HTMLElement {
-	static observedAttributes = ['columns', 'filters', 'page', 'page-size', 'rows'];
+	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
 
 	#allowSelection = false;
 	#anchor = null;
 	#initialized = false;
+	#inView = null;
 	#multiFilterOperator = 'AND'; 
 	#prevHeaderBtnRect = null;
 	#rowsUnfiltered = null;
@@ -29,13 +30,22 @@ export default class Table extends HTMLElement {
 				:host([density='cozy']) #row-footer {
 					padding: 24px 6px;
 				}
+				:host([density='cozy']) .row {
+					height: 70px;
+				}
 				:host([density='comfortable']) .cell,
 				:host([density='comfortable']) #row-footer {
 					padding: 12px 6px
 				}
+				:host([density='comfortable']) .row {
+					height: 46px;
+				}
 				:host([density='compact']) .cell,
 				:host([density='compact']) #row-footer {
 					padding: 6px;
+				}
+				:host([density='compact']) .row {
+					height: 34px;
 				}
 				.body {
 					display: flex;
@@ -165,6 +175,7 @@ export default class Table extends HTMLElement {
 				}
 				.row {
 					display: flex;
+					height: 34px;
 				}
 				.row:not(#row-header):last-child .cell {
 					border-color: transparent;
@@ -389,9 +400,6 @@ export default class Table extends HTMLElement {
 			case 'page':
 				this.page = newVal;
 				break;
-			case 'page-size':
-				this.pageSize = newVal;
-				break;
 			case 'rows':
 				this.rows = JSON.parse(newVal);
 				break;
@@ -425,7 +433,8 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
 		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
-		this.shadowRoot.addEventListener('click', this.onClickInside)
+		this.shadowRoot.querySelector('.table-scrollable').addEventListener('scroll', this.onScroll);
+		this.shadowRoot.addEventListener('click', this.onClickInside);
 		document.addEventListener('click', this.onClickOutside);
 		document.addEventListener('keydown', this.onKeyDown);
 		this.#initialized = true;
@@ -500,6 +509,11 @@ export default class Table extends HTMLElement {
 		element.classList.add('row');
 		element.id = isHeader ? 'row-header' : `row-${index}`;
 
+		const range = this.getCurrentRange();
+		this.shadowRoot.host.querySelector(`[slot*="${index}-"]`)?.remove();
+		const isInView = this.#inView ? this.#inView[Math.abs(range.min - index)] : true;
+		if (!isInView && !isHeader) return element; 
+
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
 			selector.className = 'cell selectable';
@@ -553,17 +567,10 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.host.innerHTML = '';
 		this.#body.innerHTML = '';
 		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
-		const range = this.getCurrentRange();
 		if (this.#allowSelection) {
 			this.#header.querySelector('input').checked = isAllSelected;
 		}
-		this._rows.forEach((row, index) => {
-			this.shadowRoot.getElementById(`row-${index}`)?.remove();
-			if (index >= range.min && index < range.max) {
-				const el = this.buildRow(row, index, false);
-				this.#body.appendChild(el);
-			}
-		});
+		this.updateTableRows();
 	}
 
 	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
@@ -629,6 +636,18 @@ export default class Table extends HTMLElement {
 	onManageColumnsClick = (e) => {
 		this.#popup.classList.remove('visible');
 		this.#visibilityPopup.classList.add('visible');
+	}
+
+	onScroll = () => {
+		const isElementInViewport = (el, container) => {
+			const rect = el.getBoundingClientRect();
+		    const containerRect = container.getBoundingClientRect();
+		    return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
+		};
+		const container = this.shadowRoot.querySelector('.table-scrollable');
+		const children = [...this.#body.childNodes];
+		this.#inView = children.map(el => isElementInViewport(el, container));
+		this.updateTableRows();
 	}
 
 	onSelectHeaderButton = (e, col) => {
@@ -734,12 +753,14 @@ export default class Table extends HTMLElement {
 	setNextPage = () => {
 		if (this.page + 1 < this.getTotalPages()) {
 			this.page = this.page + 1;
+			this.shadowRoot.querySelector('.table-scrollable').scrollTo(0, 0);
 		}
 	}
 
 	setPrevPage = () => {
 		if (this.page - 1 >= 0) {
 			this.page = this.page - 1;
+			this.shadowRoot.querySelector('.table-scrollable').scrollTo(0, 0);
 		}
 	}
 
@@ -878,6 +899,17 @@ export default class Table extends HTMLElement {
 		this.#popup.style.transform = x1 < 0 ? `translateX(calc(-100% - ${x1}px))` : 'translateX(-100%)';
 		this.#visibilityPopup.style.transform = x2 < 0 ? `translateX(calc(-100% - ${x2}px))` : 'translateX(-100%)';
 		this.#filterPopup.style.transform = x3 < 0 ? `translateX(calc(-100% - ${x3}px))` : 'translateX(-100%)';
+	}
+
+	updateTableRows = () => {
+		const range = this.getCurrentRange();
+		this._rows.forEach((row, index) => {
+			this.shadowRoot.getElementById(`row-${index}`)?.remove();
+			if (index >= range.min && index < range.max) {
+				const el = this.buildRow(row, index, false);
+				this.#body.appendChild(el);
+			}
+		});
 	}
 
 	updateTotalPages = () => {
