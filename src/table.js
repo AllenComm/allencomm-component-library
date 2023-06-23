@@ -1,7 +1,7 @@
 // TODO:
-//   Adding filters is inefficient...
-//   Sorting is inefficient when there are 1000 rows...
-
+//	- make it so header btn is on screen always when using touch device
+//	- fix bouncy header (sticky)
+//	- make scrolling smoother. its a combo of inView and setting the scroll content transform.
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
 
@@ -13,7 +13,23 @@ export default class Table extends HTMLElement {
 	#prevHeaderBtnRect = null;
 	#rowsUnfiltered = null;
 	#RESERVED_SELECTED = '~~SELECTED~~';
-
+	#body = null;
+	#scrollContent = null;
+	#popup = null;
+	#visibilityPopup = null;
+	#filterPopup = null;
+	#footerCurrentPage = null;
+	#footerPageSize = null;
+	#footerPrevBtn = null;
+	#footerNextBtn = null;
+	#footerSelectedMulti = null; 
+	#footerSelectedNumber = null; 
+	#footerSelectedSingle = null; 
+	#footerTotalPages = null; 
+	#header = null; 
+	#scrollableContainer = null;
+	#lastScrollTop = 0;
+	
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -47,9 +63,8 @@ export default class Table extends HTMLElement {
 				:host([density='compact']) .row {
 					height: 34px;
 				}
-				.body {
-					display: flex;
-					flex-direction: column;
+				#body {
+					position: relative;
 				}
 				.cell {
 					background-color: white;
@@ -123,6 +138,7 @@ export default class Table extends HTMLElement {
 					font-weight: bold;
 					position: sticky;
 					top: 0;
+					z-index: 1;
 				}
 				.header .cell {
 					background-color: white;
@@ -199,6 +215,14 @@ export default class Table extends HTMLElement {
 					cursor: default;
 					pointer-events: none;
 				}
+				#scroll-content {
+					display: flex;
+					flex-direction: column;
+					left: 0;
+					position: absolute;
+					top: 0;
+					width: 100%;
+				}
 				.table {
 					background-color: white;
 					border: 1px solid rgba(0, 0, 0, .1);
@@ -215,7 +239,9 @@ export default class Table extends HTMLElement {
 			<div class='table' tabindex="-1">
 				<div class='table-scrollable'>
 					<div class='header'></div>
-					<div class='body'></div>
+					<div id='body'>
+						<div id="scroll-content"></div>
+					</div>
 				</div>
 				<div class='footer'>
 					<div class='row' id='row-footer'>
@@ -232,6 +258,7 @@ export default class Table extends HTMLElement {
 								<option value='50'>50</option>
 								<option value='100'>100</option>
 								<option value='1000'>1000</option>
+								<option value='Infinity'>all</option>
 							</select>
 						</div>
 						<div class='footer-inner'>
@@ -308,56 +335,6 @@ export default class Table extends HTMLElement {
 		this._filters = null;
 	}
 
-	get page() { return this._page; }
-	set page(newVal) {
-		if (newVal != this._page) {
-			this._page = newVal;
-			this.#footerCurrentPage.innerText = newVal + 1;
-			this.forceRender();
-		}
-	}
-
-	get pageSize() { return this._pageSize; }
-	set pageSize(newVal) {
-		if (newVal === this._pageSize) return;
-		this._pageSize = newVal;
-		const el = this.shadowRoot.querySelector('select');
-		[...el?.options || []].forEach((a) => {
-			if (parseInt(a.innerHTML) === this._pageSize) {
-				el.setAttribute('selected', a.id);
-			}
-		});
-
-		const topEl = [...this.#body.childNodes][0] || {};
-		const topIndex = parseInt(topEl?.id?.match(/\d+/));
-		if (!topEl || isNaN(topIndex)) return;
-		const range = this.getCurrentRange();
-
-		if (topIndex < range.min || topIndex > range.max) {
-			const findPage = (page) => {
-				const border = topIndex < range.min ? page * newVal : (page + 1) * newVal;
-				return topIndex < border ? findPage(topIndex < range.min ? page - 1 : page + 1) : page;
-			}
-			this.page = findPage(this.page);
-		}
-		this.forceRender();
-	}
-
-	get rows() { return this._rows; }
-	set rows(newVal) {
-		this.#rowsUnfiltered = newVal;
-		this.onRowsUpdate(newVal);
-	}
-
-	onRowsUpdate = (rows) => {
-		console.time('sort and filter');
-		this._rows = this.rowsFilter(this.rowsSort(rows));
-		console.timeEnd('sort and filter');
-		console.time('render');
-		this.forceRender();
-		console.timeEnd('render');
-	}
-
 	get columns() { return this._columns; }
 	set columns(newVal) {
 		this._columns = newVal;
@@ -372,19 +349,37 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	get #body() { return this.shadowRoot.querySelector('.body'); }
-	get #popup() { return this.shadowRoot.querySelector('#popup'); }
-	get #visibilityPopup() { return this.shadowRoot.querySelector('#visibility-popup'); }
-	get #filterPopup() { return this.shadowRoot.querySelector('#filter-popup'); }
-	get #footerCurrentPage() { return this.shadowRoot.querySelector('#current-page'); }
-	get #footerPageSize() { return this.shadowRoot.querySelector('#page-size'); }
-	get #footerPrevBtn() { return this.shadowRoot.querySelector('#prev-page'); }
-	get #footerNextBtn() { return this.shadowRoot.querySelector('#next-page'); }
-	get #footerSelectedMulti() { return this.shadowRoot.querySelector('#selected-multi'); }
-	get #footerSelectedNumber() { return this.shadowRoot.querySelector('#selected-number'); }
-	get #footerSelectedSingle() { return this.shadowRoot.querySelector('#selected-single'); }
-	get #footerTotalPages() { return this.shadowRoot.querySelector('#total-pages'); }
-	get #header() { return this.shadowRoot.querySelector('.header'); }
+	get page() { return this._page; }
+	set page(newVal) {
+		if (newVal != this._page) {
+			this._page = newVal;
+			this.#footerCurrentPage.innerText = newVal + 1;
+			this.forceRender();
+		}
+	}
+
+	get pageSize() { return this._pageSize; }
+	set pageSize(newVal) {
+		if (newVal === this._pageSize) return;
+		this._pageSize = newVal;
+		[...this.#footerPageSize?.options || []].forEach((a) => {
+			if (parseInt(a.value) === this._pageSize) {
+				this.#footerPageSize.setAttribute('selected', a.id);
+			}
+		});
+		this.page = 0;
+		if (this.#scrollContent) {
+			this.#scrollContent.style.transform = '';
+		}
+		this.forceRender();
+	}
+
+	get rows() { return this._rows; }
+	set rows(newVal) {
+		this.#rowsUnfiltered = newVal;
+		this.onRowsUpdate(newVal);
+	}
+
 	get selected() { return this._rows?.filter(a => a[this.#RESERVED_SELECTED] ) || []; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -421,6 +416,22 @@ export default class Table extends HTMLElement {
 		}
 		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
 		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
+
+		this.#body = this.shadowRoot.querySelector('#body');
+		this.#scrollContent = this.shadowRoot.querySelector('#scroll-content');
+		this.#popup = this.shadowRoot.querySelector('#popup');
+		this.#visibilityPopup = this.shadowRoot.querySelector('#visibility-popup');
+		this.#filterPopup = this.shadowRoot.querySelector('#filter-popup');
+		this.#footerCurrentPage = this.shadowRoot.querySelector('#current-page');
+		this.#footerPageSize = this.shadowRoot.querySelector('#page-size');
+		this.#footerPrevBtn = this.shadowRoot.querySelector('#prev-page');
+		this.#footerNextBtn = this.shadowRoot.querySelector('#next-page');
+		this.#footerSelectedMulti = this.shadowRoot.querySelector('#selected-multi');
+		this.#footerSelectedNumber = this.shadowRoot.querySelector('#selected-number');
+		this.#footerSelectedSingle = this.shadowRoot.querySelector('#selected-single');
+		this.#footerTotalPages = this.shadowRoot.querySelector('#total-pages');
+		this.#header = this.shadowRoot.querySelector('.header');
+		this.#scrollableContainer = this.shadowRoot.querySelector('.table-scrollable');
 		
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
@@ -433,7 +444,7 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
 		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
-		this.shadowRoot.querySelector('.table-scrollable').addEventListener('scroll', this.onScroll);
+		this.#scrollableContainer.addEventListener('scroll', this.onScroll);
 		this.shadowRoot.addEventListener('click', this.onClickInside);
 		document.addEventListener('click', this.onClickOutside);
 		document.addEventListener('keydown', this.onKeyDown);
@@ -452,8 +463,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(column.type);
-		element.style.flex = `0 0 ${column.width}`;
-		element.style.whiteSpace = column.wrap ? 'normal' : null;
+		element.style.flex = `0 0 ${column.width || '100px'}`;
 		element.title = data;
 		element.setAttribute('id', `cell-${cellIndex}`);
 
@@ -478,7 +488,7 @@ export default class Table extends HTMLElement {
 		content.textContent = name;
 		element.className = `cell sort-${sort || 'none'}`;
 		element.setAttribute('data-property', column.property);
-		element.style.flex = `0 0 ${width}`;
+		element.style.flex = `0 0 ${width || '100px'}`;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
@@ -508,11 +518,6 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('row');
 		element.id = isHeader ? 'row-header' : `row-${index}`;
-
-		const range = this.getCurrentRange();
-		this.shadowRoot.host.querySelector(`[slot*="${index}-"]`)?.remove();
-		const isInView = this.#inView ? this.#inView[Math.abs(range.min - index)] : true;
-		if (!isInView && !isHeader) return element; 
 
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
@@ -565,12 +570,13 @@ export default class Table extends HTMLElement {
 		this.updateVisibilityPopup();
 		this.updateFilterPopup();
 		this.shadowRoot.host.innerHTML = '';
-		this.#body.innerHTML = '';
+		this.#scrollContent.innerHTML = '';
 		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
 		if (this.#allowSelection) {
 			this.#header.querySelector('input').checked = isAllSelected;
 		}
 		this.updateTableRows();
+		this.onScroll();
 	}
 
 	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
@@ -581,10 +587,26 @@ export default class Table extends HTMLElement {
 	}
 
 	getCurrentRange = () => {
+		if (this.pageSize === Infinity) return { min: 0, max: this.rows.length };
 		const offset = this.pageSize;
 		const min = this.page * offset;
 		const max = (this.page + 1) * offset;
 		return { min, max };
+	}
+
+	getRowHeight = () => {
+		const density = this.getAttribute('density') ?? 'compact';
+		switch (density) {
+			case 'compact': return 34;
+			case 'comfortable': return 46;
+			case 'cozy': return 70;
+		}
+	}
+
+	getScrollableHeight = () => {
+		const rowHeight = this.getRowHeight();
+		const rowCount = this.pageSize < Infinity ? this.pageSize : this.rows.length;
+		return rowHeight * rowCount;
 	}
 
 	getTotalPages = () => {
@@ -599,6 +621,12 @@ export default class Table extends HTMLElement {
 		this.#popup.style.transform = '';
 		this.#visibilityPopup.style.transform = '';
 		this.#filterPopup.style.transform = '';
+	}
+
+	isRowInView = (el) => {
+		const rect = el.getBoundingClientRect();
+		const containerRect = this.#scrollableContainer.getBoundingClientRect();
+		return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
 	}
 
 	onClickInside = (e) => {
@@ -638,15 +666,24 @@ export default class Table extends HTMLElement {
 		this.#visibilityPopup.classList.add('visible');
 	}
 
-	onScroll = () => {
-		const isElementInViewport = (el, container) => {
-			const rect = el.getBoundingClientRect();
-		    const containerRect = container.getBoundingClientRect();
-		    return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
-		};
-		const container = this.shadowRoot.querySelector('.table-scrollable');
-		const children = [...this.#body.childNodes];
-		this.#inView = children.map(el => isElementInViewport(el, container));
+	onRowsUpdate = (rows) => {
+		console.time('sort and filter');
+		this._rows = this.rowsFilter(this.rowsSort(rows));
+		console.timeEnd('sort and filter');
+		console.time('render');
+		this.forceRender();
+		console.timeEnd('render');
+	}
+
+	onScroll = (e) => {
+		const scrollTop = this.#scrollableContainer.scrollTop;
+		if (e && this.#lastScrollTop === scrollTop) return; 
+
+		this.#lastScrollTop = this.#scrollableContainer.scrollTop;
+		const { height } = this.#scrollableContainer.getBoundingClientRect();
+		const max = Math.max(0, Math.min(this.getScrollableHeight() - height, scrollTop));
+		this.#body.style.height = `${this.getScrollableHeight()}px`;
+		this.#scrollContent.style.transform = `translateY(${max}px)`; 
 		this.updateTableRows();
 	}
 
@@ -764,7 +801,7 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	setPageSize = (e) => this.pageSize = parseInt(e.target.value);
+	setPageSize = (e) => this.pageSize = Number(e.target.value);
 	
 	sortColumn = (dir) => {
 		if (this.currentColumn) {
@@ -903,11 +940,24 @@ export default class Table extends HTMLElement {
 
 	updateTableRows = () => {
 		const range = this.getCurrentRange();
+		const { height } = this.#scrollableContainer.getBoundingClientRect();
+		const scrollPos = this.#scrollableContainer.scrollTop;
+		const rowHeight = this.getRowHeight();
+		const isRowViewable = (i) => {
+			const index = i - range.min;
+			const rowPos = index * rowHeight;
+			const inView = rowPos + rowHeight < scrollPos + height && rowPos + rowHeight > scrollPos;
+			return inView;
+		};
+		
 		this._rows.forEach((row, index) => {
 			this.shadowRoot.getElementById(`row-${index}`)?.remove();
+			this.shadowRoot.host.querySelector(`[slot*="${index}-"]`)?.remove();
 			if (index >= range.min && index < range.max) {
+				const inView = isRowViewable(index);
+				if (!inView) return;
 				const el = this.buildRow(row, index, false);
-				this.#body.appendChild(el);
+				this.#scrollContent.appendChild(el);
 			}
 		});
 	}
