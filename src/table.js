@@ -8,7 +8,6 @@ export default class Table extends HTMLElement {
 	#allowSelection = false;
 	#anchor = null;
 	#initialized = false;
-	#inView = null;
 	#multiFilterOperator = 'AND'; 
 	#prevHeaderBtnRect = null;
 	#rowsUnfiltered = null;
@@ -19,6 +18,7 @@ export default class Table extends HTMLElement {
 	#visibilityPopup = null;
 	#filterPopup = null;
 	#footerCurrentPage = null;
+	#footerPageInfo = null;
 	#footerPageSize = null;
 	#footerPrevBtn = null;
 	#footerNextBtn = null;
@@ -184,6 +184,7 @@ export default class Table extends HTMLElement {
 					transform: translateX(-100%);
 					transition: opacity .1s ease;
 					white-space: nowrap;
+					z-index: 1;
 				}
 				.popup.visible {
 					opacity: 1;
@@ -192,6 +193,7 @@ export default class Table extends HTMLElement {
 				.row {
 					display: flex;
 					height: 34px;
+					width: 100%;
 				}
 				.row:not(#row-header):last-child .cell {
 					border-color: transparent;
@@ -261,7 +263,7 @@ export default class Table extends HTMLElement {
 								<option value='Infinity'>all</option>
 							</select>
 						</div>
-						<div class='footer-inner'>
+						<div id='page-info' class='footer-inner'>
 							<div id='current-page'>0</div>
 							of
 							<div id='total-pages'>0</div>
@@ -371,6 +373,11 @@ export default class Table extends HTMLElement {
 		if (this.#scrollContent) {
 			this.#scrollContent.style.transform = '';
 		}
+		
+		if (this.#footerPageInfo) {
+			this.#footerPageInfo.style.display = this._pageSize === Infinity ? 'none' : '';
+		}
+
 		this.forceRender();
 	}
 
@@ -423,6 +430,7 @@ export default class Table extends HTMLElement {
 		this.#visibilityPopup = this.shadowRoot.querySelector('#visibility-popup');
 		this.#filterPopup = this.shadowRoot.querySelector('#filter-popup');
 		this.#footerCurrentPage = this.shadowRoot.querySelector('#current-page');
+		this.#footerPageInfo = this.shadowRoot.querySelector('#page-info');
 		this.#footerPageSize = this.shadowRoot.querySelector('#page-size');
 		this.#footerPrevBtn = this.shadowRoot.querySelector('#prev-page');
 		this.#footerNextBtn = this.shadowRoot.querySelector('#next-page');
@@ -449,7 +457,6 @@ export default class Table extends HTMLElement {
 		document.addEventListener('click', this.onClickOutside);
 		document.addEventListener('keydown', this.onKeyDown);
 		this.#initialized = true;
-		this.forceRender();
 	}
 
 	disconnectedCallback() {
@@ -565,17 +572,11 @@ export default class Table extends HTMLElement {
 		if (!this.#initialized || !this._rows || !this._columns) return;
 
 		this.updateTotalPages();
-		this.updateHeader();
 		this.updateFooter();
 		this.updateVisibilityPopup();
 		this.updateFilterPopup();
-		this.shadowRoot.host.innerHTML = '';
-		this.#scrollContent.innerHTML = '';
-		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
-		if (this.#allowSelection) {
-			this.#header.querySelector('input').checked = isAllSelected;
-		}
 		this.updateTableRows();
+		this.updateHeader();
 		this.onScroll();
 	}
 
@@ -629,7 +630,7 @@ export default class Table extends HTMLElement {
 		return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
 	}
 
-	onClickInside = (e) => {
+	onClickInside = () => {
 		this.shadowRoot.querySelector('.table').focus();
 	}
 
@@ -661,7 +662,7 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	onManageColumnsClick = (e) => {
+	onManageColumnsClick = () => {
 		this.#popup.classList.remove('visible');
 		this.#visibilityPopup.classList.add('visible');
 	}
@@ -915,6 +916,11 @@ export default class Table extends HTMLElement {
 	updateHeader = () => {
 		this.#header.innerHTML = '';
 		this.#header.appendChild(this.buildRow(this._columns, -1, true));
+
+		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
+		if (this.#allowSelection) {
+			this.#header.querySelector('input').checked = isAllSelected;
+		}
 	}
 
 	updatePopupPosition = (rect) => {
@@ -939,6 +945,9 @@ export default class Table extends HTMLElement {
 	}
 
 	updateTableRows = () => {
+		this.shadowRoot.host.innerHTML = '';
+		this.#scrollContent.innerHTML = '';
+
 		const range = this.getCurrentRange();
 		const { height } = this.#scrollableContainer.getBoundingClientRect();
 		const scrollPos = this.#scrollableContainer.scrollTop;
