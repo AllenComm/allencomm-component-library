@@ -5,32 +5,32 @@
 //	- add resizing of columns
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
+	#RESERVED_SELECTED = '~~SELECTED~~';
 
 	#allowSelection = false;
 	#anchor = null;
-	#initialized = false;
-	#multiFilterOperator = 'AND'; 
-	#prevHeaderBtnRect = null;
-	#rowsUnfiltered = null;
-	#RESERVED_SELECTED = '~~SELECTED~~';
 	#body = null;
-	#menu = null;
-	#manage = null;
-	#scrollContent = null;
 	#filters = null;
 	#footerCurrentPage = null;
+	#footerNextBtn = null;
 	#footerPageInfo = null;
 	#footerPageSize = null;
 	#footerPrevBtn = null;
-	#footerNextBtn = null;
-	#footerSelectedMulti = null; 
-	#footerSelectedNumber = null; 
-	#footerSelectedSingle = null; 
-	#footerTotalPages = null; 
+	#footerSelectedMulti = null;
+	#footerSelectedNumber = null;
+	#footerSelectedSingle = null;
+	#footerTotalPages = null;
 	#footerTotalRows = null;
-	#header = null; 
-	#scrollableContainer = null;
+	#header = null;
+	#initialized = false;
 	#lastScrollTop = 0;
+	#manage = null;
+	#menu = null;
+	#multiFilterOperator = 'AND';
+	#prevHeaderBtnRect = null;
+	#rowsUnfiltered = null;
+	#scrollableContainer = null;
+	#scrollContent = null;
 
 	constructor() {
 		super();
@@ -198,6 +198,7 @@ export default class Table extends HTMLElement {
 					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					display: inline-flex;
 					height: 34px;
+					min-width: 100%;
 					width: auto;
 				}
 				.row:not(#row-header):last-child .cell {
@@ -429,7 +430,7 @@ export default class Table extends HTMLElement {
 		if (page != null && !isNaN(page)) {
 			this.page = parseInt(page);
 		}
-		const pageSize = parseInt(this.getAttribute('page-size'));
+		const pageSize = Number(this.getAttribute('page-size'));
 		if (pageSize != null && !isNaN(pageSize)) {
 			this.pageSize = pageSize;
 		}
