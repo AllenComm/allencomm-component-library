@@ -344,7 +344,7 @@ export default class Table extends HTMLElement {
 		this.NONE = 'none';
 		this._columns = null;
 		this._page = 0;
-		this._pageSize = 10;
+		this._pageSize = 100;
 		this._rows = null;
 		this._filters = null;
 	}
@@ -426,8 +426,9 @@ export default class Table extends HTMLElement {
 			this.page = Number(page);
 		}
 		const pageSize = Number(this.getAttribute('page-size'));
+		console.log({pageSize});
 		if (pageSize != null && !isNaN(pageSize)) {
-			this.pageSize = pageSize;
+			this.pageSize = pageSize || this._pageSize;
 		}
 		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
 		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
@@ -648,7 +649,7 @@ export default class Table extends HTMLElement {
 	onKeyDown = (e) => {
 		const isCtrlA = e.ctrlKey && e.key === 'a' || e.key === 'A';
 		const isFocusedOn = this.shadowRoot.contains(this.shadowRoot.activeElement);
-		if (isCtrlA && isFocusedOn) {
+		if (isCtrlA && isFocusedOn && this.#allowSelection) {
 			e.preventDefault();
 			this.onSelectAllRows();
 		}
