@@ -2,7 +2,6 @@
 //	- make it so header btn is on screen always when using touch device
 //	- fix bouncy header (sticky)
 //	- make scrolling smoother. its a combo of inView and setting the scroll content transform.
-//	- show total rows when all/infinity is selected.
 //	- add resizing of columns
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
@@ -28,6 +27,7 @@ export default class Table extends HTMLElement {
 	#footerSelectedNumber = null; 
 	#footerSelectedSingle = null; 
 	#footerTotalPages = null; 
+	#footerTotalRows = null;
 	#header = null; 
 	#scrollableContainer = null;
 	#lastScrollTop = 0;
@@ -70,8 +70,6 @@ export default class Table extends HTMLElement {
 				}
 				.cell {
 					background-color: white;
-					border-bottom: 1px solid rgba(0, 0, 0, .1);
-					flex: 1 0 100px;
 					overflow: hidden;
 					padding: 6px;
 					text-overflow: ellipsis;
@@ -197,9 +195,10 @@ export default class Table extends HTMLElement {
 					opacity: .2;
 				}
 				.row {
-					display: flex;
+					border-bottom: 1px solid rgba(0, 0, 0, .1);
+					display: inline-flex;
 					height: 34px;
-					width: 100%;
+					width: auto;
 				}
 				.row:not(#row-header):last-child .cell {
 					border-color: transparent;
@@ -208,6 +207,7 @@ export default class Table extends HTMLElement {
 					background: #D7DFF3;
 				}
 				#row-footer {
+					display: flex;
 					justify-content: space-between;
 					place-items: center;
 					padding: 6px;
@@ -224,12 +224,16 @@ export default class Table extends HTMLElement {
 					pointer-events: none;
 				}
 				#scroll-content {
+					align-items: flex-start;
 					display: flex;
 					flex-direction: column;
+					justify-content: flex-start;
 					left: 0;
+					min-width: 100%;
+					overflow: hidden;
 					position: absolute;
 					top: 0;
-					width: 100%;
+					width: fit-content;
 				}
 				.table {
 					background-color: white;
@@ -242,6 +246,9 @@ export default class Table extends HTMLElement {
 				.table-scrollable {
 					flex: 1 1 auto;
 					overflow: auto;
+				}
+				#total-rows {
+					text-align: right;
 				}
 			</style>
 			<div class='table' tabindex="-1">
@@ -259,7 +266,7 @@ export default class Table extends HTMLElement {
 							<span id='selected-multi' hidden='true'>rows selected</span>
 						</div>
 						<div class='footer-inner'>
-							<span style='font-size: 11px; place-self: center;'>Rows per page:</span>
+							<div>Rows per page:</div>
 							<select id='page-size'>
 								<option value='10'>10</option>
 								<option value='25'>25</option>
@@ -269,6 +276,7 @@ export default class Table extends HTMLElement {
 								<option value='Infinity'>all</option>
 							</select>
 						</div>
+						<div id='total-rows' class='footer-inner'></div>
 						<div id='page-info' class='footer-inner'>
 							<div id='current-page'>0</div>
 							of
@@ -381,10 +389,6 @@ export default class Table extends HTMLElement {
 		if (this.#scrollContent) {
 			this.#scrollContent.style.transform = '';
 		}
-		
-		if (this.#footerPageInfo) {
-			this.#footerPageInfo.style.display = this._pageSize === Infinity ? 'none' : '';
-		}
 
 		this.forceRender();
 	}
@@ -448,6 +452,7 @@ export default class Table extends HTMLElement {
 		this.#footerTotalPages = this.shadowRoot.querySelector('#total-pages');
 		this.#header = this.shadowRoot.querySelector('.header');
 		this.#scrollableContainer = this.shadowRoot.querySelector('.table-scrollable');
+		this.#footerTotalRows = this.shadowRoot.querySelector('#total-rows');
 		
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
@@ -476,7 +481,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(column.type);
-		element.style.flex = `0 0 ${column.width || '100px'}`;
+		element.style.width = `${column.width || '100px'}`;
 		element.title = data;
 		element.setAttribute('id', `cell-${cellIndex}`);
 
@@ -501,7 +506,7 @@ export default class Table extends HTMLElement {
 		content.textContent = name;
 		element.className = `cell sort-${sort || 'none'}`;
 		element.setAttribute('data-property', column.property);
-		element.style.flex = `0 0 ${width || '100px'}`;
+		element.style.width = `${width || '100px'}`;
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
@@ -849,8 +854,12 @@ export default class Table extends HTMLElement {
 		this.#footerSelectedNumber.hidden = hidden;
 		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
 		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
-
+		
 		this.#footerPageSize.value = this.pageSize;
+		this.#footerTotalRows.innerHTML = `${this.rows.length.toLocaleString()} rows`;
+		const isInfinity = this.pageSize === Infinity;
+		this.#footerTotalRows.style.display = isInfinity ? 'block' : 'none';
+		this.#footerPageInfo.style.display = isInfinity ? 'none' : 'flex';
 	}
 
 	updateHeader = () => {
