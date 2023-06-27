@@ -69,7 +69,6 @@ export default class Table extends HTMLElement {
 					position: relative;
 				}
 				.cell {
-					background-color: white;
 					overflow: hidden;
 					padding: 6px;
 					text-overflow: ellipsis;
@@ -204,7 +203,7 @@ export default class Table extends HTMLElement {
 				.row:not(#row-header):last-child .cell {
 					border-color: transparent;
 				}
-				.row[aria-selected='true'] .cell {
+				.row[aria-selected='true'] {
 					background: #D7DFF3;
 				}
 				#row-footer {
@@ -382,7 +381,7 @@ export default class Table extends HTMLElement {
 		if (newVal === this._pageSize) return;
 		this._pageSize = newVal;
 		[...this.#footerPageSize?.options || []].forEach((a) => {
-			if (parseInt(a.value) === this._pageSize) {
+			if (Number(a.value) === this._pageSize) {
 				this.#footerPageSize.setAttribute('selected', a.id);
 			}
 		});
@@ -428,7 +427,7 @@ export default class Table extends HTMLElement {
 		this.filters = filters ? JSON.parse(filters) : null;
 		const page = this.getAttribute('page');
 		if (page != null && !isNaN(page)) {
-			this.page = parseInt(page);
+			this.page = Number(page);
 		}
 		const pageSize = Number(this.getAttribute('page-size'));
 		if (pageSize != null && !isNaN(pageSize)) {
@@ -1003,7 +1002,7 @@ export default class Table extends HTMLElement {
 	}
 
 	updateTotalPages = () => {
-		const currentTotal = parseInt(this.#footerTotalPages.innerText);
+		const currentTotal = Number(this.#footerTotalPages.innerText);
 		if (currentTotal != this.getTotalPages()) {
 			this.#footerTotalPages.innerText = this.getTotalPages();
 		}
