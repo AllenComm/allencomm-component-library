@@ -2,6 +2,8 @@
 //	- make it so header btn is on screen always when using touch device
 //	- fix bouncy header (sticky)
 //	- make scrolling smoother. its a combo of inView and setting the scroll content transform.
+//	- show total rows when all/infinity is selected.
+//	- add resizing of columns
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
 
@@ -13,10 +15,10 @@ export default class Table extends HTMLElement {
 	#rowsUnfiltered = null;
 	#RESERVED_SELECTED = '~~SELECTED~~';
 	#body = null;
+	#menu = null;
+	#manage = null;
 	#scrollContent = null;
-	#popup = null;
-	#visibilityPopup = null;
-	#filterPopup = null;
+	#filters = null;
 	#footerCurrentPage = null;
 	#footerPageInfo = null;
 	#footerPageSize = null;
@@ -29,7 +31,7 @@ export default class Table extends HTMLElement {
 	#header = null; 
 	#scrollableContainer = null;
 	#lastScrollTop = 0;
-	
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -116,7 +118,7 @@ export default class Table extends HTMLElement {
 				.filter[data-type="number"] .boolean {
 					display: none;
 				}
-				#filter-popup .filter:first-child .filter-and-or {
+				#filters .filter:first-child .filter-and-or {
 					visibility: hidden;
 				}
 				.footer:not(:empty) {
@@ -165,30 +167,34 @@ export default class Table extends HTMLElement {
 				.header .cell:hover > .cell-menu-btn {
 					opacity: 1;
 				}
+				#menu {
+					left: 0;
+					position: absolute;
+					top: 0;
+					z-index: 1;
+				}
+				#menu > * {
+					background-color: white;
+					flex-direction: column;
+					display: none;
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity .1s ease;
+					white-space: nowrap;
+				}
+				#menu.visible:not(.manage):not(.filter) #options,
+				#menu.visible.manage #manage,
+				#menu.visible.filter #filters {
+					display: flex;
+					opacity: 1;
+					pointer-events: all;
+				}
 				.pages {
 					display: flex;
 				}
 				#prev-page:disabled,
 				#next-page:disabled {
 					opacity: .2;
-				}
-				.popup {
-					background-color: white;
-					display: flex;
-					flex-direction: column;
-					left: 0;
-					opacity: 0;
-					pointer-events: none;
-					position: absolute;
-					top: 32px;
-					transform: translateX(-100%);
-					transition: opacity .1s ease;
-					white-space: nowrap;
-					z-index: 1;
-				}
-				.popup.visible {
-					opacity: 1;
-					pointer-events: all;
 				}
 				.row {
 					display: flex;
@@ -280,15 +286,17 @@ export default class Table extends HTMLElement {
 						</div>
 					</div>
 				</div>
-				<div id='popup' class='popup'>
-					<button id='sort-asc-btn'>Sort ASC</button>
-					<button id='sort-desc-btn'>Sort DESC</button>
-					<button id='filter-btn'>Filter</button>
-					<button id='manage-columns-btn'>Manage Columns</button>
-					<button id='export-csv'>Export To CSV</button>
+				<div id='menu'>
+					<div id='options'>
+						<button id='sort-asc-btn'>Sort ASC</button>
+						<button id='sort-desc-btn'>Sort DESC</button>
+						<button id='filter-btn'>Filter</button>
+						<button id='manage-columns-btn'>Manage Columns</button>
+						<button id='export-csv'>Export To CSV</button>
+					</div>
+					<div id='manage'></div>
+					<div id='filters'></div>
 				</div>
-				<div id='visibility-popup' class='popup'></div>
-				<div id='filter-popup' class='popup'></div>
 			</div>
 			<template id='filter-template'>
 				<div class='filter'>
@@ -426,9 +434,9 @@ export default class Table extends HTMLElement {
 
 		this.#body = this.shadowRoot.querySelector('#body');
 		this.#scrollContent = this.shadowRoot.querySelector('#scroll-content');
-		this.#popup = this.shadowRoot.querySelector('#popup');
-		this.#visibilityPopup = this.shadowRoot.querySelector('#visibility-popup');
-		this.#filterPopup = this.shadowRoot.querySelector('#filter-popup');
+		this.#menu = this.shadowRoot.querySelector('#menu');
+		this.#manage = this.shadowRoot.querySelector('#manage');
+		this.#filters = this.shadowRoot.querySelector('#filters');
 		this.#footerCurrentPage = this.shadowRoot.querySelector('#current-page');
 		this.#footerPageInfo = this.shadowRoot.querySelector('#page-info');
 		this.#footerPageSize = this.shadowRoot.querySelector('#page-size');
@@ -444,14 +452,12 @@ export default class Table extends HTMLElement {
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
-		this.#popup.addEventListener('click', (e) => e.stopPropagation());
-		this.#visibilityPopup.addEventListener('click', (e) => e.stopPropagation());
-		this.#filterPopup.addEventListener('click', (e) => e.stopPropagation());
-		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onManageColumnsClick);
+		this.#menu.addEventListener('click', (e) => e.stopPropagation());
+		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onMenuManageClick);
 		this.shadowRoot.querySelector('#export-csv').addEventListener('click', this.exportToCsv);
 		this.shadowRoot.querySelector('#sort-asc-btn').addEventListener('click', () => this.sortColumn(this.ASC));
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
-		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onFilterClick);
+		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onMenuFilterClick);
 		this.#scrollableContainer.addEventListener('scroll', this.onScroll);
 		this.shadowRoot.addEventListener('click', this.onClickInside);
 		document.addEventListener('click', this.onClickOutside);
@@ -506,8 +512,8 @@ export default class Table extends HTMLElement {
 			filterBtn.className = 'cell-filter-btn';
 			filterBtn.innerHTML = `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAbUlEQVQ4y2NgGE5gK8N/PHATpoZDeDUcwNSgwPAWp/I3DHLYHOXJ8Ber8r8Mbrj8UY9VQy1ujzMxbMNQvoWBEV9YCTHcQ1F+j0GQUPAaMXyHK/8O5BEBkuEakoiNRJgGhlENeMARsPIjDMMUAABg/nwFPtIxLAAAAABJRU5ErkJggg=="></img>`
 			filterBtn.addEventListener('click', (e) => { 
-				this.onSelectHeaderButton(e, column);
-				this.onFilterClick();
+				this.onMenuOpenClick(e, column);
+				this.onMenuFilterClick();
 			});
 			element.appendChild(filterBtn);
 		}
@@ -515,7 +521,7 @@ export default class Table extends HTMLElement {
 		const menuBtn = document.createElement('button');
 		menuBtn.className = 'cell-menu-btn';
 		menuBtn.textContent = '\u1392';
-		menuBtn.addEventListener('click', (e) => this.onSelectHeaderButton(e, column));
+		menuBtn.addEventListener('click', (e) => this.onMenuOpenClick(e, column));
 		element.appendChild(menuBtn);
 
 		return element;
@@ -573,18 +579,11 @@ export default class Table extends HTMLElement {
 
 		this.updateTotalPages();
 		this.updateFooter();
-		this.updateVisibilityPopup();
-		this.updateFilterPopup();
-		this.updateTableRows();
+		this.updateMenuManage();
+		this.updateMenuFilters();
+		this.updateRows();
 		this.updateHeader();
 		this.onScroll();
-	}
-
-	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
-		const otherElementRect = otherElement.getBoundingClientRect();
-		const positionTop = elementRect.top - otherElementRect.top;
-		const positionLeft = elementRect.left - otherElementRect.left;
-		return { top: positionTop, left: positionLeft };
 	}
 
 	getCurrentRange = () => {
@@ -593,6 +592,13 @@ export default class Table extends HTMLElement {
 		const min = this.page * offset;
 		const max = (this.page + 1) * offset;
 		return { min, max };
+	}
+
+	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
+		const otherElementRect = otherElement.getBoundingClientRect();
+		const positionTop = elementRect.top - otherElementRect.top;
+		const positionLeft = elementRect.left - otherElementRect.left;
+		return { top: positionTop, left: positionLeft };
 	}
 
 	getRowHeight = () => {
@@ -617,13 +623,6 @@ export default class Table extends HTMLElement {
 		return 0;
 	}
 
-	hidePopups = () => {
-		this.shadowRoot.querySelectorAll('.popup.visible').forEach(el => el.classList.remove('visible'));
-		this.#popup.style.transform = '';
-		this.#visibilityPopup.style.transform = '';
-		this.#filterPopup.style.transform = '';
-	}
-
 	isRowInView = (el) => {
 		const rect = el.getBoundingClientRect();
 		const containerRect = this.#scrollableContainer.getBoundingClientRect();
@@ -642,15 +641,7 @@ export default class Table extends HTMLElement {
 				el.classList.remove('visible');
 			}
 		};
-		checkClick(this.#popup);
-		checkClick(this.#visibilityPopup);
-		checkClick(this.#filterPopup);
-	}
-
-	onFilterClick = () => {
-		this.#popup.classList.remove('visible');
-		this.updateFilterPopup();
-		this.#filterPopup.classList.add('visible');
+		checkClick(this.#menu);
 	}
 
 	onKeyDown = (e) => {
@@ -662,9 +653,36 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	onManageColumnsClick = () => {
-		this.#popup.classList.remove('visible');
-		this.#visibilityPopup.classList.add('visible');
+	onMenuCloseClick = () => {
+		this.#menu.classList.remove('filter');
+		this.#menu.classList.remove('manage');
+		this.#menu.classList.remove('visible');
+		this.#menu.style.transform = '';
+	}
+
+	onMenuFilterClick = () => {
+		this.#menu.classList.remove('manage');
+		this.#menu.classList.add('filter');
+		this.updateMenuFilters();
+		this.updateMenuPosition(this.#prevHeaderBtnRect);
+	}
+
+	onMenuManageClick = () => {
+		this.#menu.classList.remove('filter');
+		this.#menu.classList.add('manage');
+		this.updateMenuPosition(this.#prevHeaderBtnRect);
+	}
+
+	onMenuOpenClick = (e, col) => {
+		e.stopPropagation();
+		this.currentColumn = col;
+		this.onMenuCloseClick();
+		const rect = e.target.getBoundingClientRect();
+		this.#prevHeaderBtnRect = rect;
+		this.updateMenuPosition(rect);
+		this.#menu.classList.remove('manage');
+		this.#menu.classList.remove('filter');
+		this.#menu.classList.add('visible');
 	}
 
 	onRowsUpdate = (rows) => {
@@ -685,17 +703,7 @@ export default class Table extends HTMLElement {
 		const max = Math.max(0, Math.min(this.getScrollableHeight() - height, scrollTop));
 		this.#body.style.height = `${this.getScrollableHeight()}px`;
 		this.#scrollContent.style.transform = `translateY(${max}px)`; 
-		this.updateTableRows();
-	}
-
-	onSelectHeaderButton = (e, col) => {
-		e.stopPropagation();
-		this.currentColumn = col;
-		this.hidePopups();
-		const rect = e.target.getBoundingClientRect();
-		this.#prevHeaderBtnRect = rect;
-		this.updatePopupPosition(rect);
-		this.#popup.classList.add('visible');
+		this.updateRows();
 	}
 	
 	onSelectAllRows = () => {
@@ -717,6 +725,36 @@ export default class Table extends HTMLElement {
 		}
 		this.forceRender();
 		this.fireChangeEvent();
+	}
+	
+	rowsFilter = (rows) => {
+		const operators = {
+			'=': (a, b) => Number(a) === Number(b),
+			'!=': (a, b) => Number(a) !== Number(b),
+			'>': (a, b) => Number(a) > Number(b),
+			'>=': (a, b) => Number(a) >= Number(b),
+			'<': (a, b) => Number(a) < Number(b),
+			'<=': (a, b) => Number(a) <= Number(b),
+			'empty': (a) => `${a}`.length === 0,
+			'not_empty': (a) => `${a}`.length > 0,
+			'contains': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) >= 0,
+			'equals': (a, b) => a.toLowerCase() === b.toLowerCase(),
+			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
+			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
+			'AND': (arr) => arr.every(a => a),
+			'OR': (arr) => arr.some(a => a),
+			'is_true': (a) => a === true || a === 'true',
+			'is_false': (a) => a === false || a === 'false'
+		};
+		
+		const fitleredRows = rows.filter(row => {
+			const results = this.filters.map(({ column, operator, value }) => {
+				const result = operators[operator](row[column], value);
+				return result;
+			});	
+			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
+		});
+		return fitleredRows;
 	}
 	
 	rowsSort = (r) => {
@@ -757,36 +795,6 @@ export default class Table extends HTMLElement {
 		rows.sort(compare);
 		return rows;
 	}
-	
-	rowsFilter = (rows) => {
-		const operators = {
-			'=': (a, b) => Number(a) === Number(b),
-			'!=': (a, b) => Number(a) !== Number(b),
-			'>': (a, b) => Number(a) > Number(b),
-			'>=': (a, b) => Number(a) >= Number(b),
-			'<': (a, b) => Number(a) < Number(b),
-			'<=': (a, b) => Number(a) <= Number(b),
-			'empty': (a) => `${a}`.length === 0,
-			'not_empty': (a) => `${a}`.length > 0,
-			'contains': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) >= 0,
-			'equals': (a, b) => a.toLowerCase() === b.toLowerCase(),
-			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
-			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
-			'AND': (arr) => arr.every(a => a),
-			'OR': (arr) => arr.some(a => a),
-			'is_true': (a) => a === true || a === 'true',
-			'is_false': (a) => a === false || a === 'false'
-		};
-		
-		const fitleredRows = rows.filter(row => {
-			const results = this.filters.map(({ column, operator, value }) => {
-				const result = operators[operator](row[column], value);
-				return result;
-			});	
-			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
-		});
-		return fitleredRows;
-	}
 
 	setNextPage = () => {
 		if (this.page + 1 < this.getTotalPages()) {
@@ -817,7 +825,7 @@ export default class Table extends HTMLElement {
 			this.onRowsUpdate([...this._rows]);
 			this.forceRender();
 			this.fireChangeEvent();
-			this.hidePopups();
+			this.onMenuCloseClick();
 		}
 	}
 
@@ -827,18 +835,45 @@ export default class Table extends HTMLElement {
 		const newSort = sortCycle[column.sort || 'none'];
 		this.sortColumn(newSort);
 	}
+	
+	updateFooter = () => {
+		const selectedCount = this.selected.length;
+		const totalPages = this.getTotalPages();
 
-	updateFilterPopup = () => {		
-		this.#filterPopup.innerHTML = '';
+		this.#footerCurrentPage.innerText = this.page + 1;
+		this.#footerPrevBtn.disabled = this.page <= 0;
+		this.#footerNextBtn.disabled = this.page + 1 >= totalPages;
+
+		const hidden = selectedCount === 0;
+		this.#footerSelectedNumber.innerText = hidden ? '' : selectedCount.toLocaleString();
+		this.#footerSelectedNumber.hidden = hidden;
+		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
+		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
+
+		this.#footerPageSize.value = this.pageSize;
+	}
+
+	updateHeader = () => {
+		this.#header.innerHTML = '';
+		this.#header.appendChild(this.buildRow(this._columns, -1, true));
+
+		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
+		if (this.#allowSelection) {
+			this.#header.querySelector('input').checked = isAllSelected;
+		}
+	}
+
+	updateMenuFilters = () => {		
+		this.#filters.innerHTML = '';
 		const addBtn = document.createElement('button');
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
 			filters.push({ column: this.currentColumn.property, operator: 'not_empty', value: '' });
 			this.filters = filters;
-			this.updatePopupPosition(this.#prevHeaderBtnRect);
+			this.updateMenuPosition(this.#prevHeaderBtnRect);
 		});
-		this.#filterPopup.appendChild(addBtn);
+		this.#filters.appendChild(addBtn);
 
 		const addFilter = (property, operator, value, index) => {
 			const template = this.shadowRoot.querySelector('#filter-template');
@@ -887,64 +922,50 @@ export default class Table extends HTMLElement {
 			}
 			filterRemove.addEventListener('click', () => {
 				this.filters = this.filters.filter((a, i) => i !== index);
-				this.updatePopupPosition(this.#prevHeaderBtnRect);
+				this.updateMenuPosition(this.#prevHeaderBtnRect);
 			});
 
-			this.#filterPopup.insertBefore(clone, addBtn);
+			this.#filters.insertBefore(clone, addBtn);
 		};
 
 		this.filters.forEach((filter, index) => addFilter(filter.column, filter.operator, filter.value, index));
 	}
-	
-	updateFooter = () => {
-		const selectedCount = this.selected.length;
-		const totalPages = this.getTotalPages();
 
-		this.#footerCurrentPage.innerText = this.page + 1;
-		this.#footerPrevBtn.disabled = this.page <= 0;
-		this.#footerNextBtn.disabled = this.page + 1 >= totalPages;
+	updateMenuManage = () => {
+		if (!this.columns) return;
 
-		const hidden = selectedCount === 0;
-		this.#footerSelectedNumber.innerText = hidden ? '' : selectedCount.toLocaleString();
-		this.#footerSelectedNumber.hidden = hidden;
-		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
-		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
+		this.#manage.innerHTML = '';
+		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
 
-		this.#footerPageSize.value = this.pageSize;
+		this.columns.forEach((col, index) => {
+			const wrapper = document.createElement('div');
+			wrapper.innerHTML = `
+				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
+				<label for='vis-${col.property}'>${col.name}</label>
+			`;
+			wrapper.querySelector('input').addEventListener('change', (e) => {
+				const columns = [ ...this.columns ];
+				columns[index].hidden = !e.target.checked;
+				this.columns = columns;
+				this.forceRender();
+			});
+			this.#manage.appendChild(wrapper);
+		});
 	}
 
-	updateHeader = () => {
-		this.#header.innerHTML = '';
-		this.#header.appendChild(this.buildRow(this._columns, -1, true));
-
-		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
-		if (this.#allowSelection) {
-			this.#header.querySelector('input').checked = isAllSelected;
-		}
-	}
-
-	updatePopupPosition = (rect) => {
+	updateMenuPosition = (rect) => {
 		const { width, height } = rect;
 		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, this.shadowRoot.querySelector('.table'));
 
-		this.#popup.style.left = `${left + width}px`;
-		this.#popup.style.top = `${top + height}px`;
-		this.#visibilityPopup.style.left = `${left + width}px`;
-		this.#visibilityPopup.style.top = `${top + height}px`;
-		this.#filterPopup.style.left = `${left + width}px`;
-		this.#filterPopup.style.top = `${top + height}px`;
+		this.#menu.style.left = `${left + width}px`;
+		this.#menu.style.top = `${top + height}px`;
+		this.#menu.style.transform = 'translateX(-100%)';
 
-		this.#popup.style.transform = 'translateX(-100%)';
-		this.#visibilityPopup.style.transform = 'translateX(-100%)';
-		this.#filterPopup.style.transform = 'translateX(-100%)';
-
-		const [ x1, x2, x3 ] = [this.#popup.getBoundingClientRect().left, this.#visibilityPopup.getBoundingClientRect().left, this.#filterPopup.getBoundingClientRect().left];
-		this.#popup.style.transform = x1 < 0 ? `translateX(calc(-100% - ${x1}px))` : 'translateX(-100%)';
-		this.#visibilityPopup.style.transform = x2 < 0 ? `translateX(calc(-100% - ${x2}px))` : 'translateX(-100%)';
-		this.#filterPopup.style.transform = x3 < 0 ? `translateX(calc(-100% - ${x3}px))` : 'translateX(-100%)';
+		const x = this.#menu.getBoundingClientRect().left;
+		this.#menu.style.transform = x < 0 ? `translateX(calc(-100% - ${x}px))` : 'translateX(-100%)';
 	}
 
-	updateTableRows = () => {
+	updateRows = () => {
 		this.shadowRoot.host.innerHTML = '';
 		this.#scrollContent.innerHTML = '';
 
@@ -976,28 +997,6 @@ export default class Table extends HTMLElement {
 		if (currentTotal != this.getTotalPages()) {
 			this.#footerTotalPages.innerText = this.getTotalPages();
 		}
-	}
-
-	updateVisibilityPopup = () => {
-		if (!this.columns) return;
-
-		this.#visibilityPopup.innerHTML = '';
-		const disableLastInput = this.columns.filter(a => !a.hidden).length <= 1;
-
-		this.columns.forEach((col, index) => {
-			const wrapper = document.createElement('div');
-			wrapper.innerHTML = `
-				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
-				<label for='vis-${col.property}'>${col.name}</label>
-			`;
-			wrapper.querySelector('input').addEventListener('change', (e) => {
-				const columns = [ ...this.columns ];
-				columns[index].hidden = !e.target.checked;
-				this.columns = columns;
-				this.forceRender();
-			});
-			this.#visibilityPopup.appendChild(wrapper);
-		});
 	}
 }
 
