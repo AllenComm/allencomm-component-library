@@ -104,13 +104,9 @@ export default class Table extends HTMLElement {
 					display: flex;
 				}
 				.filter[data-type="string"] .number,
-				.filter[data-type="string"] .boolean {
-					display: none;
-				}
+				.filter[data-type="string"] .boolean,
 				.filter[data-type="boolean"] .number,
-				.filter[data-type="boolean"] .string {
-					display: none;
-				}
+				.filter[data-type="boolean"] .string,
 				.filter[data-type="number"] .string,
 				.filter[data-type="number"] .boolean {
 					display: none;
