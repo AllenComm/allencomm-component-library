@@ -241,6 +241,7 @@ export default class Table extends HTMLElement {
 				}
 				.table-scrollable {
 					flex: 1 1 auto;
+					height: 100%;
 					overflow: auto;
 				}
 				#total-rows {
@@ -268,7 +269,8 @@ export default class Table extends HTMLElement {
 								<option value='25'>25</option>
 								<option value='50'>50</option>
 								<option value='100'>100</option>
-								<option value='1000'>1000</option>
+								<option value='1000'>1,000</option>
+								<option value='10000'>10,000</option>
 								<option value='Infinity'>all</option>
 							</select>
 						</div>
@@ -685,9 +687,9 @@ export default class Table extends HTMLElement {
 	}
 
 	onRowsUpdate = (rows) => {
-		console.time('sort and filter');
+		console.time('sort/filter');
 		this._rows = this.rowsFilter(this.rowsSort(rows));
-		console.timeEnd('sort and filter');
+		console.timeEnd('sort/filter');
 		console.time('render');
 		this.forceRender();
 		console.timeEnd('render');
@@ -978,8 +980,7 @@ export default class Table extends HTMLElement {
 		const { height } = this.#scrollableContainer.getBoundingClientRect();
 		const scrollPos = this.#scrollableContainer.scrollTop;
 		const rowHeight = this.getRowHeight();
-		const isRowViewable = (i) => {
-			const index = i - range.min;
+		const isRowViewable = (index) => {
 			const rowPos = index * rowHeight;
 			const inView = rowPos + rowHeight < scrollPos + height && rowPos + rowHeight > scrollPos;
 			return inView;
