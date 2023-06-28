@@ -130,13 +130,13 @@ export default class Table extends HTMLElement {
 					justify-content: flex-start;
 				}
 				.header {
+					background-color: white;
 					font-weight: bold;
 					position: sticky;
 					top: 0;
 					z-index: 1;
 				}
 				.header .cell {
-					background-color: white;
 					cursor: pointer;
 					overflow: hidden;
 					position: relative;
