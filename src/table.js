@@ -426,7 +426,6 @@ export default class Table extends HTMLElement {
 			this.page = Number(page);
 		}
 		const pageSize = Number(this.getAttribute('page-size'));
-		console.log({pageSize});
 		if (pageSize != null && !isNaN(pageSize)) {
 			this.pageSize = pageSize || this._pageSize;
 		}
@@ -579,11 +578,9 @@ export default class Table extends HTMLElement {
 	forceRender = () => {
 		if (!this.#initialized || !this._rows || !this._columns) return;
 
-		this.updateTotalPages();
 		this.updateFooter();
 		this.updateMenuManage();
 		this.updateMenuFilters();
-		this.updateRows();
 		this.updateHeader();
 		this.onScroll();
 	}
@@ -703,7 +700,9 @@ export default class Table extends HTMLElement {
 		this.#lastScrollTop = this.#scrollableContainer.scrollTop;
 		const { height } = this.#scrollableContainer.getBoundingClientRect();
 		const max = Math.max(0, Math.min(this.getScrollableHeight() - height, scrollTop));
-		this.#body.style.height = `${this.getScrollableHeight()}px`;
+		if (this.#body.style.height !== this.getScrollableHeight()) {
+			this.#body.style.height = `${this.getScrollableHeight()}px`;
+		}
 		this.#scrollContent.style.transform = `translateY(${max}px)`; 
 		this.updateRows();
 	}
@@ -825,7 +824,6 @@ export default class Table extends HTMLElement {
 			this.currentColumn.sort = dir;
 			headerCell.classList.add(`sort-${dir}`);
 			this.onRowsUpdate([...this._rows]);
-			this.forceRender();
 			this.fireChangeEvent();
 			this.onMenuCloseClick();
 		}
@@ -842,7 +840,7 @@ export default class Table extends HTMLElement {
 		const selectedCount = this.selected.length;
 		const totalPages = this.getTotalPages();
 
-		this.#footerCurrentPage.innerText = this.page + 1;
+		this.#footerCurrentPage.innerText = (this.page + 1).toLocaleString();
 		this.#footerPrevBtn.disabled = this.page <= 0;
 		this.#footerNextBtn.disabled = this.page + 1 >= totalPages;
 
@@ -854,6 +852,7 @@ export default class Table extends HTMLElement {
 		
 		this.#footerPageSize.value = this.pageSize;
 		this.#footerTotalRows.innerHTML = `${this.rows.length.toLocaleString()} rows`;
+		this.#footerTotalPages.innerText = this.getTotalPages().toLocaleString();
 		const isInfinity = this.pageSize === Infinity;
 		this.#footerTotalRows.style.display = isInfinity ? 'block' : 'none';
 		this.#footerPageInfo.style.display = isInfinity ? 'none' : 'flex';
@@ -985,24 +984,18 @@ export default class Table extends HTMLElement {
 			const inView = rowPos + rowHeight < scrollPos + height && rowPos + rowHeight > scrollPos;
 			return inView;
 		};
-		
-		this._rows.forEach((row, index) => {
-			this.shadowRoot.getElementById(`row-${index}`)?.remove();
-			this.shadowRoot.host.querySelector(`[slot*="${index}-"]`)?.remove();
-			if (index >= range.min && index < range.max) {
-				const inView = isRowViewable(index);
-				if (!inView) return;
-				const el = this.buildRow(row, index, false);
+		const visibleRows = this._rows.slice(range.min, range.max).filter((row, index) => isRowViewable(index));
+		const visibleRowIds = visibleRows.map((row, index) => `row-${range.min + index}`);
+		const currentRowIds = Array.from(this.#scrollContent.children).map(el => el.id);
+		const rowsToRemove = currentRowIds.filter(id => !visibleRowIds.includes(id));
+
+		rowsToRemove.forEach(id => this.shadowRoot.getElementById(id)?.remove());
+		visibleRows.forEach((row, index) => {
+			if (!currentRowIds.includes(`row-${range.min + index}`)) {
+				const el = this.buildRow(row, range.min + index, false);
 				this.#scrollContent.appendChild(el);
 			}
 		});
-	}
-
-	updateTotalPages = () => {
-		const currentTotal = Number(this.#footerTotalPages.innerText);
-		if (currentTotal != this.getTotalPages()) {
-			this.#footerTotalPages.innerText = this.getTotalPages();
-		}
 	}
 }
 
