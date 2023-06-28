@@ -10,6 +10,7 @@ export default class Option extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					align-items: center;
 					border-radius: 3px;
 					cursor: pointer;
 					display: flex;
