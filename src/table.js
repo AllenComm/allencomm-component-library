@@ -613,7 +613,7 @@ export default class Table extends HTMLElement {
 
 	getScrollableHeight = () => {
 		const rowHeight = this.getRowHeight();
-		const rowCount = this.pageSize < Infinity ? this.pageSize : this.rows.length;
+		const rowCount = this.pageSize < Infinity && this.rows.length > this.pageSize ? this.pageSize : this.rows.length;
 		return rowHeight * rowCount;
 	}
 
