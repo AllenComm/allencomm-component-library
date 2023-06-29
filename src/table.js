@@ -124,6 +124,7 @@ export default class Table extends HTMLElement {
 					gap: 5px;
 					justify-content: flex-end;
 					user-select: none;
+					white-space: nowrap;
 				}
 				.footer-inner:first-child {
 					flex: 3;
@@ -237,6 +238,7 @@ export default class Table extends HTMLElement {
 					display: flex;
 					flex-direction: column;
 					height: 100%;
+					overflow: hidden;
 					position: relative;
 				}
 				.table-scrollable {
