@@ -30,7 +30,6 @@ export default class Checkbox extends HTMLElement {
 				.inner {
 					display: flex;
 					flex: 1;
-					justify-content: flex-end;
 				}
 				input {
 					margin: 0;
@@ -59,12 +58,12 @@ export default class Checkbox extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
-				<slot name='on-label'></slot>
-				<slot name='off-label'></slot>
-				<slot></slot>
 				<div class='inner'>
 					<input tabindex='-1' type='checkbox'></input>
 				</div>
+				<slot name='on-label'></slot>
+				<slot name='off-label'></slot>
+				<slot></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
