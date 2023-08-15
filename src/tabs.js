@@ -127,7 +127,7 @@ export default class Tabs extends HTMLElement {
 
 	handleChange = (e) => {
 		e.stopPropagation();
-		const target = e.target;
+		const target = e.currentTarget;
 		this.#tabs.forEach((a, i) => {
 			if (a.id !== target.id && a.getAttribute('aria-selected')) {
 				a.setAttribute('aria-selected', false);
@@ -148,7 +148,7 @@ export default class Tabs extends HTMLElement {
 			case 'NumpadEnter':
 			case 'Enter':
 			case 'Space':
-				if (e.target.nodeName.toLowerCase() === 'ac-tab') {
+				if (e.currentTarget.nodeName.toLowerCase() === 'ac-tab') {
 					e.preventDefault();
 					e.stopPropagation();
 					this.handleChange(e);
