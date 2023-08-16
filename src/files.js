@@ -16,7 +16,12 @@ export default class Files extends HTMLElement {
 					flex-direction: column;
 					justify-content: center;
 					padding: 30px;
+					position: relative;
 					width: 100%;
+				}
+				#drop-zone img {
+					user-select: none;
+					pointer-events: none;
 				}
 				#drop-zone:hover img {
 					filter: invert(25%) sepia(87%) saturate(2352%) hue-rotate(205deg) brightness(106%) contrast(107%);
@@ -59,12 +64,12 @@ export default class Files extends HTMLElement {
 					opacity: 1;
 				}
 			</style>
-			<button id="drop-zone">
+			<label for="file-input" id="drop-zone" tabindex="0">
 				<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABH9JREFUaEPtmFmIHFUUhr/uHpGo+KIiKIQ8KC4DihHRaBAVokRxZ0YQNYoQNSEuqIiCzPiioOCGC0FxXCHEBxdcg6CESF4SotEEg3F9UEQQH4XMdMtfdav6dNetqltVDclAX2imp+vcc/7/bPfcarHIV2uR42dM4GBHcByBcQQaemCcQkMOXAWcBpzu/up7B/gR+An4HfgU2NrQ8en2UUVgKfAIcEc+MJnqJY+3dGDTAsw1JTIKAgIt8CKRWQOwzdPo9zYb6XJnExJNCWwCbjAAvgV2AvuYYDfzfOPcfiZwhvtcDxxh9mwBLqtLogmBZ4B7jeGXgEeBf0rAXAg8C5xl5D4BrqhDoi6BB4EnI4NxjqwFXqkCoA1vdOGWdE+bDXR5oYqOxHzVPTcC7/SxczXwYVUlTv5y4GOz92bg7Sq66kRgG3CBM/IBcE0Vgx5ZdaJbXSR/A04GDoTqrErgKkCgtfYBp4YaKpA7DvgFONLJ3Aa8Hqq3KoHXABnQWg18FmqoRG4d8KIrqC8AHYhBqwoBtUGdoicAP7iTtsRIZwoWJPNuieApTmcstowl/Mp/IQxCCKx0fVq9+pxIaYv36HFdiYEpYLOTmQ4g8TdwrJOfBPY2JXC2C+u5ZgRIdD7hTt88Gxa8k+lMw0J+JFpso5c2hyuBj5oQuAR4EzgxR8ka99z3OAbvnyGKIvEypGPFPcDzdQkoNdSLlxgQs8B+4Dtgd4Hivuc9BKKfOkyz4KmJNjN0kR0t/X2sDoFlwJdRGcVLxao+r5ZZthz4FPkeQLmsmtlDz32PtWQj4QhEu1v8RS9ylj7bi+pnoIjbMNfVoRIvzTTHlKF2z6dasDkdlkHgle/WoyIYE/KTmDHyw2a/BtYDGhYHliUg4HMmba4F3g8gMFywAi8P63dLQIRUG5P9a8FAJGagNetpGBZCJrUsAU2Tdznp4BwEbgdedfsS8GqB1qOJPt3U1FonXaIVzD4TK2D+POAh4Ph+SR22HA7sSlhZAhppV7sIhPRt65kHonkm9nzSv61HrUMSEnKYPmXrJNeRdPJryUk6m/7VP5aA7q0S1go+SIx1AbOHTz8CbWbpDnSVYdkyEpJXMR/tBDXKKzIDBEwNjuSVoy+FyoAWPbf60inYRmAHoNNXS1fAon4fAmTUBJRCSnOtdBK2BDYCa10N6Kb0VgjKApmiFKqrOpMllsDdwHNOs25cN9W14vblFXFdtRfFh2zUj3wRmFgF83pDkKwqrdQHatQppE73lDPkrQE9U9pYz4eM23kejQi4/t3UGbLxfdwdI43eLpQA0UXicIPqYuCrGnHvp1C2jVZVZ6OZew4kSj2zfDQShEyjFljTFFoB6CS+f2isXw54T2Jr/Hzgc+Co5MWPz2VucozGxxY9jTg2VWzbi7b7rwiFLx+HzRbOQj6MjwMPB8c7myr2dM+qycOelfzDvTjO3NJCivRS814zeceZx8lXrPcBTw9vCPC7cl2jyc+uvf+ZlwXBDj4UBUMicCjiTjGNCRzs8IwjMI5AQw8s+hT6H7bQB0CP4BRuAAAAAElFTkSuQmCC"></img>
 				<slot></slot>
-			</button>
+			</label>
+			<input id="file-input" type="file" tabindex="-1"></input>
 			<div id="list"></div>
-			<input type="file"></input>
 		`;
 		this._files = [];
 		this._multiple = false;
@@ -83,15 +88,16 @@ export default class Files extends HTMLElement {
 			this.#input.setAttribute('multiple', '');
 		}
 
-		this.#input.addEventListener('change', this.handleInputChange)
 		this.#dropZone.addEventListener('click', this.handleClick);
+		this.#input.addEventListener('click', this.handleClick);
+		this.#input.addEventListener('change', this.handleInputChange);
 		this.#dropZone.addEventListener('drop', this.handleDrop);
 		this.#dropZone.addEventListener('dragover', this.handleDragOver);
 		this.#dropZone.addEventListener('dragleave', this.handleDragLeave);
 	}
 
-	handleClick = () => {
-		this.#input.click();
+	handleClick = (e) => {
+		e.stopPropagation();
 	}
 
 	handleDragLeave = () => {
