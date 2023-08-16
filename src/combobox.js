@@ -106,7 +106,7 @@ export default class Combobox extends HTMLElement {
 			<slot></slot>
 			<div class='outer'>
 				<input type='text'/>
-				<button class='arrow'>
+				<button class='arrow' tabIndex='-1'>
 					<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 96 960 960" width="18">
 						<path d="M480 936 300 756l44-44 136 136 136-136 44 44-180 180ZM344 444l-44-44 180-180 180 180-44 44-136-136-136 136Z"/>
 					</svg>
@@ -372,8 +372,6 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleFocusOut = (e) => {
-		console.log('handleFocusOut');
-		console.log(e);
 		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
