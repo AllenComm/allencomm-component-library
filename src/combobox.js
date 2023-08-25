@@ -206,13 +206,14 @@ export default class Combobox extends HTMLElement {
 	get selected() { return this._selected; }
 	set selected(newVal) {
 		this._selected = newVal;
+		console.log(newVal);
 		if (newVal > -1) {
 			this.#btnClear.setAttribute('hidden', false);
 		} else {
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			this.#btnClear.setAttribute('hidden', true);
 		}
-		this.#options.map((a, i) => {
+		this.#options.forEach((a, i) => {
 			if (newVal > -1 && i === newVal) {
 				this.#input.value = a.innerHTML;
 				this.#expanded = false;
@@ -242,8 +243,9 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
-	connectedCallback() {
-		const initialSelected = this.getAttribute('selected');
+	init = () => {
+		this.#options = [];
+		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
 		const comboCounts = combos.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
@@ -280,20 +282,26 @@ export default class Combobox extends HTMLElement {
 				}
 			});
 		}
-		if (this.getAttribute('disabled') === 'true') {
-			this.disabled = true;
-		} else {
-			this.disabled = false;
-		}
-		this.#expanded = false;
-		this.#input.setAttribute('role', 'combobox');
-		this.#list.setAttribute('role', 'listbox');
-		this.setAttribute('aria-haspopup', this.#list.id);
-		this.#options.map((a, i) => {
+
+		const initialSelected = this.getAttribute('selected');
+		this.#options.forEach((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
 				this.selected = i;
 			}
 		});
+
+		this.disabled = this.getAttribute('disabled') === 'true';
+		this.#expanded = false;
+		this.#input.setAttribute('role', 'combobox');
+		this.#list.setAttribute('role', 'listbox');
+		this.setAttribute('aria-haspopup', this.#list.id);
+	}
+
+	connectedCallback() {
+		const observer = new MutationObserver(this.handleChildChange);
+		const target = this.shadowRoot.host;
+		observer.observe(target, { childList: true });
+		this.init();
 	}
 
 	handleBtnClearClick = () => {
@@ -306,6 +314,13 @@ export default class Combobox extends HTMLElement {
 		if (this.contains(e.target) && (!this.contains(e.relatedTarget) || e.relatedTarget === this) && this.getAttribute('aria-activedescendant')) {
 			this.removeAttribute('aria-activedescendant');
 			this.handleFocusOut(e);
+		}
+	}
+
+	handleChildChange = (mutationList, observer) => {
+		const shouldUpdate = mutationList.some(a => a.type === 'childList');
+		if (shouldUpdate) {
+			this.init();
 		}
 	}
 
@@ -384,8 +399,8 @@ export default class Combobox extends HTMLElement {
 						this.selected = index;
 					}
 				}
-			} else if (this.#input.value !== this.#options[this.selected].innerText) {
-				this.#input.value = this.#options[this.selected].innerText;
+			} else if (this.#input.value !== this.#options[this.selected]?.innerText) {
+				this.#input.value = this.#options[this.selected]?.innerText || '';
 			}
 		}
 	}

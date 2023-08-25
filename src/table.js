@@ -689,12 +689,8 @@ export default class Table extends HTMLElement {
 	}
 
 	onRowsUpdate = (rows) => {
-		console.time('sort/filter');
 		this._rows = this.rowsFilter(this.rowsSort(rows));
-		console.timeEnd('sort/filter');
-		console.time('render');
 		this.forceRender();
-		console.timeEnd('render');
 	}
 
 	onScroll = (e) => {
