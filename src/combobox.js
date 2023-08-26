@@ -205,8 +205,10 @@ export default class Combobox extends HTMLElement {
 
 	get selected() { return this._selected; }
 	set selected(newVal) {
+		if (typeof newVal != 'number') {
+			return;
+		}
 		this._selected = newVal;
-		console.log(newVal);
 		if (newVal > -1) {
 			this.#btnClear.setAttribute('hidden', false);
 		} else {
