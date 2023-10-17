@@ -89,6 +89,7 @@ export default class Files extends HTMLElement {
 		}
 
 		this.#dropZone.addEventListener('click', this.handleClick);
+		this.#dropZone.addEventListener('keydown', this.handleKeydown);
 		this.#input.addEventListener('click', this.handleClick);
 		this.#input.addEventListener('change', this.handleInputChange);
 		this.#dropZone.addEventListener('drop', this.handleDrop);
@@ -129,6 +130,17 @@ export default class Files extends HTMLElement {
 		e.target.value = '';
 	}
 
+	handleKeydown = (e) => {
+		switch (e.code) {
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				this.#input.click();
+				break;
+		}
+	}
+
 	addFile = (file) => {
 		const accept = this.getAttribute('accept');
 		if (accept && accept.indexOf(file.type) === -1) return;
@@ -143,7 +155,7 @@ export default class Files extends HTMLElement {
 		node.className = 'item';
 		node.innerHTML = `<span>${file.name}</span><button><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAVUlEQVQ4y+WSuREAIAgEtwm6sP+MKixIAwPfUS6WEHZn+ODzSDi2ZQ0nnQWnkBfFyBT8LLTiqOyZq/LEZyiEj0oQ70oYlwWxJXFoca3y4eTXkJ/vm6g9L0LBODY4BgAAAABJRU5ErkJggg=="></img></button>`;
 		node.querySelector('button').addEventListener('click', () => this.removeFile(file, node));
-		this.#list.appendChild(node);	
+		this.#list.appendChild(node);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
