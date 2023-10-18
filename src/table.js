@@ -1,8 +1,3 @@
-// TODO:
-//	- make it so header btn is on screen always when using touch device
-//	- fix bouncy header (sticky)
-//	- make scrolling smoother. its a combo of inView and setting the scroll content transform.
-//	- add resizing of columns
 export default class Table extends HTMLElement {
 	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
 	#RESERVED_SELECTED = '~~SELECTED~~';
@@ -453,7 +448,7 @@ export default class Table extends HTMLElement {
 		this.#header = this.shadowRoot.querySelector('.header');
 		this.#scrollableContainer = this.shadowRoot.querySelector('.table-scrollable');
 		this.#footerTotalRows = this.shadowRoot.querySelector('#total-rows');
-		
+
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
@@ -475,7 +470,7 @@ export default class Table extends HTMLElement {
 		document.removeEventListener('keydown', this.onKeyDown);
 	}
 
-	buildCell = (data, cellIndex, rowIndex, column) => {
+	buildCell = (data, cellIndex, rowIndex, column, rowData) => {
 		if (column.hidden) return null;
 
 		const element = document.createElement('div');
@@ -490,7 +485,7 @@ export default class Table extends HTMLElement {
 
 		if (render) {
 			const el = document.createElement('span');
-			el.innerHTML = render(data);
+			el.innerHTML = render(rowData);
 			el.firstElementChild.slot = `${rowIndex}-${cellIndex}`;
 			this.shadowRoot.host.appendChild(el.firstElementChild);
 		}
@@ -516,7 +511,7 @@ export default class Table extends HTMLElement {
 			const filterBtn = document.createElement('button');
 			filterBtn.className = 'cell-filter-btn';
 			filterBtn.innerHTML = `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAbUlEQVQ4y2NgGE5gK8N/PHATpoZDeDUcwNSgwPAWp/I3DHLYHOXJ8Ber8r8Mbrj8UY9VQy1ujzMxbMNQvoWBEV9YCTHcQ1F+j0GQUPAaMXyHK/8O5BEBkuEakoiNRJgGhlENeMARsPIjDMMUAABg/nwFPtIxLAAAAABJRU5ErkJggg=="></img>`
-			filterBtn.addEventListener('click', (e) => { 
+			filterBtn.addEventListener('click', (e) => {
 				this.onMenuOpenClick(e, column);
 				this.onMenuFilterClick();
 			});
@@ -531,7 +526,7 @@ export default class Table extends HTMLElement {
 
 		return element;
 	}
-	
+
 	buildRow = (row, index, isHeader) => {
 		const element = document.createElement('div');
 		element.classList.add('row');
@@ -553,9 +548,9 @@ export default class Table extends HTMLElement {
 			selector.append(inner);
 			element.append(selector);
 		}
-		
+
 		const rowData = isHeader ? Object.values(row) : this.columns.map((a) => row[a?.property] ?? null);
-		const rowElements = rowData.map((data, i) => isHeader ? this.buildCellHeader(data, i, this.columns[i]) : this.buildCell(data, i, index, this.columns[i]));
+		const rowElements = rowData.map((data, i) => isHeader ? this.buildCellHeader(data, i, this.columns[i]) : this.buildCell(data, i, index, this.columns[i], row));
 		rowElements.filter(Boolean).forEach(el => element.append(el));
 
 		return element;
@@ -695,7 +690,7 @@ export default class Table extends HTMLElement {
 
 	onScroll = (e) => {
 		const scrollTop = this.#scrollableContainer.scrollTop;
-		if (e && this.#lastScrollTop === scrollTop) return; 
+		if (e && this.#lastScrollTop === scrollTop) return;
 
 		this.#lastScrollTop = this.#scrollableContainer.scrollTop;
 		const { height } = this.#scrollableContainer.getBoundingClientRect();
@@ -703,17 +698,17 @@ export default class Table extends HTMLElement {
 		if (this.#body.style.height !== this.getScrollableHeight()) {
 			this.#body.style.height = `${this.getScrollableHeight()}px`;
 		}
-		this.#scrollContent.style.transform = `translateY(${max}px)`; 
+		this.#scrollContent.style.transform = `translateY(${max}px)`;
 		this.updateRows();
 	}
-	
+
 	onSelectAllRows = () => {
 		const isAllSelected = this._rows.every(a => a[this.#RESERVED_SELECTED]);
 		this._rows.forEach(a => a[this.#RESERVED_SELECTED] = !isAllSelected);
 		this.forceRender();
 		this.fireChangeEvent();
 	}
-	
+
 	onSelectRow = (e, index) => {
 		if (e.shiftKey) {
 			const createRange = (start, end) => Array.from({length: end - start + 1}, (v, k) => k + start);
@@ -727,7 +722,7 @@ export default class Table extends HTMLElement {
 		this.forceRender();
 		this.fireChangeEvent();
 	}
-	
+
 	rowsFilter = (rows) => {
 		const operators = {
 			'=': (a, b) => Number(a) === Number(b),
@@ -747,17 +742,17 @@ export default class Table extends HTMLElement {
 			'is_true': (a) => a === true || a === 'true',
 			'is_false': (a) => a === false || a === 'false'
 		};
-		
+
 		const fitleredRows = rows.filter(row => {
 			const results = this.filters.map(({ column, operator, value }) => {
 				const result = operators[operator](row[column], value);
 				return result;
-			});	
+			});
 			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
 		});
 		return fitleredRows;
 	}
-	
+
 	rowsSort = (r) => {
 		const rows = [...r];
 		const colDetails = this.columns.map((col, i) => ({
@@ -812,12 +807,12 @@ export default class Table extends HTMLElement {
 	}
 
 	setPageSize = (e) => this.pageSize = Number(e.target.value);
-	
+
 	sortColumn = (dir) => {
 		if (this.currentColumn) {
 			const headerCell = this.#header.querySelector(`.row > .cell[data-property="${this.currentColumn.property}"]`);
 			const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
-			
+
 			this.#anchor = null;
 			cells.forEach(a => a.className = `cell`);
 			this.columns.forEach(a => a.sort = this.NONE);
@@ -835,7 +830,7 @@ export default class Table extends HTMLElement {
 		const newSort = sortCycle[column.sort || 'none'];
 		this.sortColumn(newSort);
 	}
-	
+
 	updateFooter = () => {
 		const selectedCount = this.selected.length;
 		const totalPages = this.getTotalPages();
@@ -849,7 +844,7 @@ export default class Table extends HTMLElement {
 		this.#footerSelectedNumber.hidden = hidden;
 		this.#footerSelectedMulti.hidden = hidden || selectedCount === 1;
 		this.#footerSelectedSingle.hidden = hidden || selectedCount !== 1;
-		
+
 		this.#footerPageSize.value = this.pageSize;
 		this.#footerTotalRows.innerHTML = `${this.rows.length.toLocaleString()} rows`;
 		this.#footerTotalPages.innerText = this.getTotalPages().toLocaleString();
@@ -868,7 +863,7 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	updateMenuFilters = () => {		
+	updateMenuFilters = () => {
 		this.#filters.innerHTML = '';
 		const addBtn = document.createElement('button');
 		addBtn.textContent = '+ Add Filter';
@@ -907,17 +902,17 @@ export default class Table extends HTMLElement {
 				option.value = col.property;
 				filterProperty.appendChild(option);
 			});
-			
+
 			filterProperty.value = property;
 			filterMulti.value = this.#multiFilterOperator;
 			filterOperator.value = operator;
-			if (filterInput) { 
+			if (filterInput) {
 				filterInput.value = value;
 			}
 			container.setAttribute('data-type', column.type);
 
 			filterMulti.addEventListener('change', (e) => {
-				this.#multiFilterOperator = e.target.value; 
+				this.#multiFilterOperator = e.target.value;
 				onFilterUpdate(e);
 			});
 			filterProperty.addEventListener('change', onFilterUpdate);
