@@ -42,7 +42,7 @@ export default class Select extends HTMLElement {
 					right: 0;
 					top: 0;
 					width: 22px;
-					z-index: 1;
+					z-index: 2;
 				}
 				.arrow.hidden {
 					display: none;
@@ -77,7 +77,7 @@ export default class Select extends HTMLElement {
 					position: absolute;
 					visibility: hidden;
 					width: 100%;
-					z-index: 2;
+					z-index: 3;
 				}
 				.list[anchor='bottom'] {
 					top: 0;
