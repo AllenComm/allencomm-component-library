@@ -36,6 +36,11 @@ export default class Files extends HTMLElement {
 					margin-top: 30px;
 					padding: 12px;
 				}
+				#list([aria-activedescendant]:not([aria-activedescendant=''])) {
+					border-radius: 3px;
+					outline: 2px solid #000;
+					outline-offset: 2px;
+				}
 				input {
 					display: none;
 				}
@@ -74,7 +79,7 @@ export default class Files extends HTMLElement {
 		this._files = [];
 		this._multiple = false;
 	}
-	
+
 	get #dropZone() { return this.shadowRoot.querySelector('#drop-zone'); }
 	get #input() { return this.shadowRoot.querySelector('input'); }
 	get #list() { return this.shadowRoot.querySelector('#list'); }
@@ -95,6 +100,40 @@ export default class Files extends HTMLElement {
 		this.#dropZone.addEventListener('drop', this.handleDrop);
 		this.#dropZone.addEventListener('dragover', this.handleDragOver);
 		this.#dropZone.addEventListener('dragleave', this.handleDragLeave);
+		this.#list.setAttribute('role', 'listbox');
+	}
+
+	handleChildKeydown = (e, file, node) => {
+		switch (e.code) {
+			case 'ArrowDown':
+			case 'ArrowRight':
+				e.preventDefault();
+				e.stopPropagation();
+				if (e.target?.nextElementSibling?.className.toLowerCase() === 'item') {
+					e.target.nextElementSibling.focus();
+				}
+				break;
+			case 'ArrowLeft':
+			case 'ArrowUp':
+				e.preventDefault();
+				e.stopPropagation();
+				if (e.target?.previousElementSibling?.className.toLowerCase() === 'item') {
+					e.target.previousElementSibling.focus();
+				}
+				break;
+			case 'NumpadEnter':
+			case 'Enter':
+			case 'Space':
+				e.preventDefault();
+				e.stopPropagation();
+				if (e.target?.previousElementSibling?.className.toLowerCase() === 'item') {
+					e.target.previousElementSibling.focus();
+				} else if (e.target?.nextElementSibling?.className.toLowerCase() === 'item') {
+					e.target.nextElementSibling.focus();
+				}
+				this.removeFile(file, node);
+				break;
+		}
 	}
 
 	handleClick = (e) => {
@@ -151,10 +190,15 @@ export default class Files extends HTMLElement {
 			this.clear();
 			this._files = [file];
 		}
+
 		const node = document.createElement('DIV');
 		node.className = 'item';
 		node.innerHTML = `<span>${file.name}</span><button><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAVUlEQVQ4y+WSuREAIAgEtwm6sP+MKixIAwPfUS6WEHZn+ODzSDi2ZQ0nnQWnkBfFyBT8LLTiqOyZq/LEZyiEj0oQ70oYlwWxJXFoca3y4eTXkJ/vm6g9L0LBODY4BgAAAABJRU5ErkJggg=="></img></button>`;
-		node.querySelector('button').addEventListener('click', () => this.removeFile(file, node));
+		node.setAttribute('tabindex', 0);
+		node.addEventListener('keydown', (e) => this.handleChildKeydown(e, file, node));
+		const btn = node.querySelector('button');
+		btn.setAttribute('tabindex', -1);
+		btn.addEventListener('click', () => this.removeFile(file, node));
 		this.#list.appendChild(node);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
