@@ -246,7 +246,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	init = () => {
-		console.log('init() version 2');
+		console.log('init() version 3');
 		this.#options = [];
 		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
@@ -288,10 +288,14 @@ export default class Combobox extends HTMLElement {
 
 		const initialSelected = this.getAttribute('selected');
 		this.#options.forEach((a, i) => {
-			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
+			if (initialSelected === a.id || initialSelected === a.innerHTML || (a.getAttribute('selected') === 'true' || a.getAttribute('selected') === true)) {
 				this.selected = i;
+			} else {
+				this.selected = -1;
 			}
 		});
+		console.log('initialSelected', initialSelected);
+		console.log('option # selected', this.selected);
 
 		this.disabled = this.getAttribute('disabled') === 'true';
 		this.#expanded = false;
@@ -321,9 +325,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleChildChange = (mutationList, observer) => {
-		console.log('handleChildChange', mutationList);
 		const shouldUpdate = mutationList.some(a => a.type === 'childList' || (a.type === 'attributes' && a.attributeName === 'selected'));
-		console.log('shouldUpdate?', shouldUpdate);
 		if (shouldUpdate) {
 			this.init();
 		}
