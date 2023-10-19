@@ -632,9 +632,9 @@ export default class Table extends HTMLElement {
 		return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
 	}
 
-	onClickInside = () => {
+	onClickInside = (e) => {
 		this.shadowRoot.querySelector('.table').focus();
-		console.log('onClickInside');
+		console.log('onClickInside', e.target);
 	}
 
 	onClickOutside = (e) => {
