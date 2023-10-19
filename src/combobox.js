@@ -246,7 +246,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	init = () => {
-		console.log('init() version 1');
+		console.log('init() version 2');
 		this.#options = [];
 		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
