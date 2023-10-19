@@ -246,7 +246,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	init = () => {
-		console.log('init() version 3');
+		console.log('init() version 4');
 		this.#options = [];
 		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
@@ -286,10 +286,11 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 
-		this.selected = -1;
+		this.clearValue();
 		const initialSelected = this.getAttribute('selected');
 		this.#options.forEach((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || (a.getAttribute('selected') === 'true' || a.getAttribute('selected') === true)) {
+				this.#input.value = a.value;
 				this.selected = i;
 			}
 		});
@@ -310,9 +311,13 @@ export default class Combobox extends HTMLElement {
 		this.init();
 	}
 
-	handleBtnClearClick = () => {
+	clearValue() {
 		this.#input.value = '';
 		this.selected = -1;
+	}
+
+	handleBtnClearClick = () => {
+		this.clearValue();
 	};
 
 	handleChildBlur = (e) => {
