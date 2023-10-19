@@ -303,7 +303,7 @@ export default class Combobox extends HTMLElement {
 	connectedCallback() {
 		const observer = new MutationObserver(this.handleChildChange);
 		const target = this.shadowRoot.host;
-		observer.observe(target, { childList: true });
+		observer.observe(target, { childList: true, subtree: true });
 		this.init();
 	}
 
