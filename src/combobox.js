@@ -214,6 +214,7 @@ export default class Combobox extends HTMLElement {
 		} else {
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			this.#btnClear.setAttribute('hidden', true);
+			this.#input.value = '';
 		}
 		this.#options.forEach((a, i) => {
 			if (newVal > -1 && i === newVal) {
@@ -246,7 +247,6 @@ export default class Combobox extends HTMLElement {
 	}
 
 	init = () => {
-		console.log('init() version 4');
 		this.#options = [];
 		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
@@ -286,16 +286,13 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 
-		this.clearValue();
+		this.selected = -1;
 		const initialSelected = this.getAttribute('selected');
 		this.#options.forEach((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || (a.getAttribute('selected') === 'true' || a.getAttribute('selected') === true)) {
-				this.#input.value = a.value;
 				this.selected = i;
 			}
 		});
-		console.log('initialSelected', initialSelected);
-		console.log('option # selected', this.selected);
 
 		this.disabled = this.getAttribute('disabled') === 'true';
 		this.#expanded = false;
@@ -311,13 +308,8 @@ export default class Combobox extends HTMLElement {
 		this.init();
 	}
 
-	clearValue() {
-		this.#input.value = '';
-		this.selected = -1;
-	}
-
 	handleBtnClearClick = () => {
-		this.clearValue();
+		this.selected = -1;
 	};
 
 	handleChildBlur = (e) => {
@@ -554,7 +546,6 @@ export default class Combobox extends HTMLElement {
 
 		if (int > -1) {
 			this.selected = int;
-			this.#input.value = this.#options[int].value;
 		} else {
 			this.selected = -1;
 		}

@@ -185,6 +185,9 @@ export default class Select extends HTMLElement {
 	get selected() { return this._selected; }
 	set selected(newVal) {
 		this._selected = newVal;
+		if (newVal == -1) {
+			this.#inner.innerText = '';
+		}
 		this.options.map((a, i) => {
 			if (newVal > -1 && i === newVal) {
 				this.#inner.innerText = a.innerHTML;
@@ -216,8 +219,7 @@ export default class Select extends HTMLElement {
 		}
 	}
 
-	connectedCallback() {
-		const initialSelected = this.getAttribute('selected');
+	init() {
 		const combos = [...document.querySelectorAll('ac-select')];
 		const comboCounts = combos.map((a) => {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
@@ -262,11 +264,27 @@ export default class Select extends HTMLElement {
 		if (this.getAttribute('anchor') !== null) this.#list.setAttribute('anchor', this.getAttribute('anchor'));
 		this.setAttribute('aria-haspopup', this.#list.id);
 		this.setAttribute('role', 'select');
+
+		const initialSelected = this.getAttribute('selected');
 		this.options.map((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || a.getAttribute('selected') === 'true') {
 				this.selected = i;
 			}
 		});
+	}
+
+	connectedCallback() {
+		const observer = new MutationObserver(this.handleChildChange);
+		const target = this.shadowRoot.host;
+		observer.observe(target, { attributes: true, childList: true, subtree: true });
+		this.init();
+	}
+
+	handleChildChange = (mutationList, observer) => {
+		const shouldUpdate = mutationList.some(a => a.type === 'childList' || (a.type === 'attributes' && a.attributeName === 'selected'));
+		if (shouldUpdate) {
+			this.init();
+		}
 	}
 
 	handleFocusOut = (e) => {
