@@ -322,7 +322,7 @@ export default class Combobox extends HTMLElement {
 
 	handleChildChange = (mutationList, observer) => {
 		console.log('handleChildChange', mutationList);
-		const shouldUpdate = mutationList.some(a => a.type === 'childList');
+		const shouldUpdate = mutationList.some(a => a.type === 'childList' || (a.type === 'attributes' && a.attributeName === 'selected'));
 		console.log('shouldUpdate?', shouldUpdate);
 		if (shouldUpdate) {
 			this.init();
