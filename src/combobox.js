@@ -246,6 +246,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	init = () => {
+		console.log('init()');
 		this.#options = [];
 		this.disabled = true;
 		const combos = [...document.querySelectorAll('ac-combobox')];
@@ -320,7 +321,9 @@ export default class Combobox extends HTMLElement {
 	}
 
 	handleChildChange = (mutationList, observer) => {
+		console.log('handleChildChange', mutationList);
 		const shouldUpdate = mutationList.some(a => a.type === 'childList');
+		console.log('shouldUpdate?', shouldUpdate);
 		if (shouldUpdate) {
 			this.init();
 		}
