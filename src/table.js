@@ -452,11 +452,11 @@ export default class Table extends HTMLElement {
 		this.#footerNextBtn.addEventListener('click', this.setNextPage);
 		this.#footerPrevBtn.addEventListener('click', this.setPrevPage);
 		this.#footerPageSize.addEventListener('change', this.setPageSize);
-		this.#footerPageSize.addEventListener('click', (e) => console.log('click', e));
-		this.#footerPageSize.addEventListener('touchstart', (e) => console.log('touchstart', e));
-		this.#footerPageSize.addEventListener('touchend', (e) => console.log('touchend', e));
-		this.#footerPageSize.addEventListener('touchcancel', (e) => console.log('touchcancel', e));
-		this.#footerPageSize.addEventListener('touchmove', (e) => console.log('touchmove', e));
+		this.#footerPageSize.addEventListener('click', (e) => console.log('click', e.target));
+		this.#footerPageSize.addEventListener('touchstart', (e) => console.log('touchstart', e.target));
+		this.#footerPageSize.addEventListener('touchend', (e) => console.log('touchend', e.target));
+		this.#footerPageSize.addEventListener('touchcancel', (e) => console.log('touchcancel', e.target));
+		this.#footerPageSize.addEventListener('touchmove', (e) => console.log('touchmove', e.target));
 		this.#menu.addEventListener('click', (e) => e.stopPropagation());
 		this.shadowRoot.querySelector('#manage-columns-btn').addEventListener('click', this.onMenuManageClick);
 		this.shadowRoot.querySelector('#export-csv').addEventListener('click', this.exportToCsv);
@@ -634,6 +634,7 @@ export default class Table extends HTMLElement {
 
 	onClickInside = () => {
 		this.shadowRoot.querySelector('.table').focus();
+		console.log('onClickInside');
 	}
 
 	onClickOutside = (e) => {
