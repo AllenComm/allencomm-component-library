@@ -286,12 +286,11 @@ export default class Combobox extends HTMLElement {
 			});
 		}
 
+		this.selected = -1;
 		const initialSelected = this.getAttribute('selected');
 		this.#options.forEach((a, i) => {
 			if (initialSelected === a.id || initialSelected === a.innerHTML || (a.getAttribute('selected') === 'true' || a.getAttribute('selected') === true)) {
 				this.selected = i;
-			} else {
-				this.selected = -1;
 			}
 		});
 		console.log('initialSelected', initialSelected);
