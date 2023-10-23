@@ -66,7 +66,7 @@ export default class Password extends HTMLElement {
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
-				<input type='password'/>
+				<input type='password' autocomplete='current-password' id='current-password' name='password'/>
 				<div class='icon toggle-show'>
 					<div>
 						<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
