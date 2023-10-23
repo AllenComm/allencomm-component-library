@@ -212,9 +212,9 @@ export default class Combobox extends HTMLElement {
 		if (newVal > -1) {
 			this.#btnClear.setAttribute('hidden', false);
 		} else {
+			this.#input.value = '';
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
 			this.#btnClear.setAttribute('hidden', true);
-			this.#input.value = '';
 		}
 		this.#options.forEach((a, i) => {
 			if (newVal > -1 && i === newVal) {
