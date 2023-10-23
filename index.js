@@ -12,6 +12,7 @@ import Loading from './src/loading.js';
 import Listbox from './src/listbox.js';
 import Number from './src/number.js';
 import Option from './src/option.js';
+import Password from './src/password.js';
 import Radio from './src/radio.js';
 import Select from './src/select.js';
 import Slider from './src/slider.js';
@@ -38,6 +39,7 @@ export {
 	Listbox,
 	Number,
 	Option,
+	Password,
 	Radio,
 	Select,
 	Slider,
