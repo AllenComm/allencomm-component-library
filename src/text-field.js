@@ -21,6 +21,21 @@ export default class TextField extends HTMLElement {
 				:host(:not([search='true'])) .icon {
 					display: none !important;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					flex: 100%;
+					font-size: 90%;
+					padding: 5px 5px 0px 5px;
+				}
+				#helper.hidden {
+					display: none;
+				}
+				.inner {
+					display: flex;
+					flex: 1;
+					flex-direction: column;
+					justify-content: flex-end;
+				}
 				input {
 					border-radius: 3px;
 					border-width: 1px;
@@ -34,14 +49,17 @@ export default class TextField extends HTMLElement {
 					outline: 1px solid #000;
 					z-index: 1;
 				}
+				input.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
+				}
 				label {
-					align-items: flex-start;
+					align-items: baseline;
 					cursor: pointer;
 					display: flex;
 					flex-direction: row;
 					flex-wrap: wrap;
 					gap: 0 10px;
-					place-items: center;
 					position: relative;
 					width: 100%;
 				}
@@ -75,19 +93,24 @@ export default class TextField extends HTMLElement {
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
-				<input type='text'/>
-				<div class='icon'>
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18" fill="#000000">
-							<path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-						</svg>
+				<div class='inner'>
+					<input type='text'/>
+					<div class='icon'>
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18" fill="#000000">
+								<path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+							</svg>
+						</div>
 					</div>
+					<slot name='icon'></slot>
+					<div id='helper' class='hidden'></div>
 				</div>
-				<slot name='icon'></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
+		this._helperText = '';
 		this._slotIcon = null;
 	}
 
@@ -113,6 +136,34 @@ export default class TextField extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.input.classList.add('error');
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+			this.input.classList.remove('error');
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
+	get #helperText() { return this._helperText; }
+	set #helperText(newVal) {
+		this._helperText = newVal;
+		this.#helperDiv.innerText = newVal;
+	}
+
 	get #slotIcon() { return this._slotIcon; }
 	set #slotIcon(newVal) { this._slotIcon = newVal; }
 
@@ -127,12 +178,16 @@ export default class TextField extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
 		const placeholder = this.getAttribute('placeholder');
 		const search = this.getAttribute('search');
 		const size = this.getAttribute('size');
 		const value = this.getAttribute('value');
+		if (error) this.error = error;
+		if (helperText) this.#helperText = helperText;
 		if (maxlength) this.input.setAttribute('maxlength', maxlength);
 		if (minlength) this.input.setAttribute('minlength', minlength);
 		if (placeholder) this.input.setAttribute('placeholder', placeholder);

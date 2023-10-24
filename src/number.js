@@ -14,9 +14,19 @@ export default class Number extends HTMLElement {
 					outline: none;
 					width: 100%;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					flex: 100%;
+					font-size: 90%;
+					padding: 5px 5px 0px 5px;
+				}
+				#helper.hidden {
+					display: none;
+				}
 				.inner {
 					display: flex;
 					flex: 1;
+					flex-direction: column;
 					justify-content: flex-end;
 				}
 				input {
@@ -31,8 +41,12 @@ export default class Number extends HTMLElement {
 					outline: 1px solid #000;
 					z-index: 1;
 				}
+				input.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
+				}
 				label {
-					align-items: center;
+					align-items: baseline;
 					display: flex;
 					flex-wrap: wrap;
 					gap: 0 10px;
@@ -43,11 +57,14 @@ export default class Number extends HTMLElement {
 				<slot></slot>
 				<div class='inner'>
 					<input type='number'></input>
+					<div id='helper' class='hidden'></div>
 				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
+		this._helperText = '';
 	}
 
 	get disabled() { return this._disabled; }
@@ -69,6 +86,34 @@ export default class Number extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.#input.classList.add('error');
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+			this.#input.classList.remove('error');
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
+	get #helperText() { return this._helperText; }
+	set #helperText(newVal) {
+		this._helperText = newVal;
+		this.#helperDiv.innerText = newVal;
+	}
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	get value() { return parseFloat(this.#input.value); }
@@ -84,6 +129,8 @@ export default class Number extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const max = this.getAttribute('max');
 		const maxlength = this.getAttribute('maxlength');
 		const min = this.getAttribute('min');
@@ -92,6 +139,8 @@ export default class Number extends HTMLElement {
 		const size = this.getAttribute('size');
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
+		if (error) this.error = error;
+		if (helperText) this.#helperText = helperText;
 		if (max != null) {
 			this.#input.setAttribute('max', max);
 			this.setAttribute('aria-valueMax', max);
