@@ -1,5 +1,5 @@
 export default class Radio extends HTMLElement {
-	static observedAttributes = ['checked', 'disabled'];
+	static observedAttributes = ['checked', 'disabled', 'error'];
 
 	constructor() {
 		super();
@@ -23,6 +23,14 @@ export default class Radio extends HTMLElement {
 					outline-offset: 2px;
 					width: 13px;
 					z-index: 1;
+				}
+				#helper {
+					color: rgb(240, 45, 50);
+					font-size: 90%;
+					margin-right: 10px;
+				}
+				#helper.hidden {
+					display: none;
 				}
 				.inner {
 					display: flex;
@@ -60,12 +68,14 @@ export default class Radio extends HTMLElement {
 				<slot name='off-label'></slot>
 				<slot></slot>
 				<div class='inner'>
+					<div id='helper' class='hidden'></div>
 					<input tabindex='-1' type='radio'></input>
 				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
 	}
 
 	get checked() { return this.#input.checked; }
@@ -96,6 +106,26 @@ export default class Radio extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
 	get id() { return this.#input.id; }
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
@@ -113,11 +143,16 @@ export default class Radio extends HTMLElement {
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const id = this.getAttribute('id');
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
@@ -134,6 +169,8 @@ export default class Radio extends HTMLElement {
 		}
 		this.#input.setAttribute('name', name);
 		this.#input.setAttribute('value', value);
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (this.getAttribute('disabled') === 'true') {
 			this.disabled = true;
 		} else {
@@ -156,8 +193,7 @@ export default class Radio extends HTMLElement {
 	}
 
 	handleKeydown = (e) => {
-		// Add arrow key navigation/toggling within same group, like default
-		// html
+		// Add arrow key navigation/toggling within same group, like default html
 		switch (e.code) {
 			case 'Enter':
 			case 'Space':

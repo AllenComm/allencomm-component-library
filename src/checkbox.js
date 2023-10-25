@@ -1,5 +1,5 @@
 export default class Checkbox extends HTMLElement {
-	static observedAttributes = ['checked', 'disabled'];
+	static observedAttributes = ['checked', 'error', 'disabled'];
 
 	constructor() {
 		super();
@@ -27,6 +27,14 @@ export default class Checkbox extends HTMLElement {
 				:host([disabled='true']) input, :host([disabled='true']) label {
 					cursor: default;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					font-size: 90%;
+					margin-right: 10px;
+				}
+				#helper.hidden {
+					display: none;
+				}
 				.inner {
 					display: flex;
 					flex: 1;
@@ -37,6 +45,10 @@ export default class Checkbox extends HTMLElement {
 				}
 				input, label {
 					cursor: pointer;
+				}
+				input.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
 				}
 				label {
 					align-items: center;
@@ -63,12 +75,14 @@ export default class Checkbox extends HTMLElement {
 				<slot name='off-label'></slot>
 				<slot></slot>
 				<div class='inner'>
+					<div id='helper' class='hidden'></div>
 					<input tabindex='-1' type='checkbox'></input>
 				</div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
 	}
 
 	get checked() { return this.#input.checked; }
@@ -96,6 +110,26 @@ export default class Checkbox extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -106,12 +140,19 @@ export default class Checkbox extends HTMLElement {
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		this.#input.checked = checked;
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (this.getAttribute('disabled') === 'true') {
 			this.disabled = true;
 		} else {

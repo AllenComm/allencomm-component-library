@@ -1,5 +1,5 @@
 export default class Switch extends HTMLElement {
-	static observedAttributes = ['checked'];
+	static observedAttributes = ['checked', 'error'];
 
 	constructor() {
 		super();
@@ -17,6 +17,14 @@ export default class Switch extends HTMLElement {
 					border-radius: 3px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
+				}
+				#helper {
+					color: rgb(240, 45, 50);
+					font-size: 90%;
+					margin-right: 10px;
+				}
+				#helper.hidden {
+					display: none;
 				}
 				input {
 					display: none;
@@ -93,6 +101,7 @@ export default class Switch extends HTMLElement {
 				<slot name='on-label'></slot>
 				<slot name='off-label'></slot>
 				<div class='inner'>
+					<div id='helper' class='hidden'></div>
 					<input tabindex='-1' type='checkbox'></input>
 					<div class='wrapper'>
 						<div class='indicator'></div>
@@ -101,9 +110,30 @@ export default class Switch extends HTMLElement {
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._error = false;
 	}
 
 	get checked() { return this.#input.checked; }
+
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
@@ -112,16 +142,23 @@ export default class Switch extends HTMLElement {
 			const bool = newVal === 'true';
 			this.#input.checked = bool;
 			this.handleChange();
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		this.#input.checked = checked;
 		this.#input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
 		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 	}
 
 	handleChange = (e) => {

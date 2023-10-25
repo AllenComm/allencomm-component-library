@@ -1,5 +1,5 @@
 export default class Select extends HTMLElement {
-	static observedAttributes = ['disabled', 'selected'];
+	static observedAttributes = ['disabled', 'error', 'selected'];
 
 	constructor() {
 		super();
@@ -61,6 +61,14 @@ export default class Select extends HTMLElement {
 					gap: 10px;
 					width: 100%;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					font-size: 90%;
+					margin-right: 10px;
+				}
+				#helper.hidden {
+					display: none;
+				}
 				.inner {
 					height: 100%;
 				}
@@ -96,6 +104,10 @@ export default class Select extends HTMLElement {
 					position: relative;
 					width: 100%;
 				}
+				.outer.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
+				}
 			</style>
 			<div class='component'>
 				<slot></slot>
@@ -112,6 +124,7 @@ export default class Select extends HTMLElement {
 							</svg>
 						</div>
 					</div>
+					<div id='helper' class='hidden'></div>
 				</div>
 			</div>
 		`;
@@ -172,6 +185,28 @@ export default class Select extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.shadowRoot.querySelector('.outer').classList.add('error');
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+			this.shadowRoot.querySelector('.outer').classList.remove('error');
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
 	get #inner() { return this.shadowRoot.querySelector('.inner'); }
 
 	get #list() { return this.shadowRoot.querySelector('.list'); }
@@ -216,6 +251,9 @@ export default class Select extends HTMLElement {
 			} else if (!isNaN(parseInt(newVal))) {
 				this.selected = parseInt(newVal);
 			}
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
@@ -225,6 +263,8 @@ export default class Select extends HTMLElement {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
 		});
 		const currentTabsIndex = combos.findIndex((a) => a === this);
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const offset = comboCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
@@ -234,6 +274,8 @@ export default class Select extends HTMLElement {
 		let optionIndex = 0;
 		let optionId = optionIndex + offset;
 
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {

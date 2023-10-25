@@ -110,7 +110,6 @@ export default class TextField extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 		this._error = false;
-		this._helperText = '';
 		this._slotIcon = null;
 	}
 
@@ -141,14 +140,14 @@ export default class TextField extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._error = bool;
 		if (bool) {
-			if (this.#helperText.length > 0) {
+			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.removeAttribute('aria-hidden');
 				this.#helperDiv.classList.remove('hidden');
 			}
 			this.input.classList.add('error');
 			this.dispatchEvent(new Event('error', { 'composed': true }));
 		} else {
-			if (this.#helperText.length > 0) {
+			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.setAttribute('aria-hidden', !bool);
 				this.#helperDiv.classList.add('hidden');
 			}
@@ -157,12 +156,6 @@ export default class TextField extends HTMLElement {
 	}
 
 	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
-
-	get #helperText() { return this._helperText; }
-	set #helperText(newVal) {
-		this._helperText = newVal;
-		this.#helperDiv.innerText = newVal;
-	}
 
 	get #slotIcon() { return this._slotIcon; }
 	set #slotIcon(newVal) { this._slotIcon = newVal; }
@@ -190,7 +183,7 @@ export default class TextField extends HTMLElement {
 		const size = this.getAttribute('size');
 		const value = this.getAttribute('value');
 		if (error) this.error = error;
-		if (helperText) this.#helperText = helperText;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (maxlength) this.input.setAttribute('maxlength', maxlength);
 		if (minlength) this.input.setAttribute('minlength', minlength);
 		if (placeholder) this.input.setAttribute('placeholder', placeholder);

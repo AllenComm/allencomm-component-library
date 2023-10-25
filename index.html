@@ -73,11 +73,11 @@
 			</section>
 			<section id="ac-checkbox">
 				<h3>Checkbox</h3>
-				<ac-checkbox>Label</ac-checkbox>
+				<ac-checkbox helperText="This is the helper text">Label</ac-checkbox>
 			</section>
 			<section id="ac-combobox">
 				<h3>Combobox</h3>
-				<ac-combobox autocomplete='list'>
+				<ac-combobox autocomplete='list' helperText="This is the helper text">
 					<ac-option>Option 1a</ac-option>
 					<ac-option>Option 1b</ac-option>
 					<ac-option>Option 2a</ac-option>
@@ -85,7 +85,7 @@
 					<ac-option>Option 3a</ac-option>
 					<ac-option>Option 3b</ac-option>
 				</ac-combobox>
-				<ac-combobox autocomplete='inline' style="margin-top: 30px;">
+				<ac-combobox autocomplete='inline' style="margin-top: 30px;" helperText="This is the helper text">
 					<ac-option>Option 1a</ac-option>
 					<ac-option>Option 1b</ac-option>
 					<ac-option>Option 2a</ac-option>
@@ -93,7 +93,7 @@
 					<ac-option>Option 3a</ac-option>
 					<ac-option>Option 3b</ac-option>
 				</ac-combobox>
-				<ac-combobox autocomplete='both' style="margin-top: 30px;">
+				<ac-combobox autocomplete='both' style="margin-top: 30px;" helperText="This is the helper text">
 					<ac-option></ac-option>
 					<ac-option>(500) Days of Summer</ac-option>
 					<ac-option>27 Dresses</ac-option>
@@ -189,7 +189,7 @@
 			</section>
 			<section id="ac-files">
 				<h3>Files</h3>
-				<ac-files multiple="true">Drop files here</ac-files>
+				<ac-files multiple="true" helperText="This is the helper text">Drop files here</ac-files>
 			</section>
 			<section id="ac-loading">
 				<h3>Loading</h3>
@@ -221,16 +221,16 @@
 			</section>
 			<section id="ac-password">
 				<h3>Password</h3>
-				<ac-password>Password</ac-password>
+				<ac-password helperText="This is the helper text">Password</ac-password>
 			</section>
 			<section id="ac-radio">
 				<h3>Radio</h3>
-				<ac-radio name='radio' value='1' id='one' checked=true>Label 1</ac-radio>
-				<ac-radio name='radio' value='2' id='two'>Label 2</ac-radio>
+				<ac-radio name='radio' value='1' id='one' checked=true helperText="This is the helper text">Label 1</ac-radio>
+				<ac-radio name='radio' value='2' id='two' helperText="This is the helper text">Label 2</ac-radio>
 			</section>
 			<section id="ac-select">
 				<h3>Select</h3>
-				<ac-select>
+				<ac-select helperText="This is the helper text">
 					Label
 					<ac-option>Option 1</ac-option>
 					<ac-option>Option 2</ac-option>
@@ -239,11 +239,11 @@
 			</section>
 			<section id="ac-slider">
 				<h3>Slider</h3>
-				<ac-slider min="0" max="10" step="1" value="5">Label</ac-slider>
+				<ac-slider min="0" max="10" step="1" value="5" helperText="This is the helper text">Label</ac-slider>
 			</section>
 			<section id="ac-switch">
 				<h3>Switch</h3>
-				<ac-switch><span slot="on-label">On</span><span slot="off-label">Off</span></ac-switch>
+				<ac-switch helperText="This is the helper text"><span slot="on-label">On</span><span slot="off-label">Off</span></ac-switch>
 			</section>
 			<section id="ac-table">
 				<h3>Table</h3>
@@ -273,14 +273,12 @@
 			</section>
 			<section id="ac-text-area">
 				<h3>Text-Area</h3>
-				<ac-text-area>Label</ac-text-area>
+				<ac-text-area helperText="This is the helper text">Label</ac-text-area>
 			</section>
 			<section id="ac-text-field">
 				<h3>Text-Field</h3>
-				<ac-text-field>Label</ac-text-field>
-				<ac-text-field search='true' style="margin-top: 30px;">Label</ac-text-field>
 				<ac-text-field helperText="This is the helper text">Label</ac-text-field>
-				<ac-text-field search='true' helperText="This is the helper text">Label</ac-text-field>
+				<ac-text-field search='true' style="margin-top: 30px;" helperText="This is the helper text">Label</ac-text-field>
 			</section>
 		</main>
 		<script>

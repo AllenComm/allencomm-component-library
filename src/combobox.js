@@ -1,5 +1,5 @@
 export default class Combobox extends HTMLElement {
-	static observedAttributes = ['disabled'];
+	static observedAttributes = ['disabled', 'error'];
 
 	constructor() {
 		super();
@@ -27,12 +27,27 @@ export default class Combobox extends HTMLElement {
 					cursor: default;
 					fill: #b0b0b0;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					flex: 100%;
+					font-size: 90%;
+					padding: 5px 5px 0px 5px;
+				}
+				#helper.hidden {
+					display: none;
+				}
 				input {
+					border-radius: 3px;
+					border-width: 1px;
 					display: block;
 					outline: none;
 					position: relative;
 					width: 100%;
 					z-index: 1;
+				}
+				input.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
 				}
 				.arrow, .clear, slot[name='clear-btn'], slot[name='expand-btn'] {
 					cursor: pointer;
@@ -121,11 +136,13 @@ export default class Combobox extends HTMLElement {
 				<div class='list'>
 					<slot name='options'></slot>
 				</div>
+				<div id='helper' class='hidden'></div>
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 		this._expanded = false;
+		this._error = false;
 		this._focused = null;
 		this._options = [];
 		this._selected = -1;
@@ -186,6 +203,26 @@ export default class Combobox extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.#input.classList.add('error');
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+			this.#input.classList.remove('error');
+		}
+	}
+
 	get #expanded() { return this._expanded; }
 	set #expanded(newVal) {
 		this._expanded = newVal;
@@ -195,6 +232,8 @@ export default class Combobox extends HTMLElement {
 
 	get #focused() { return this._focused; }
 	set #focused(newVal) { this._focused = newVal }
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
@@ -243,6 +282,9 @@ export default class Combobox extends HTMLElement {
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
@@ -254,6 +296,8 @@ export default class Combobox extends HTMLElement {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
 		});
 		const currentTabsIndex = combos.findIndex((a) => a === this);
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const offset = comboCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
@@ -263,6 +307,8 @@ export default class Combobox extends HTMLElement {
 		let optionIndex = 0;
 		let optionId = optionIndex + offset;
 
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {

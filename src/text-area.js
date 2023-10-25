@@ -1,5 +1,5 @@
 export default class TextArea extends HTMLElement {
-	static observedAttributes = ['disabled', 'value'];
+	static observedAttributes = ['disabled', 'error', 'value'];
 
 	constructor() {
 		super();
@@ -13,6 +13,15 @@ export default class TextArea extends HTMLElement {
 					display: block;
 					outline: none;
 					width: 100%;
+				}
+				#helper {
+					color: rgb(240, 45, 50);
+					flex: 100%;
+					font-size: 90%;
+					padding: 5px 5px 0px 5px;
+				}
+				#helper.hidden {
+					display: none;
 				}
 				label {
 					align-items: flex-start;
@@ -35,14 +44,20 @@ export default class TextArea extends HTMLElement {
 					outline: 1px solid #000;
 					z-index: 1;
 				}
+				textarea.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
+				}
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
 				<textarea></textarea>
+				<div id='helper' class='hidden'></div>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
 		this._oldValue = null;
 	}
 
@@ -70,6 +85,28 @@ export default class TextArea extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.#textarea.classList.add('error');
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+			this.#textarea.classList.remove('error');
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
 	get #textarea() { return this.shadowRoot.querySelector('textarea'); }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -78,12 +115,17 @@ export default class TextArea extends HTMLElement {
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
 	connectedCallback() {
 		const autoHeight = this.getAttribute('auto-height');
 		const cols = this.getAttribute('cols');
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const lines = this.getAttribute('lines');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
@@ -97,6 +139,8 @@ export default class TextArea extends HTMLElement {
 			this.#textarea.setAttribute('auto-height', true);
 		}
 		if (cols) this.#textarea.setAttribute('cols', cols);
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
 		if (minlength) this.#textarea.setAttribute('minlength', minlength);
 		if (placeholder) this.#textarea.setAttribute('placeholder', placeholder);

@@ -1,5 +1,5 @@
 export default class Slider extends HTMLElement {
-	static observedAttributes = ['disabled', 'value'];
+	static observedAttributes = ['disabled', 'error', 'value'];
 
 	constructor() {
 		super();
@@ -20,12 +20,28 @@ export default class Slider extends HTMLElement {
 					outline-offset: 2px;
 					z-index: 1;
 				}
+				#helper {
+					color: rgb(240, 45, 50);
+					flex: 100%;
+					font-size: 90%;
+					padding: 5px 5px 0px 5px;
+				}
+				#helper.hidden {
+					display: none;
+				}
+				.inner {
+					display: flex;
+					flex: 1;
+					flex-direction: column;
+					justify-content: flex-end;
+					margin-top: 1px;
+				}
 				input {
 					cursor: pointer;
 					width: 100%;
 				}
 				label {
-					align-items: center;
+					align-items: flex-start;
 					display: flex;
 					gap: 0 10px;
 					width: 100%;
@@ -33,12 +49,16 @@ export default class Slider extends HTMLElement {
 			</style>
 			<label tabindex='-1'>
 				<slot></slot>
-				<input tabindex='-1' type='range'></input>
+				<div class='inner'>
+					<input tabindex='-1' type='range'></input>
+					<div id='helper' class='hidden'></div>
+				</div>
 				<output></output>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
+		this._error = false;
 	}
 
 	get disabled() { return this._disabled; }
@@ -62,6 +82,26 @@ export default class Slider extends HTMLElement {
 		}
 	}
 
+	get error() { return this._error; }
+	set error(newVal) {
+		const bool = newVal === 'true' || newVal === true;
+		this._error = bool;
+		if (bool) {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.removeAttribute('aria-hidden');
+				this.#helperDiv.classList.remove('hidden');
+			}
+			this.dispatchEvent(new Event('error', { 'composed': true }));
+		} else {
+			if (this.#helperDiv.innerText.length > 0) {
+				this.#helperDiv.setAttribute('aria-hidden', !bool);
+				this.#helperDiv.classList.add('hidden');
+			}
+		}
+	}
+
+	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
+
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
 	get #output() { return this.shadowRoot.querySelector('output'); }
@@ -76,15 +116,22 @@ export default class Slider extends HTMLElement {
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
 	connectedCallback() {
+		const error = this.getAttribute('error');
+		const helperText = this.getAttribute('helperText');
 		const max = this.getAttribute('max');
 		const min = this.getAttribute('min');
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
 		this.#input.setAttribute('aria-hidden', true);
+		if (error) this.error = error;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (max != null) {
 			this.#input.setAttribute('max', max);
 			this.setAttribute('aria-valueMax', max);

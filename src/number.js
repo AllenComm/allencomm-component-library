@@ -64,7 +64,6 @@ export default class Number extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 		this._error = false;
-		this._helperText = '';
 	}
 
 	get disabled() { return this._disabled; }
@@ -91,14 +90,14 @@ export default class Number extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._error = bool;
 		if (bool) {
-			if (this.#helperText.length > 0) {
+			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.removeAttribute('aria-hidden');
 				this.#helperDiv.classList.remove('hidden');
 			}
 			this.#input.classList.add('error');
 			this.dispatchEvent(new Event('error', { 'composed': true }));
 		} else {
-			if (this.#helperText.length > 0) {
+			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.setAttribute('aria-hidden', !bool);
 				this.#helperDiv.classList.add('hidden');
 			}
@@ -107,12 +106,6 @@ export default class Number extends HTMLElement {
 	}
 
 	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
-
-	get #helperText() { return this._helperText; }
-	set #helperText(newVal) {
-		this._helperText = newVal;
-		this.#helperDiv.innerText = newVal;
-	}
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
@@ -143,7 +136,7 @@ export default class Number extends HTMLElement {
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
 		if (error) this.error = error;
-		if (helperText) this.#helperText = helperText;
+		if (helperText) this.#helperDiv.innerText = helperText;
 		if (max != null) {
 			this.#input.setAttribute('max', max);
 			this.setAttribute('aria-valueMax', max);
