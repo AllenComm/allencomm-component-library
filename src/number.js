@@ -1,5 +1,5 @@
 export default class Number extends HTMLElement {
-	static observedAttributes = ['disabled', 'value'];
+	static observedAttributes = ['disabled', 'error', 'value'];
 
 	constructor() {
 		super();
@@ -125,6 +125,9 @@ export default class Number extends HTMLElement {
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
+		} else if (attr === 'error') {
+			const bool = newVal === 'true' || newVal === true;
+			this.error = bool;
 		}
 	}
 
