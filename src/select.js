@@ -17,10 +17,9 @@ export default class Select extends HTMLElement {
 				:host(:focus-visible) {
 					outline: none;
 				}
-				:host(:focus-within) .outer {
+				:host(:focus-within) .inner {
 					border-radius: 3px;
-					outline: 2px solid #000;
-					outline-offset: 2px;
+					outline: 1px solid #000;
 				}
 				:host([expanded='true']) .list {
 					visibility: visible;
@@ -37,11 +36,11 @@ export default class Select extends HTMLElement {
 				.arrow, slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;
-					height: 22px;
+					height: 24px;
 					position: absolute;
 					right: 0;
 					top: 0;
-					width: 22px;
+					width: 24px;
 					z-index: 2;
 				}
 				.arrow.hidden {
@@ -50,8 +49,8 @@ export default class Select extends HTMLElement {
 				.arrow div, ::slotted(*[slot='expand-btn']) {
 					display: flex !important;
 					height: 100%;
-					max-height: 22px !important;
-					max-width: 22px !important;
+					max-height: 24px !important;
+					max-width: 24px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
@@ -64,13 +63,23 @@ export default class Select extends HTMLElement {
 				#helper {
 					color: rgb(240, 45, 50);
 					font-size: 90%;
-					margin-right: 10px;
+					padding: 5px 5px 0;
 				}
 				#helper.hidden {
 					display: none;
 				}
 				.inner {
-					height: 100%;
+					background-color: #fff;
+					border: 1px solid #000;
+					border-radius: 3px;
+					cursor: pointer;
+					min-height: 26px;
+					outline: none;
+					padding: 1px 2px;
+				}
+				.inner.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
 				}
 				.list {
 					background-color: #fff;
@@ -80,11 +89,12 @@ export default class Select extends HTMLElement {
 					flex-direction: column;
 					gap: 1px;
 					left: 0;
+					margin: 0 1px;
 					max-height: 300px;
 					overflow-y: auto;
 					position: absolute;
 					visibility: hidden;
-					width: 100%;
+					width: calc(100% - 2px);
 					z-index: 3;
 				}
 				.list[anchor='bottom'] {
@@ -92,21 +102,10 @@ export default class Select extends HTMLElement {
 					transform: translateY(-100%);
 				}
 				.outer {
-					background-color: #fff;
-					border: 1px solid #767676;
-					border-radius: 3px;
-					cursor: pointer;
 					display: block;
 					flex: 1;
-					height: 24px;
-					outline: none;
-					padding: 1px 2px;
 					position: relative;
 					width: 100%;
-				}
-				.outer.error {
-					border-color: rgb(240, 45, 50);
-					border-style: solid;
 				}
 			</style>
 			<div class='component'>
@@ -194,14 +193,14 @@ export default class Select extends HTMLElement {
 				this.#helperDiv.removeAttribute('aria-hidden');
 				this.#helperDiv.classList.remove('hidden');
 			}
-			this.shadowRoot.querySelector('.outer').classList.add('error');
+			this.shadowRoot.querySelector('.inner').classList.add('error');
 			this.dispatchEvent(new Event('error', { 'composed': true }));
 		} else {
 			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.setAttribute('aria-hidden', !bool);
 				this.#helperDiv.classList.add('hidden');
 			}
-			this.shadowRoot.querySelector('.outer').classList.remove('error');
+			this.shadowRoot.querySelector('.inner').classList.remove('error');
 		}
 	}
 
