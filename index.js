@@ -16,6 +16,7 @@ import Password from './src/password.js';
 import Radio from './src/radio.js';
 import Select from './src/select.js';
 import Slider from './src/slider.js';
+import Snackbar from './src/snackbar.js';
 import Switch from './src/switch.js';
 import Tab from './src/tab.js';
 import Tabs from './src/tabs.js';
@@ -43,6 +44,7 @@ export {
 	Radio,
 	Select,
 	Slider,
+	Snackbar,
 	Switch,
 	Tab,
 	Tabs,

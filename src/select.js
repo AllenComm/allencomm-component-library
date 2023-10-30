@@ -263,7 +263,7 @@ export default class Select extends HTMLElement {
 		});
 		const currentTabsIndex = combos.findIndex((a) => a === this);
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		const offset = comboCounts.map((a, i) => {
 			if (i < currentTabsIndex) {
 				return a;
@@ -274,7 +274,7 @@ export default class Select extends HTMLElement {
 		let optionId = optionIndex + offset;
 
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {

@@ -134,14 +134,14 @@ export default class Files extends HTMLElement {
 	connectedCallback() {
 		const accept = this.getAttribute('accept');
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		if (accept) this.#input.setAttribute('accept', accept);
 		if (this.getAttribute('multiple') === 'true') {
 			this._multiple = true;
 			this.#input.setAttribute('multiple', '');
 		}
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 
 		this.#dropZone.addEventListener('click', this.handleClick);
 		this.#dropZone.addEventListener('keydown', this.handleKeydown);

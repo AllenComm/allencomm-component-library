@@ -205,14 +205,14 @@ export default class Password extends HTMLElement {
 
 	connectedCallback() {
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
 		const placeholder = this.getAttribute('placeholder');
 		const size = this.getAttribute('size');
 		const value = this.getAttribute('value');
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (maxlength) this.#input.setAttribute('maxlength', maxlength);
 		if (minlength) this.#input.setAttribute('minlength', minlength);
 		if (placeholder) this.#input.setAttribute('placeholder', placeholder);

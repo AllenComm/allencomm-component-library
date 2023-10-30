@@ -124,14 +124,14 @@ export default class Slider extends HTMLElement {
 
 	connectedCallback() {
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		const max = this.getAttribute('max');
 		const min = this.getAttribute('min');
 		const step = this.getAttribute('step');
 		const value = this.getAttribute('value');
 		this.#input.setAttribute('aria-hidden', true);
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (max != null) {
 			this.#input.setAttribute('max', max);
 			this.setAttribute('aria-valueMax', max);

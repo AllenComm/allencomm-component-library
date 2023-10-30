@@ -149,10 +149,10 @@ export default class Checkbox extends HTMLElement {
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		this.#input.checked = checked;
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.getAttribute('disabled') === 'true') {
 			this.disabled = true;
 		} else {

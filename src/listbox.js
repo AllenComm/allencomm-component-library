@@ -71,7 +71,7 @@ export default class Listbox extends HTMLElement {
 		return this._selected;
 	}
 	set selected(newVal) {
-		if (typeof(newVal) === 'object') {
+		if (typeof newVal === 'object') {
 			this._selectedArr = newVal;
 		} else {
 			this._selected = parseInt(newVal);

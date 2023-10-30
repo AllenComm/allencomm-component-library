@@ -152,7 +152,7 @@ export default class Radio extends HTMLElement {
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		const id = this.getAttribute('id');
 		const name = this.getAttribute('name') || '';
 		const value = this.getAttribute('value') || id || '';
@@ -170,7 +170,7 @@ export default class Radio extends HTMLElement {
 		this.#input.setAttribute('name', name);
 		this.#input.setAttribute('value', value);
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.getAttribute('disabled') === 'true') {
 			this.disabled = true;
 		} else {

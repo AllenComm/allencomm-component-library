@@ -125,7 +125,7 @@ export default class TextArea extends HTMLElement {
 		const autoHeight = this.getAttribute('auto-height');
 		const cols = this.getAttribute('cols');
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		const lines = this.getAttribute('lines');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
@@ -140,7 +140,7 @@ export default class TextArea extends HTMLElement {
 		}
 		if (cols) this.#textarea.setAttribute('cols', cols);
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (maxlength) this.#textarea.setAttribute('maxlength', maxlength);
 		if (minlength) this.#textarea.setAttribute('minlength', minlength);
 		if (placeholder) this.#textarea.setAttribute('placeholder', placeholder);

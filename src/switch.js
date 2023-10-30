@@ -151,14 +151,14 @@ export default class Switch extends HTMLElement {
 	connectedCallback() {
 		const checked = this.getAttribute('checked') || false;
 		const error = this.getAttribute('error');
-		const helperText = this.getAttribute('helperText');
+		const helpertext = this.getAttribute('helpertext');
 		this.#input.checked = checked;
 		this.#input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
 		this.setAttribute('tabindex', 0);
 		this.addEventListener('keydown', this.handleKeydown);
 		if (error) this.error = error;
-		if (helperText) this.#helperDiv.innerText = helperText;
+		if (helpertext) this.#helperDiv.innerText = helpertext;
 	}
 
 	handleChange = (e) => {
