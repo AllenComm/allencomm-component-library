@@ -244,10 +244,12 @@
 			</section>
 			<section id="ac-snackbar">
 				<h3>Snackbar</h3>
-				<ac-button id="snackbar-1-button">Toggle Snackbar</ac-button>
-				<ac-button id="snackbar-2-button">Toggle Snackbar (auto hide)</ac-button>
-				<ac-snackbar anchor="bottom center" id="snackbar-1">Snackbar message here...</ac-snackbar>
-				<ac-snackbar id="snackbar-2" autohide="1000">Snackbar message here...</ac-snackbar>
+				<ac-button id="snackbar-1-button">Toggle Snackbar 1</ac-button>
+				<ac-button id="snackbar-2-button">Toggle Snackbar 2</ac-button>
+				<ac-button id="snackbar-3-button">Toggle Snackbar 3</ac-button>
+				<ac-snackbar id="snackbar-1" anchor="bottom center">Snackbar message here...</ac-snackbar>
+				<ac-snackbar id="snackbar-2" autohide="5000">Snackbar message here...</ac-snackbar>
+				<ac-snackbar id="snackbar-3" anchor="lefte up top bottom" autohide="5000" direction="down" animation="slide">Snackbar message here...</ac-snackbar>
 			</section>
 			<section id="ac-switch">
 				<h3>Switch</h3>
@@ -310,6 +312,10 @@
 			});
 			document.getElementById('snackbar-2-button').addEventListener('click', () => {
 				const snackbar = document.getElementById('snackbar-2');
+				toggleSnackbar(snackbar);
+			});
+			document.getElementById('snackbar-3-button').addEventListener('click', () => {
+				const snackbar = document.getElementById('snackbar-3');
 				toggleSnackbar(snackbar);
 			});
 		</script>

@@ -8,47 +8,143 @@ export default class Snackbar extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					background: #fff;
-					display: none;
-					flex-direction: column;
-					margin: 20px;
-					position: fixed;
+					display: block;
+					height: 0px;
+					width: 0px;
 				}
-				:host([open='true']) {
+				#body {
+					animation-direction: alternate;
+					background: #fff;
+					box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
+					border-radius: 3px;
+					display: none;
+					margin: 20px;
+					min-width: 250px;
+					padding: 15px;
+					position: fixed;
+					/* visibility: hidden; */
+				}
+				#body[animation='scale'] {
+					animation: scale .25s;
+				}
+				#body[animation='slide'] {
+					animation: slide-left .25s;
+				}
+				#body[open='true'] {
 					display: flex;
+					/* visibility: visible; */
 					z-index: 100;
 				}
-				:host([anchor*='center']) {
+				#body[horizontal='center'] {
 					left: 50%;
 					transform: translateX(-50%);
 				}
-				:host([anchor*='left']) {
+				#body[horizontal='center'][animation='scale'] {
+					animation: scaleAndTranslate .25s;
+
+				}
+				#body[horizontal='left'] {
 					left: 0;
 				}
-				:host([anchor*='right']) {
+				#body[horizontal='right'] {
 					right: 0;
 				}
-				:host([anchor*='bottom']) {
+				#body[vertical='bottom'] {
 					bottom: 0;
 				}
-				:host([anchor*='top']) {
+				#body[vertical='top'] {
 					top: 0;
 				}
+				@keyframes scale {
+					from {
+						transform: scale(0);
+					} to {
+						transform: scale(1);
+					}
+				}
+				@keyframes scaleAndTranslate {
+					from {
+						transform: scale(0) translateX(-50%);
+					} to {
+						transform: scale(1) translateX(-50%);
+					}
+				}
 			</style>
-			<slot></slot>
-			<div class='close'></div>
+			<div id='body'>
+				<slot></slot>
+				<div class='close'></div>
+			</div>
 		`;
-		this._anchor = '';
+		this._anchor = 'bottom left';
+		this._animation = 'scale';
 		this._autohide = -1;
+		this._direction = null;
 		this._onclose = null;
 		this._open = false;
+		this._horizontal = null;
+		this._vertical = null;
 	}
 
-	get #anchor() { return this._anchor; }
-	set #anchor(newVal) { this._anchor = newVal; }
+	set #anchor(newVal) {
+		if (newVal.length > 0) {
+			this._anchor = newVal;
+			const anchors = newVal.split(' ');
+			anchors.map((a, i) => {
+				switch(a) {
+					case 'bottom':
+					case 'top':
+						if (!this.#vertical) {
+							this.#vertical = a;
+						}
+						break;
+					case 'center':
+					case 'left':
+					case 'right':
+						if (!this.#horizontal) {
+							this.#horizontal = a;
+						}
+						break;
+				}
+			});
+			if (!this.#vertical) {
+				this.#vertical = 'bottom';
+			}
+			if (!this.#horizontal) {
+				this.#horizontal = 'left';
+			}
+		}
+	}
+
+	get #animation() { return this._animation; }
+	set #animation(newVal) {
+		this._animation = newVal;
+		this.#body.setAttribute('animation', newVal);
+	}
 
 	get #autohide() { return this._autohide; }
 	set #autohide(newVal) { this._autohide = parseFloat(newVal); }
+
+	get #body() { return this.shadowRoot.querySelector('#body'); }
+
+	set #direction(newVal) {
+		if (this.#animation == 'slide') {
+			this._direction = newVal;
+		} else if (this._direction != null) {
+			this._direction = null;
+		}
+	}
+
+	get #horizontal() { return this._horizontal; }
+	set #horizontal(newVal) {
+		this._horizontal = newVal;
+		this.#body.setAttribute('horizontal', newVal);
+	}
+
+	get #vertical() { return this._vertical; }
+	set #vertical(newVal) {
+		this._vertical = newVal;
+		this.#body.setAttribute('vertical', newVal);
+	}
 
 	get onclose() { return this._onclose; }
 	set onclose(newVal) { this._onclose = newVal; }
@@ -61,12 +157,12 @@ export default class Snackbar extends HTMLElement {
 			if (this.#autohide > 0) {
 				setTimeout(() => this.handleClose(), this.#autohide);
 			}
-			this.setAttribute('open', true);
+			this.#body.setAttribute('open', true);
 		} else {
 			if (this.onclose != null) {
 				this.onclose();
 			}
-			this.setAttribute('open', false);
+			this.#body.setAttribute('open', false);
 		}
 	}
 
@@ -78,15 +174,23 @@ export default class Snackbar extends HTMLElement {
 
 	connectedCallback() {
 		const anchor = this.getAttribute('anchor');
+		const animation = this.getAttribute('animation');
 		const autohide = this.getAttribute('autohide');
+		const direction = this.getAttribute('direction');
 		const onclose = this.getAttribute('onclose');
 		const open = this.getAttribute('open');
-		if (anchor && typeof anchor === 'object' && (anchor.horizontal || anchor.vertical)) {
+		if (anchor != null) {
 			this.#anchor = anchor;
 		} else {
-			this.#anchor = { vertical: 'bottom', horizontal: 'left' };
+			this.#anchor = this._anchor;
+		}
+		if (animation != null) {
+			this.#animation = animation;
+		} else {
+			this.#animation = this._animation;
 		}
 		if (autohide) this.#autohide = autohide;
+		if (direction != null) this.#direction = direction;
 		if (onclose != null) this.onclose = onclose;
 		if (open != null) this.open = open;
 	}
