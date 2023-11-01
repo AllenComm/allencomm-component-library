@@ -13,7 +13,8 @@ export default class Snackbar extends HTMLElement {
 					width: 0px;
 				}
 				#body {
-					animation-direction: alternate;
+					animation-duration: .25s;
+					animation-fill-mode: both;
 					background: #fff;
 					box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
 					border-radius: 3px;
@@ -22,26 +23,54 @@ export default class Snackbar extends HTMLElement {
 					min-width: 250px;
 					padding: 15px;
 					position: fixed;
-					/* visibility: hidden; */
+					transform-origin: center;
+					z-index: 100;
 				}
-				#body[animation='scale'] {
-					animation: scale .25s;
-				}
-				#body[animation='slide'] {
-					animation: slide-left .25s;
+				#body[open='false'] {
+					animation-name: scaleOut;
+					animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+					display: flex;
 				}
 				#body[open='true'] {
+					animation-name: scaleIn;
+					animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
 					display: flex;
-					/* visibility: visible; */
-					z-index: 100;
+				}
+				#body[open='false'][horizontal='center'] {
+					animation-name: scaleTransformOut;
+					transform-origin: left;
+				}
+				#body[open='true'][horizontal='center'] {
+					animation-name: scaleTransformIn;
+					transform-origin: left;
+				}
+				#body[open='false'][animation='slide'][direction='down'] {
+					animation-name: slideDownOut;
+				}
+				#body[open='true'][animation='slide'][direction='down'] {
+					animation-name: slideDownIn;
+				}
+				#body[open='false'][animation='slide'][direction='left'] {
+					animation-name: slideLeftOut;
+				}
+				#body[open='true'][animation='slide'][direction='left'] {
+					animation-name: slideLeftIn;
+				}
+				#body[open='false'][animation='slide'][direction='right'] {
+					animation-name: slideRightOut;
+				}
+				#body[open='true'][animation='slide'][direction='right'] {
+					animation-name: slideRightIn;
+				}
+				#body[open='false'][animation='slide'][direction='up'] {
+					animation-name: slideUpOut;
+				}
+				#body[open='true'][animation='slide'][direction='up'] {
+					animation-name: slideUpIn;
 				}
 				#body[horizontal='center'] {
 					left: 50%;
 					transform: translateX(-50%);
-				}
-				#body[horizontal='center'][animation='scale'] {
-					animation: scaleAndTranslate .25s;
-
 				}
 				#body[horizontal='left'] {
 					left: 0;
@@ -55,18 +84,88 @@ export default class Snackbar extends HTMLElement {
 				#body[vertical='top'] {
 					top: 0;
 				}
-				@keyframes scale {
+				@keyframes scaleIn {
 					from {
 						transform: scale(0);
 					} to {
 						transform: scale(1);
 					}
 				}
-				@keyframes scaleAndTranslate {
+				@keyframes scaleOut {
+					from {
+						transform: scale(1);
+					} to {
+						transform: scale(0);
+					}
+				}
+				@keyframes scaleTransformIn {
 					from {
 						transform: scale(0) translateX(-50%);
 					} to {
 						transform: scale(1) translateX(-50%);
+					}
+				}
+				@keyframes scaleTransformOut {
+					from {
+						transform: scale(1) translateX(-50%);
+					} to {
+						transform: scale(0) translateX(-50%);
+					}
+				}
+				@keyframes slideDownIn {
+					from {
+						transform: translateY(-100vh);
+					} to {
+						transform: translateY(0);
+					}
+				}
+				@keyframes slideDownOut {
+					from {
+						transform: translateY(0);
+					} to {
+						transform: translateY(-100vh);
+					}
+				}
+				@keyframes slideLeftIn {
+					from {
+						transform: translateX(-100vw);
+					} to {
+						transform: translateX(0);
+					}
+				}
+				@keyframes slideLeftOut {
+					from {
+						transform: translateX(0);
+					} to {
+						transform: translateX(-100vw);
+					}
+				}
+				@keyframes slideRightIn {
+					from {
+						transform: translateX(100vw);
+					} to {
+						transform: translateX(0);
+					}
+				}
+				@keyframes slideRightOut {
+					from {
+						transform: translateX(0);
+					} to {
+						transform: translateX(100vw);
+					}
+				}
+				@keyframes slideUpIn {
+					from {
+						transform: translateY(100vh);
+					} to {
+						transform: translateY(0);
+					}
+				}
+				@keyframes slideUpOut {
+					from {
+						transform: translateY(0);
+					} to {
+						transform: translateY(100vh);
 					}
 				}
 			</style>
@@ -78,10 +177,11 @@ export default class Snackbar extends HTMLElement {
 		this._anchor = 'bottom left';
 		this._animation = 'scale';
 		this._autohide = -1;
-		this._direction = null;
+		this._direction = 'left';
 		this._onclose = null;
 		this._open = false;
 		this._horizontal = null;
+		this._timer = null;
 		this._vertical = null;
 	}
 
@@ -129,6 +229,7 @@ export default class Snackbar extends HTMLElement {
 	set #direction(newVal) {
 		if (this.#animation == 'slide') {
 			this._direction = newVal;
+			this.#body.setAttribute('direction', newVal);
 		} else if (this._direction != null) {
 			this._direction = null;
 		}
@@ -155,10 +256,12 @@ export default class Snackbar extends HTMLElement {
 		this._open = bool;
 		if (bool) {
 			if (this.#autohide > 0) {
-				setTimeout(() => this.handleClose(), this.#autohide);
+				this._timer = setTimeout(() => this.handleClose(), this.#autohide);
 			}
 			this.#body.setAttribute('open', true);
 		} else {
+			clearTimeout(this._timer);
+			this._timer = null;
 			if (this.onclose != null) {
 				this.onclose();
 			}
@@ -190,7 +293,11 @@ export default class Snackbar extends HTMLElement {
 			this.#animation = this._animation;
 		}
 		if (autohide) this.#autohide = autohide;
-		if (direction != null) this.#direction = direction;
+		if (direction != null) {
+			this.#direction = direction;
+		} else {
+			this.#direction = this._direction;
+		}
 		if (onclose != null) this.onclose = onclose;
 		if (open != null) this.open = open;
 	}
