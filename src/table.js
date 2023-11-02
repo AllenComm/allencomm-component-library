@@ -975,6 +975,7 @@ export default class Table extends HTMLElement {
 		const { height } = this.#scrollableContainer.getBoundingClientRect();
 		const scrollPos = this.#scrollableContainer.scrollTop;
 		const rowHeight = this.getRowHeight();
+		const remainder = scrollPos % rowHeight;
 		const isRowViewable = (index) => {
 			const rowPos = index * rowHeight;
 			const inView = rowPos + rowHeight < scrollPos + height && rowPos + rowHeight > scrollPos;
@@ -989,6 +990,7 @@ export default class Table extends HTMLElement {
 		visibleRows.forEach((row, index) => {
 			if (!currentRowIds.includes(`row-${range.min + index}`)) {
 				const el = this.buildRow(row, range.min + index, false);
+				el.style.transform = `translateY(-${remainder}px)`;
 				this.#scrollContent.appendChild(el);
 			}
 		});
