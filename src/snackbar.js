@@ -44,6 +44,12 @@ export default class Snackbar extends HTMLElement {
 					animation-name: scaleTransformIn;
 					transform-origin: left;
 				}
+				#body[open='false'][animation='fade'] {
+					animation-name: fadeOut;
+				}
+				#body[open='true'][animation='fade'] {
+					animation-name: fadeIn;
+				}
 				#body[open='false'][animation='slide'][direction='down'] {
 					animation-name: slideDownOut;
 				}
@@ -84,31 +90,53 @@ export default class Snackbar extends HTMLElement {
 				#body[vertical='top'] {
 					top: 0;
 				}
+				@keyframes fadeIn {
+					from {
+						opacity: 0;
+					} to {
+						opacity: 1;
+					}
+				}
+				@keyframes fadeOut {
+					from {
+						opacity: 1;
+					} to {
+						opacity: 0;
+					}
+				}
 				@keyframes scaleIn {
 					from {
+						opacity: 0;
 						transform: scale(0);
 					} to {
+						opacity: 1;
 						transform: scale(1);
 					}
 				}
 				@keyframes scaleOut {
 					from {
+						opacity: 1;
 						transform: scale(1);
 					} to {
+						opacity: 0;
 						transform: scale(0);
 					}
 				}
 				@keyframes scaleTransformIn {
 					from {
+						opacity: 0;
 						transform: scale(0) translateX(-50%);
 					} to {
+						opacity: 1;
 						transform: scale(1) translateX(-50%);
 					}
 				}
 				@keyframes scaleTransformOut {
 					from {
+						opacity: 1;
 						transform: scale(1) translateX(-50%);
 					} to {
+						opacity: 0;
 						transform: scale(0) translateX(-50%);
 					}
 				}
@@ -171,7 +199,6 @@ export default class Snackbar extends HTMLElement {
 			</style>
 			<div id='body'>
 				<slot></slot>
-				<div class='close'></div>
 			</div>
 		`;
 		this._anchor = 'bottom left';
