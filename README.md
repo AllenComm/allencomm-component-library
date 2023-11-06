@@ -49,6 +49,7 @@ Unnamed = Slots which allow any child to be placed inside
     - unnamed
     - `on-label` - (Optional) Only shown when checkbox is on
     - `off-label` - (Optional) Only shown when checkbox is off
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Combobox
     - unnamed
     - `expand-btn` - (Optional, should be `<img>`) Used to replace the
@@ -56,37 +57,53 @@ Unnamed = Slots which allow any child to be placed inside
     - `clear-btn` - (Optional, should be `<img>`) Used to replace the clear-btn
         icon
     - `options` - Auto assigned children based on `ac-option`
+	- `helpertext` - (Optional) Shown when `error` is set to true
+- Files
+	- `helpertext` - (Optional) Shown when `error` is set to true
+    - Anything else is not slotted
 - Listbox
     - unnamed
     - `options` - Auto assigned children based on `ac-option`
 - Number
     - unnamed
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Option
     - unnamed
+- Password
+	- `helpertext` - (Optional) Shown when `error` is set to true
+    - Anything else is not slotted
 - Radio
     - unnamed
     - `on-label` - (Optional) Only shown when radio is on
     - `off-label` - (Optional) Only shown when radio is off
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Select
     - unnamed
     - `expand-btn` - (Optional, should be `<img>`) Used to replace the
         expand-btn icon
     - `options` - Auto assigned children based on `ac-option`
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Slider
     - unnamed
+	- `helpertext` - (Optional) Shown when `error` is set to true
+- Snackbar
+	- unnamed
 - Switch
     - unnamed
     - `on-label` - (Optional) Only shown when switch is on
     - `off-label` - (Optional) Only shown when switch is off
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Tabs
     - `tabs` - Auto assigned children based on `ac-tab`
     - `panels` - Auto assigned children based on `ac-tab-panel`
     - Anything else is not slotted
 - Text-Area
     - unnamed
+	- `helpertext` - (Optional) Shown when `error` is set to true
 - Text-Field
     - unnamed
     - `icon` - (Optional, should be `<img>`) Used to replace the search icon
+	- `helpertext` - (Optional) Shown when `error` is set to true
 
 ### Attributes available
 
