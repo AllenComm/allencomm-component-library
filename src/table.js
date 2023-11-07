@@ -91,6 +91,7 @@ export default class Table extends HTMLElement {
 					display: flex;
 					justify-content: center;
 					overflow: visible;
+					position: sticky;
 				}
 				.cell.selectable * {
 					margin: 0;
@@ -114,6 +115,7 @@ export default class Table extends HTMLElement {
 					border-top: 1px solid rgba(0, 0, 0, .1);
 				}
 				.footer-inner {
+					align-items: center;
 					display: flex;
 					flex: 1;
 					gap: 5px;
@@ -126,11 +128,13 @@ export default class Table extends HTMLElement {
 					justify-content: flex-start;
 				}
 				.header {
-					background-color: white;
 					font-weight: bold;
 					position: sticky;
 					top: 0;
 					z-index: 1;
+				}
+				.header .row {
+					background-color: white;
 				}
 				.header .cell {
 					cursor: pointer;
@@ -188,8 +192,10 @@ export default class Table extends HTMLElement {
 				.row {
 					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					display: inline-flex;
+					gap: 10px;
 					height: 34px;
 					min-width: 100%;
+					position: relative;
 					width: auto;
 				}
 				.row:not(#row-header):last-child .cell {
@@ -240,6 +246,7 @@ export default class Table extends HTMLElement {
 					flex: 1 1 auto;
 					height: 100%;
 					overflow: auto;
+					position: relative;
 				}
 				#total-rows {
 					text-align: right;
@@ -611,7 +618,7 @@ export default class Table extends HTMLElement {
 	getScrollableHeight = () => {
 		const rowHeight = this.getRowHeight();
 		const rowCount = this.pageSize < Infinity && this.rows.length > this.pageSize ? this.pageSize : this.rows.length;
-		return rowHeight * rowCount;
+		return rowHeight * (rowCount - 1);
 	}
 
 	getTotalPages = () => {

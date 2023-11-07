@@ -131,3 +131,24 @@ section > div {
 	flex-direction: row;
 	flex-wrap: wrap;
 }
+
+@media (max-width: 425px) {
+	body {
+		grid-template-columns: 100%;
+		grid-template-rows: auto auto;
+	}
+
+	header {
+		grid-area: 1/1/1/1;
+	}
+
+	main {
+		grid-area: 2/1/2/1;
+		max-width: 100%;
+	}
+
+	section {
+		margin-bottom: 10px;
+		padding: 5px;
+	}
+}
