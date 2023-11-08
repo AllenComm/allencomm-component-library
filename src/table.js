@@ -813,19 +813,22 @@ export default class Table extends HTMLElement {
 		const colDetails = this.columns.map((col, i) => ({
 			sort: col.sort,
 			type: this.columns[i].type,
-			property: this.columns[i].property
-		})).filter(colDetail => colDetail.sort !== this.NONE);
+			property: this.columns[i].property,
+			sortFunction: this.columns[i].sortFunction,
+		})).filter(colDetail => colDetail.sort !== this.NONE && colDetail.sort !== undefined);
 
 		const compare = (a, b) => {
 			for (let i = 0; i < colDetails.length; i++) {
-				const { type, property, sort } = colDetails[i];
+				const { type, property, sort, sortFunction } = colDetails[i];
 				const aa = a[property];
 				const bb = b[property];
 				if (aa == null) return -1;
 				if (bb == null) return 1;
 
 				let result = 0;
-				if (type === 'number') {
+				if (typeof sortFunction === 'function') {
+					result = sortFunction(aa, bb);
+				} else if (type === 'number') {
 					result = aa - bb;
 				} else if (type === 'string') {
 					if (typeof aa === 'string' && typeof bb === 'string') {
