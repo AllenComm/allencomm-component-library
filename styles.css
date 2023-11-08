@@ -83,7 +83,7 @@ body {
 	display: grid;
 	font-family: sans-serif;
 	font-size: 14px;
-	grid-template-columns: 300px 1fr;
+	grid-template-columns: 300px minmax(0, 1fr);
 	grid-template-rows: 50px 1fr;
 	width: 100%;
 }

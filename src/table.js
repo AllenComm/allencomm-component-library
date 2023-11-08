@@ -251,6 +251,21 @@ export default class Table extends HTMLElement {
 				#total-rows {
 					text-align: right;
 				}
+
+				@media (max-width: 425px) {
+					.cell-menu-btn {
+						opacity: 1;
+						position: relative;
+						top: 0;
+						transform: none;
+					}
+					.header .cell {
+						display: flex;
+					}
+					.header .cell:not(.selectable) {
+						justify-content: space-between;
+					}
+				}
 			</style>
 			<div class='table' tabindex="-1">
 				<div class='table-scrollable'>
@@ -469,12 +484,14 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.addEventListener('click', this.onClickInside);
 		document.addEventListener('click', this.onClickOutside);
 		document.addEventListener('keydown', this.onKeyDown);
+		window.addEventListener('resize', this.onResize);
 		this.#initialized = true;
 	}
 
 	disconnectedCallback() {
 		document.removeEventListener('click', this.onClickOutside);
 		document.removeEventListener('keydown', this.onKeyDown);
+		window.addEventListener('resize', this.onResize);
 	}
 
 	buildCell = (data, cellIndex, rowIndex, column, rowData) => {
@@ -483,7 +500,11 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('cell');
 		element.classList.add(column.type);
-		element.style.width = `${column.width || '100px'}`;
+		if (window.screen.width <= 425) {
+			element.style.width = `${column.width ? parseFloat(column.width) + 30 : '100'}px`;
+		} else {
+			element.style.width = `${column.width || '100px'}`;
+		}
 		element.title = data;
 		element.setAttribute('id', `cell-${cellIndex}`);
 
@@ -508,7 +529,11 @@ export default class Table extends HTMLElement {
 		content.textContent = name;
 		element.className = `cell sort-${sort || 'none'}`;
 		element.setAttribute('data-property', column.property);
-		element.style.width = `${width || '100px'}`;
+		if (window.screen.width <= 425) {
+			element.style.width = `${column.width ? parseFloat(column.width) + 30 : '100'}px`;
+		} else {
+			element.style.width = `${column.width || '100px'}`;
+		}
 		element.setAttribute('id', `cell-${index}`);
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
@@ -690,6 +715,27 @@ export default class Table extends HTMLElement {
 		this.#menu.classList.remove('manage');
 		this.#menu.classList.remove('filter');
 		this.#menu.classList.add('visible');
+	}
+
+	onResize = () => {
+		const isMobile = window.screen.width <= 425;
+		const rows = [...this.#header.children, ...this.#scrollContent.children];
+		rows.forEach((a, i) => {
+			const columns = [...a.children];
+			columns.forEach((b, j) => {
+				if (j == 0) {
+					return;
+				}
+				const col = this._columns[j-1];
+				let newStyle = `${col.width || '100px'}`;
+				if (isMobile) {
+					newStyle = `${col.width ? parseFloat(col.width) + 30 : '100'}px`;
+				}
+				if (b.style.width !== newStyle) {
+					b.style.width = newStyle;
+				}
+			});
+		});
 	}
 
 	onRowsUpdate = (rows) => {
