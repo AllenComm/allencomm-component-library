@@ -23,23 +23,6 @@ export default class Password extends HTMLElement {
 				#helper.hidden {
 					display: none;
 				}
-				input {
-					border-radius: 3px;
-					border-width: 1px;
-					flex: 1;
-					padding: 5px;
-					width: 100%;
-				}
-				input:focus-visible {
-					border-color: #000;
-					border-style: solid;
-					outline: 1px solid #000;
-					z-index: 1;
-				}
-				input.error {
-					border-color: rgb(240, 45, 50);
-					border-style: solid;
-				}
 				.icon, slot[name='toggle-show'], slot[name='toggle-hide'] {
 					display: flex;
 					height: 30px;
@@ -74,6 +57,24 @@ export default class Password extends HTMLElement {
 					flex: 1;
 					flex-direction: column;
 					justify-content: flex-end;
+				}
+				input {
+					border-radius: 3px;
+					border-width: 1px;
+					flex: 1;
+					font-family: monospace;
+					padding: 5px;
+					width: 100%;
+				}
+				input:focus-visible {
+					border-color: #000;
+					border-style: solid;
+					outline: 1px solid #000;
+					z-index: 1;
+				}
+				input.error {
+					border-color: rgb(240, 45, 50);
+					border-style: solid;
 				}
 				label {
 					align-items: baseline;
