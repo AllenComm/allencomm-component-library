@@ -267,7 +267,7 @@ Attribute notes:
 | `filters`         | **JSON**; Filter data                    |
 | `page`            | **Number**; Current page                 |
 | `page-size`       | **Number**; Initial page size            |
-| `columns`         | **JSON**; Row data                       |
+| `rows`            | **JSON**; Row data                       |
 
 | Tabs       | Attributes                             |
 |------------|----------------------------------------|

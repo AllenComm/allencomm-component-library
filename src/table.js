@@ -643,7 +643,7 @@ export default class Table extends HTMLElement {
 	getScrollableHeight = () => {
 		const rowHeight = this.getRowHeight();
 		const rowCount = this.pageSize < Infinity && this.rows.length > this.pageSize ? this.pageSize : this.rows.length;
-		return rowHeight * (rowCount - 1);
+		return rowHeight * (rowCount);
 	}
 
 	getTotalPages = () => {
@@ -864,7 +864,10 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	setPageSize = (e) => this.pageSize = Number(e.target.value);
+	setPageSize = (e) => {
+		this.pageSize = Number(e.target.value);
+		this.fireChangeEvent();
+	}
 
 	sortColumn = (dir) => {
 		if (this.currentColumn) {
@@ -877,8 +880,8 @@ export default class Table extends HTMLElement {
 			this.currentColumn.sort = dir;
 			headerCell.classList.add(`sort-${dir}`);
 			this.onRowsUpdate([...this._rows]);
-			this.fireChangeEvent();
 			this.onMenuCloseClick();
+			this.fireChangeEvent();
 		}
 	}
 
@@ -930,6 +933,7 @@ export default class Table extends HTMLElement {
 			filters.push({ column: this.currentColumn.property, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
+			this.fireChangeEvent();
 		});
 		this.#filters.appendChild(addBtn);
 
@@ -952,6 +956,7 @@ export default class Table extends HTMLElement {
 				filters[index] = filter;
 				this.page = 0;
 				this.filters = filters;
+				this.fireChangeEvent();
 			};
 
 			this._columns.forEach(col => {
@@ -981,6 +986,7 @@ export default class Table extends HTMLElement {
 			filterRemove.addEventListener('click', () => {
 				this.filters = this.filters.filter((a, i) => i !== index);
 				this.updateMenuPosition(this.#prevHeaderBtnRect);
+				this.fireChangeEvent();
 			});
 
 			this.#filters.insertBefore(clone, addBtn);
@@ -1005,6 +1011,7 @@ export default class Table extends HTMLElement {
 				const columns = [ ...this.columns ];
 				columns[index].hidden = !e.target.checked;
 				this.columns = columns;
+				this.fireChangeEvent();
 				this.forceRender();
 			});
 			this.#manage.appendChild(wrapper);
