@@ -21,8 +21,10 @@ export default class Table extends HTMLElement {
 	#lastScrollTop = 0;
 	#manage = null;
 	#menu = null;
+	#mouseDown = false;
 	#multiFilterOperator = 'AND';
 	#prevHeaderBtnRect = null;
+	#resizingColumn = null;
 	#rowsUnfiltered = null;
 	#scrollableContainer = null;
 	#scrollContent = null;
@@ -85,6 +87,19 @@ export default class Table extends HTMLElement {
 					top: 50%;
 					transform: translateY(-50%);
 					transition: opacity .2s ease;
+				}
+				.cell-resize-btn {
+					border: none;
+					cursor: ew-resize;
+					display: inline-block;
+					height: 100%;
+					opacity: 0;
+					padding: 0;
+					position: absolute;
+					right: 0;
+					top: 0;
+					transition: opacity .2s ease;
+					width: 5px;
 				}
 				.cell.selectable {
 					align-items: center;
@@ -157,7 +172,7 @@ export default class Table extends HTMLElement {
 					content: '\\1F817';
 					margin-left: 5px;
 				}
-				.header .cell:hover > .cell-menu-btn {
+				.header .cell:hover > .cell-menu-btn, .header .cell:hover > .cell-resize-btn {
 					opacity: 1;
 				}
 				#menu {
@@ -556,6 +571,12 @@ export default class Table extends HTMLElement {
 		menuBtn.addEventListener('click', (e) => this.onMenuOpenClick(e, column));
 		element.appendChild(menuBtn);
 
+		const resizeBtn = document.createElement('button');
+		resizeBtn.className = 'cell-resize-btn';
+		resizeBtn.addEventListener('mousedown', (e) => this.resizeColumnStart(e, element, index));
+		resizeBtn.addEventListener('click', (e) => e.stopPropagation());
+		element.appendChild(resizeBtn);
+
 		return element;
 	}
 
@@ -882,6 +903,42 @@ export default class Table extends HTMLElement {
 			this.onRowsUpdate([...this._rows]);
 			this.onMenuCloseClick();
 			this.fireChangeEvent();
+		}
+	}
+
+	resizeColumnEnd = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		this.#resizingColumn = null;
+	}
+
+	resizeColumnMove = (e, el, index) => {
+		e.stopPropagation();
+		e.preventDefault();
+		if (this.#resizingColumn === el) {
+			const diff = e.x - this.#mouseDown;
+			const oldWidth = parseInt(el.style.width);
+			const newWidth = diff !== 0 ? oldWidth + diff : oldWidth;
+			el.style.width = `${newWidth}px`;
+			this.#mouseDown = event.x;
+			if (this.columns[index].width != newWidth) {
+				const updatedColumns = [...this.columns];
+				updatedColumns[index].width = `${newWidth}px`;
+				this.columns = updatedColumns;
+			}
+		}
+	}
+
+	resizeColumnStart = (e, el, index) => {
+		e.stopPropagation();
+		e.preventDefault();
+		if (e.button === 0) {
+			this.#resizingColumn = el;
+			this.#mouseDown = e.x;
+			window.addEventListener('mousemove', (e) => this.resizeColumnMove(e, el, index));
+			window.addEventListener('mouseup', (e) => this.resizeColumnEnd(e, el, index));
+		} else {
+			this.#resizingColumn = null;
 		}
 	}
 
