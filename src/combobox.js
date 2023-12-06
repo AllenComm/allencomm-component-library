@@ -40,6 +40,8 @@ export default class Combobox extends HTMLElement {
 					border-radius: 3px;
 					border-width: 1px;
 					display: block;
+					font-size: 14px;
+					height: 26px;
 					outline: none;
 					position: relative;
 					width: 100%;
@@ -61,8 +63,8 @@ export default class Combobox extends HTMLElement {
 				slot[name='clear-btn'], slot[name='expand-btn'] {
 					display: flex !important;
 					height: 100%;
-					max-height: 24px !important;
-					max-width: 24px !important;
+					max-height: 26px !important;
+					max-width: 26px !important;
 					place-content: center;
 					place-items: center;
 					pointer-events: none;
@@ -77,7 +79,7 @@ export default class Combobox extends HTMLElement {
 					display: flex !important;
 					height: 100%;
 					margin: 0;
-					max-height: 22px !important;
+					max-height: 26px !important;
 					max-width: 22px !important;
 					padding: 0;
 					place-content: center;
