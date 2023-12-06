@@ -47,6 +47,7 @@ export default class Number extends HTMLElement {
 				}
 				label {
 					align-items: baseline;
+					cursor: pointer;
 					display: flex;
 					flex-wrap: wrap;
 					gap: 0 10px;

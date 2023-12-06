@@ -10,6 +10,7 @@ export default class Select extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
+					cursor: pointer;
 					display: block;
 					outline: none;
 					width: 100%;

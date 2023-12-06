@@ -42,6 +42,7 @@ export default class Slider extends HTMLElement {
 				}
 				label {
 					align-items: flex-start;
+					cursor: pointer;
 					display: flex;
 					gap: 0 10px;
 					width: 100%;
