@@ -175,6 +175,9 @@ export default class Table extends HTMLElement {
 					text-overflow: clip;
 					user-select: none;
 				}
+				.header .cell.resizing .cell-menu-btn, .header .cell.resizing .cell-resize-btn {
+					transition: none;
+				}
 				.header .cell:not(:first-child) {
 					border-left: 1px solid transparent;
 				}
@@ -558,8 +561,9 @@ export default class Table extends HTMLElement {
 
 		const element = document.createElement('div');
 		const content = document.createElement('span');
+		const resizing = this.#resizingColumn?.id === `cell-${index}`;
 		content.textContent = name;
-		element.className = `cell sort-${sort || 'none'}`;
+		element.className = `cell sort-${sort || 'none'} ${resizing ? 'resizing' : ''}`;
 		element.setAttribute('data-property', column.property);
 		if (window.screen.width <= 425) {
 			element.style.width = `${column.width ? parseFloat(column.width) + 30 : '100'}px`;
@@ -666,7 +670,6 @@ export default class Table extends HTMLElement {
 		const otherElementRect = otherElement.getBoundingClientRect();
 		const positionTop = elementRect.top - otherElementRect.top;
 		const positionLeft = elementRect.left - otherElementRect.left;
-		console.log('elementRect', elementRect, 'otherElementRect', otherElementRect);
 		return { top: positionTop, left: positionLeft };
 	}
 
@@ -924,10 +927,16 @@ export default class Table extends HTMLElement {
 		}
 	}
 
-	resizeColumnEnd = (e) => {
+	resizeColumnEnd = (e, el, index) => {
 		e.stopPropagation();
 		e.preventDefault();
-		this.#resizingColumn = null;
+		if (this.#resizingColumn !== null) {
+			if (this.#resizingColumn.classList.contains('resizing')) {
+				this.#resizingColumn.className = this.#resizingColumn.className.replaceAll(' resizing', '');
+			}
+			this.#resizingColumn = null;
+		}
+		this.#header.querySelectorAll('.resizing')?.forEach((a, i) => a.className = a.className.replaceAll(' resizing', ''));
 	}
 
 	resizeColumnMove = (e, el, index) => {
@@ -953,6 +962,9 @@ export default class Table extends HTMLElement {
 		if (e.button === 0) {
 			this.#resizingColumn = el;
 			this.#mouseDown = e.x;
+			if (!el.classList.contains(' resizing')) {
+				el.className = el.className + ' resizing';
+			}
 			window.addEventListener('mousemove', (e) => this.resizeColumnMove(e, el, index));
 			window.addEventListener('mouseup', (e) => this.resizeColumnEnd(e, el, index));
 		} else {
