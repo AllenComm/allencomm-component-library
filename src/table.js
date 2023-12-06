@@ -43,6 +43,9 @@ export default class Table extends HTMLElement {
 				}
 				:host([density='cozy']) .cell,
 				:host([density='cozy']) #row-footer {
+					padding: 24px 16px 24px 6px;
+				}
+				:host([density='cozy']) .cell.selectable {
 					padding: 24px 6px;
 				}
 				:host([density='cozy']) .row {
@@ -50,14 +53,20 @@ export default class Table extends HTMLElement {
 				}
 				:host([density='comfortable']) .cell,
 				:host([density='comfortable']) #row-footer {
-					padding: 12px 6px
+					padding: 12px 16px 12px 6px;
+				}
+				:host([density='comfortable']) .cell.selectable {
+					padding: 12px 6px;
 				}
 				:host([density='comfortable']) .row {
 					height: 46px;
 				}
 				:host([density='compact']) .cell,
 				:host([density='compact']) #row-footer {
-					padding: 6px;
+					padding: 6px 16px 6px;
+				}
+				:host([density='compact']) .cell.selectable {
+					padding: 6px 6px;
 				}
 				:host([density='compact']) .row {
 					height: 34px;
@@ -67,7 +76,7 @@ export default class Table extends HTMLElement {
 				}
 				.cell {
 					overflow: hidden;
-					padding: 6px;
+					padding: 6px 16px 6px;
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}
@@ -81,25 +90,33 @@ export default class Table extends HTMLElement {
 					width: 100%;
 				}
 				.cell-menu-btn {
+					cursor: pointer;
 					opacity: 0;
 					position: absolute;
-					right: 0;
+					right: 5px;
 					top: 50%;
 					transform: translateY(-50%);
 					transition: opacity .2s ease;
+					z-index: 2;
 				}
 				.cell-resize-btn {
 					border: none;
+					border-radius: 2px;
+					background-color: #e5e5e5;
 					cursor: ew-resize;
 					display: inline-block;
 					height: 100%;
 					opacity: 0;
 					padding: 0;
 					position: absolute;
-					right: 0;
+					right: -3px;
 					top: 0;
-					transition: opacity .2s ease;
+					transition: all .2s ease;
 					width: 5px;
+					z-index: 1;
+				}
+				.cell-resize-btn:hover {
+					background-color: #0075ff;
 				}
 				.cell.selectable {
 					align-items: center;
@@ -163,6 +180,7 @@ export default class Table extends HTMLElement {
 				}
 				.header:hover .cell:not(:first-child) {
 					border-color: rgba(0, 0, 0, .1);
+					overflow: visible;
 				}
 				.header .cell.sort-ascending > span:after {
 					content: '\\1F815';
@@ -207,7 +225,6 @@ export default class Table extends HTMLElement {
 				.row {
 					border-bottom: 1px solid rgba(0, 0, 0, .1);
 					display: inline-flex;
-					gap: 10px;
 					height: 34px;
 					min-width: 100%;
 					position: relative;
@@ -588,7 +605,7 @@ export default class Table extends HTMLElement {
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
 			selector.className = 'cell selectable';
-			selector.style.flex = '0 0 30px';
+			selector.style.flex = '0 0 35px';
 
 			const inner = document.createElement('input');
 			inner.type = 'checkbox';
@@ -649,6 +666,7 @@ export default class Table extends HTMLElement {
 		const otherElementRect = otherElement.getBoundingClientRect();
 		const positionTop = elementRect.top - otherElementRect.top;
 		const positionLeft = elementRect.left - otherElementRect.left;
+		console.log('elementRect', elementRect, 'otherElementRect', otherElementRect);
 		return { top: positionTop, left: positionLeft };
 	}
 
