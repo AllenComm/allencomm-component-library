@@ -30,15 +30,49 @@ export default class Slider extends HTMLElement {
 					display: none;
 				}
 				.inner {
+					align-self: center;
 					display: flex;
 					flex: 1;
 					flex-direction: column;
 					justify-content: flex-end;
 					margin-top: 1px;
 				}
+				/* Reset */
 				input {
+					-webkit-appearance: none;
+					appearance: none;
+					background: transparent;
 					cursor: pointer;
 					width: 100%;
+				}
+				/* Chromium, Safari */
+				input::-webkit-slider-runnable-track {
+					background-color: #d7d7d7;
+					border-radius: 5px;
+					height: 5px;
+				}
+				input::-webkit-slider-thumb {
+					-webkit-appearance: none;
+					appearance: none;
+					background-color: #d46027;
+					border-radius: 50%;
+					height: 22px;
+					margin-top: -8px;
+					width: 22px;
+				}
+				/* Firefox */
+				input::-moz-range-track {
+					background-color: #d7d7d7;
+					border-radius: 5px;
+					height: 5px;
+				}
+				input::-moz-range-thumb {
+					background-color: #d46027;
+					border: none;
+					border-radius: 50%;
+					height: 22px;
+					margin-top: -8px;
+					width: 22px;
 				}
 				label {
 					align-items: flex-start;
