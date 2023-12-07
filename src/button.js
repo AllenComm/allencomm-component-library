@@ -12,14 +12,33 @@ export default class Button extends HTMLElement {
 				:host {
 					display: inline-block;
 				}
+				:host(:focus-visible) {
+					border-radius: 3px;
+					outline-offset: 2px;
+					outline-width: 1px;
+					outline-style: solid;
+				}
 				button {
 					align-items: flex-start;
+					background-color: #d46027;
+					border-radius: 5px;
+					border: none;
+					color: #ffffff;
 					cursor: pointer;
 					display: flex;
+					justify-content: center;
+					min-width: 140px;
+					padding: 10px;
+					transition: background-color .2s ease;
 				}
 				button[disabled] {
+					background-color: #eeeeee;
+					color: #d7d7d7;
 					cursor: default;
 					pointer-events: none;
+				}
+				button:hover {
+					background-color: #fc6e28;
 				}
 			</style>
 			<button tabindex='-1'>
