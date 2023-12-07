@@ -232,6 +232,7 @@ export default class Table extends HTMLElement {
 					min-width: 100%;
 					position: relative;
 					width: auto;
+					will-change: transform;
 				}
 				.row:not(#row-header):last-child .cell {
 					border-color: transparent;
@@ -267,6 +268,7 @@ export default class Table extends HTMLElement {
 					position: absolute;
 					top: 0;
 					width: fit-content;
+					will-change: transform;
 				}
 				.table {
 					background-color: white;
@@ -795,7 +797,7 @@ export default class Table extends HTMLElement {
 		if (this.#body.style.height !== this.getScrollableHeight()) {
 			this.#body.style.height = `${this.getScrollableHeight()}px`;
 		}
-		this.#scrollContent.style.transform = `translateY(${max}px)`;
+		this.#scrollContent.style.transform = `translateY(${max}px) translateZ(0)`;
 		this.updateRows();
 	}
 
@@ -1140,7 +1142,7 @@ export default class Table extends HTMLElement {
 		visibleRows.forEach((row, index) => {
 			if (!currentRowIds.includes(`row-${range.min + index}`)) {
 				const el = this.buildRow(row, range.min + index, false);
-				el.style.transform = `translateY(-${remainder}px)`;
+				el.style.transform = `translateY(-${remainder}px) translateZ(0)`;
 				this.#scrollContent.appendChild(el);
 			}
 		});
