@@ -44,12 +44,19 @@ export default class Slider extends HTMLElement {
 					background: transparent;
 					cursor: pointer;
 					width: 100%;
+					--range: calc(var(--max) - var(--min));
+					--ratio: calc((var(--value) - var(--min)) / var(--range));
+					--sx: calc(0.5 * 2em + var(--ratio) * (100% - 2em));
 				}
 				/* Chromium, Safari */
 				input::-webkit-slider-runnable-track {
-					background-color: #d7d7d7;
+					background: linear-gradient(#d46027,#d46027) 0/var(--sx) 100% no-repeat, #e5e5e5;
 					border-radius: 5px;
 					height: 5px;
+					transition: background-color .2s ease;
+				}
+				input:hover::-webkit-slider-runnable-track, input:active::-webkit-slider-runnable-track {
+					background: linear-gradient(#fc6e28,#fc6e28) 0/var(--sx) 100% no-repeat, #e5e5e5;
 				}
 				input::-webkit-slider-thumb {
 					-webkit-appearance: none;
@@ -58,21 +65,33 @@ export default class Slider extends HTMLElement {
 					border-radius: 50%;
 					height: 22px;
 					margin-top: -8px;
+					transition: background-color .2s ease;
 					width: 22px;
+				}
+				input:hover::-webkit-slider-thumb, input:active::-webkit-slider-thumb {
+					background-color: #fc6e28;
 				}
 				/* Firefox */
 				input::-moz-range-track {
-					background-color: #d7d7d7;
+					background: linear-gradient(#d46027,#d46027) 0/var(--sx) 100% no-repeat, #e5e5e5;
 					border-radius: 5px;
 					height: 5px;
+					transition: background-color .2s ease;
+				}
+				input:hover::-moz-range-track, input:active::-moz-range-track {
+					background: linear-gradient(#fc6e28,#fc6e28) 0/var(--sx) 100% no-repeat, #e5e5e5;
 				}
 				input::-moz-range-thumb {
 					background-color: #d46027;
-					border: none;
 					border-radius: 50%;
+					border: none;
 					height: 22px;
 					margin-top: -8px;
+					transition: background-color .2s ease;
 					width: 22px;
+				}
+				input:hover::-moz-range-thumb, input:active::-moz-range-thumb {
+					background-color: #fc6e28;
 				}
 				label {
 					align-items: flex-start;
@@ -187,11 +206,15 @@ export default class Slider extends HTMLElement {
 			this.disabled = false;
 		}
 		this.setAttribute('aria-orientation', 'horizontal');
+		this.style.setProperty('--value', value);
+		this.style.setProperty('--min', min == '' ? '0' : min);
+		this.style.setProperty('--max', max == '' ? '100' : max);
 	}
 
 	handleChange = () => {
 		this.#output.innerText = this.value;
 		this.setAttribute('aria-valueNow', parseFloat(this.value));
+		this.style.setProperty('--value', parseFloat(this.value));
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 
