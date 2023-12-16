@@ -11,13 +11,18 @@ export default class Option extends HTMLElement {
 				}
 				:host {
 					align-items: center;
-					border-radius: 3px;
+					border-radius: 2px;
 					cursor: pointer;
 					display: flex;
 					padding: 5px;
+					transition: all .1s ease;
+				}
+				:host([variant='alternate']) {
+					background-color: #eee;
 				}
 				:host([aria-selected='true']) {
-					background: #0075ff;
+					background-color: #d46027;
+					color: #fff;
 				}
 				:host([hidden='true']) {
 					display: none;

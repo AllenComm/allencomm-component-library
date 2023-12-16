@@ -37,7 +37,9 @@ export default class Combobox extends HTMLElement {
 					display: none;
 				}
 				input {
-					border-radius: 3px;
+					border-color: #d7d7d7;
+					border-radius: 5px;
+					border-style: solid;
 					border-width: 1px;
 					display: block;
 					font-size: 14px;

@@ -14,13 +14,17 @@ export default class Tab extends HTMLElement {
 				:host([aria-selected='true']) button {
 					background-color: #d460271a;
 				}
+				:host([variant='alternate'][aria-selected='true']) button {
+					background-color: #d46027;
+					border-radius: 3px;
+					color: #fff;
+				}
 				button {
 					background: none;
 					border: none;
 					color: #d46027;
 					cursor: pointer;
 					display: flex;
-					font-size: 16px;
 					padding: 10px;
 					place-content: center;
 					text-align: center;

@@ -197,6 +197,9 @@ export default class Listbox extends HTMLElement {
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
+					if (this.getAttribute('orientation') === 'horizontal') {
+						a.setAttribute('variant', 'alternate');
+					}
 					const optionSelected = a.getAttribute('selected') || false;
 					this.options.push(a);
 					a.addEventListener('blur', this.handleChildBlur);

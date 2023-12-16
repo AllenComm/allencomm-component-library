@@ -93,6 +93,9 @@ export default class Tabs extends HTMLElement {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					const tabSelected = a.getAttribute('selected') || false;
+					if (isAlternate) {
+						a.setAttribute('variant', 'alternate');
+					}
 					this.#tabs.push(a);
 					a.addEventListener('click', this.handleChange);
 					a.setAttribute('slot', 'tabs');
