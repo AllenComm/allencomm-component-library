@@ -20,7 +20,7 @@ export default class Select extends HTMLElement {
 				}
 				:host(:focus-within) .inner {
 					border-radius: 3px;
-					outline: 1px solid #000;
+					outline: 2px solid #000;
 				}
 				:host([expanded='true']) .list {
 					visibility: visible;
@@ -37,7 +37,7 @@ export default class Select extends HTMLElement {
 				.arrow, slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;
-					height: 24px;
+					height: 36px;
 					position: absolute;
 					right: 0;
 					top: 0;
@@ -50,13 +50,14 @@ export default class Select extends HTMLElement {
 				.arrow div, ::slotted(*[slot='expand-btn']) {
 					display: flex !important;
 					height: 100%;
-					max-height: 24px !important;
+					max-height: 36px !important;
 					max-width: 24px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
 				}
 				.component {
+					align-items: center;
 					display: flex;
 					gap: 10px;
 					width: 100%;
@@ -76,9 +77,9 @@ export default class Select extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					cursor: pointer;
-					min-height: 26px;
+					min-height: 36px;
 					outline: none;
-					padding: 1px 2px;
+					padding: 8px;
 				}
 				.inner.error {
 					border-color: rgb(240, 45, 50);

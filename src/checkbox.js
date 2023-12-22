@@ -45,7 +45,7 @@ export default class Checkbox extends HTMLElement {
 					opacity: 0;
 					width: 0;
 				}
-				input, label {
+				input, label, span.icon {
 					cursor: pointer;
 				}
 				input.error {
@@ -62,7 +62,6 @@ export default class Checkbox extends HTMLElement {
 					background-color: #fff;
 					border: 1px solid #d7d7d7;
 					border-radius: 2px;
-					cursor: pointer;
 					height: 22px;
 					width: 22px;
 					transition: background-color .05s ease, border-color .05s ease;
@@ -118,23 +117,21 @@ export default class Checkbox extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
-			this.#input.setAttribute('disabled', bool);
+			this.#icon.removeEventListener('click', this.handleChange);
+			this.#icon.setAttribute('disabled', bool);
 			this.#input.setAttribute('disabled', bool);
 			this.#input.removeEventListener('click', this.handleChange);
 			this.#input.removeEventListener('change', this.handleChange);
-			this.#icon.setAttribute('disabled', bool);
-			this.#icon.removeEventListener('click', this.handleChange);
 			this.removeEventListener('keydown', this.handleKeydown);
 			this.setAttribute('aria-disabled', bool);
 			this.setAttribute('aria-hidden', bool);
 			this.setAttribute('tabindex', -1);
 		} else {
-			this.#input.removeAttribute('disabled');
+			this.#icon.addEventListener('click', this.handleChange);
+			this.#icon.removeAttribute('disabled');
 			this.#input.removeAttribute('disabled');
 			this.#input.addEventListener('click', this.handleChange);
 			this.#input.addEventListener('change', this.handleChange);
-			this.#icon.removeAttribute('disabled');
-			this.#icon.addEventListener('click', this.handleChange);
 			this.addEventListener('keydown', this.handleKeydown);
 			this.removeAttribute('aria-disabled');
 			this.removeAttribute('aria-hidden');
@@ -169,6 +166,7 @@ export default class Checkbox extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
+			this.#icon.checked = bool;
 			this.#input.checked = bool;
 			this.setAttribute('aria-checked', bool);
 		} else if (attr === 'disabled') {
@@ -184,8 +182,8 @@ export default class Checkbox extends HTMLElement {
 		const checked = this.getAttribute('checked') || false;
 		const error = this.getAttribute('error');
 		const helpertext = this.getAttribute('helpertext');
-		this.#input.checked = checked;
 		this.#icon.checked = checked;
+		this.#input.checked = checked;
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.getAttribute('disabled') === 'true') {

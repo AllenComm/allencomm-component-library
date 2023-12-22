@@ -17,7 +17,7 @@ export default class Slider extends HTMLElement {
 				:host(:focus-within) input, input:focus-visible {
 					border-radius: 3px;
 					outline: 2px solid #000;
-					outline-offset: 2px;
+					outline-offset: 10px;
 					z-index: 1;
 				}
 				#helper {

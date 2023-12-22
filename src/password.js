@@ -25,7 +25,7 @@ export default class Password extends HTMLElement {
 				}
 				.icon, slot[name='toggle-show'], slot[name='toggle-hide'] {
 					display: flex;
-					height: 30px;
+					height: 36px;
 					position: absolute;
 					place-content: center;
 					place-items: center;
@@ -65,7 +65,7 @@ export default class Password extends HTMLElement {
 					border-width: 1px;
 					flex: 1;
 					font-family: monospace;
-					padding: 5px;
+					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {

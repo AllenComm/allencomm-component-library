@@ -34,7 +34,7 @@ export default class Number extends HTMLElement {
 					border-radius: 5px;
 					border-style: solid;
 					border-width: 1px;
-					padding: 16px 10px;
+					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {

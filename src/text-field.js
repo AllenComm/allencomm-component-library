@@ -43,7 +43,7 @@ export default class TextField extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					flex: 1;
-					padding: 5px;
+					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {
@@ -68,7 +68,7 @@ export default class TextField extends HTMLElement {
 				}
 				.icon, slot[name='icon'] {
 					display: flex;
-					height: 30px;
+					height: 36px;
 					position: absolute;
 					place-content: center;
 					place-items: center;

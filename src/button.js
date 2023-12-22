@@ -15,7 +15,7 @@ export default class Button extends HTMLElement {
 				:host(:focus-visible) {
 					border-radius: 3px;
 					outline-offset: 2px;
-					outline-width: 1px;
+					outline-width: 2px;
 					outline-style: solid;
 				}
 				button {
