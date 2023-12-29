@@ -939,6 +939,7 @@ export default class Table extends HTMLElement {
 			this.#resizingColumn = null;
 		}
 		this.#header.querySelectorAll('.resizing')?.forEach((a, i) => a.className = a.className.replaceAll(' resizing', ''));
+		this.fireChangeEvent();
 	}
 
 	resizeColumnMove = (e, el, index) => {
@@ -946,7 +947,11 @@ export default class Table extends HTMLElement {
 		e.preventDefault();
 		if (this.#resizingColumn === el) {
 			const diff = e.x - this.#mouseDown;
-			const oldWidth = parseInt(el.style.width);
+			const type = [...el.style.width.matchAll(/([0-9\.]+)(.+)/g)]?.[0]?.[2] || 'px';
+			let oldWidth = parseInt(el.style.width);
+			if (type !== 'px') {
+				oldWidth = el.getBoundingClientRect().width;
+			}
 			const newWidth = diff !== 0 ? oldWidth + diff : oldWidth;
 			el.style.width = `${newWidth}px`;
 			this.#mouseDown = event.x;
