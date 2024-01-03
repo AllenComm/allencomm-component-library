@@ -77,9 +77,9 @@ export default class Select extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					cursor: pointer;
-					min-height: 36px;
+					height: 36px;
 					outline: none;
-					padding: 8px;
+					padding: 6px 8px;
 				}
 				.inner.error {
 					border-color: rgb(240, 45, 50);
@@ -134,6 +134,7 @@ export default class Select extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 		this._expanded = false;
+		this._initialized = false;
 		this._options = [];
 		this._selected = -1;
 		this._slotExpand = null;
@@ -231,7 +232,7 @@ export default class Select extends HTMLElement {
 				this.#inner.innerText = a.innerHTML;
 				this.#expanded = false;
 				this.focus();
-				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+				if (this._initialized) this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 				a.setAttribute('aria-selected', true);
 			} else {
 				a.setAttribute('aria-selected', false);
@@ -285,14 +286,10 @@ export default class Select extends HTMLElement {
 					this.options.push(a);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
-					if (!a.id) {
-						a.id = `option-${optionId + 1}`;
-					}
+					if (!a.id) a.id = `option-${optionId + 1}`;
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;
-					setTimeout(() => {
-						a.setAttribute('tabindex', -1)
-					});
+					setTimeout(() => a.setAttribute('tabindex', -1));
 				} else if (a.slot === 'expand-btn') {
 					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
 					this.#slotExpand = a;
@@ -316,6 +313,7 @@ export default class Select extends HTMLElement {
 				this.selected = i;
 			}
 		});
+		if (!this._initialized) this._initialized = true;
 	}
 
 	connectedCallback() {

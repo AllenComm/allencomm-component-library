@@ -14,6 +14,7 @@ export default class Option extends HTMLElement {
 					border-radius: 2px;
 					cursor: pointer;
 					display: flex;
+					height: 36px;
 					padding: 8px;
 					transition: all .1s ease;
 				}
