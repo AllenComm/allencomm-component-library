@@ -11,7 +11,6 @@ export default class Button extends HTMLElement {
 				}
 				:host {
 					display: inline-block;
-					/* outline: none; */
 					pointer-events: none;
 				}
 				button {
@@ -48,9 +47,10 @@ export default class Button extends HTMLElement {
 				<slot></slot>
 			</button>
 		`;
-		this.addEventListener('focus', (e) => e.stopPropagation());
-		this.addEventListener('mousedown', (e) => e.stopPropagation());
-		this.#button.addEventListener('click', () => this.handleClick());
+		this.addEventListener('focus', (e) => this.preventHostInteraction(e));
+		this.addEventListener('click', (e) => this.preventHostInteraction(e));
+		this.addEventListener('mousedown', (e) => this.preventHostInteraction(e));
+		this.#button.addEventListener('click', (e) => this.handleClick(e));
 		this.#button.addEventListener('keydown', (e) => this.handleKeyDown(e));
 		this.#button.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
@@ -91,9 +91,11 @@ export default class Button extends HTMLElement {
 		}
 	}
 
-	handleClick() {
+	handleClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
 		if (this.disabled) return;
-		const clickEvent = new Event('click', { 'bubbles': true, 'cancelable': true, 'composed': true });
+		const clickEvent = new Event('click', { 'bubbles': false, 'cancelable': true, 'composed': true });
 		this.dispatchEvent(clickEvent);
 	}
 
@@ -102,6 +104,12 @@ export default class Button extends HTMLElement {
 		if (e.key === 'Enter' || e.key === 'Space') {
 			this.handleClick();
 		}
+	}
+
+	preventHostInteraction(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		return;
 	}
 }
 
