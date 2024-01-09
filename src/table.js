@@ -159,6 +159,9 @@ export default class Table extends HTMLElement {
 					flex: 3;
 					justify-content: flex-start;
 				}
+				.footer-inner.center {
+					justify-content: center;
+				}
 				.header {
 					font-weight: bold;
 					position: sticky;
@@ -251,6 +254,13 @@ export default class Table extends HTMLElement {
 					display: flex;
 					place-self: center;
 				}
+				#row-footer #export-csv {
+					border: 1px solid #d46027;
+					border-radius: 3px;
+				}
+				#row-footer #export-csv path {
+					fill: #d46027;
+				}
 				#row-footer button:disabled {
 					cursor: default;
 					pointer-events: none;
@@ -316,6 +326,13 @@ export default class Table extends HTMLElement {
 							<span id='selected-single' hidden='true'>row selected</span>
 							<span id='selected-multi' hidden='true'>rows selected</span>
 						</div>
+						<div class='footer-inner center'>
+							<button id='export-csv'>
+								<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+									<path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
+								</svg>
+							</button>
+						</div>
 						<div class='footer-inner'>
 							<div>Rows per page:</div>
 							<select id='page-size'>
@@ -352,7 +369,6 @@ export default class Table extends HTMLElement {
 						<button id='sort-desc-btn'>Sort DESC</button>
 						<button id='filter-btn'>Filter</button>
 						<button id='manage-columns-btn'>Manage Columns</button>
-						<button id='export-csv'>Export To CSV</button>
 					</div>
 					<div id='manage'></div>
 					<div id='filters'></div>
@@ -937,6 +953,7 @@ export default class Table extends HTMLElement {
 			this.#resizingColumn = null;
 		}
 		this.#header.querySelectorAll('.resizing')?.forEach((a, i) => a.className = a.className.replaceAll(' resizing', ''));
+		this.fireChangeEvent();
 	}
 
 	resizeColumnMove = (e, el, index) => {
@@ -944,7 +961,11 @@ export default class Table extends HTMLElement {
 		e.preventDefault();
 		if (this.#resizingColumn === el) {
 			const diff = e.x - this.#mouseDown;
-			const oldWidth = parseInt(el.style.width);
+			const type = [...el.style.width.matchAll(/([0-9\.]+)(.+)/g)]?.[0]?.[2] || 'px';
+			let oldWidth = parseInt(el.style.width);
+			if (type !== 'px') {
+				oldWidth = el.getBoundingClientRect().width;
+			}
 			const newWidth = diff !== 0 ? oldWidth + diff : oldWidth;
 			el.style.width = `${newWidth}px`;
 			this.#mouseDown = event.x;

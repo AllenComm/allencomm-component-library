@@ -33,9 +33,11 @@ export default class TextArea extends HTMLElement {
 					width: 100%;
 				}
 				textarea {
-					border-radius: 3px;
+					border-color: #d7d7d7;
+					border-radius: 5px;
+					border-style: solid;
 					border-width: 1px;
-					padding: 5px;
+					padding: 8px;
 					width: 100%;
 				}
 				textarea:focus-visible {

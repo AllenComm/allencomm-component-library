@@ -30,9 +30,11 @@ export default class Number extends HTMLElement {
 					justify-content: flex-end;
 				}
 				input {
-					border-radius: 3px;
+					border-color: #d7d7d7;
+					border-radius: 5px;
+					border-style: solid;
 					border-width: 1px;
-					padding: 5px;
+					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {

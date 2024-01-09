@@ -16,7 +16,7 @@ export default class Switch extends HTMLElement {
 				:host(:focus-visible) .wrapper {
 					border-radius: 3px;
 					outline: 2px solid #000;
-					outline-offset: 2px;
+					outline-offset: 8px;
 				}
 				#helper {
 					color: rgb(240, 45, 50);
@@ -38,22 +38,25 @@ export default class Switch extends HTMLElement {
 					width: 100%;
 				}
 				.wrapper {
-					background: transparent;
+					background: #666;
 					border: 1px solid #b2b2b2;
 					border-radius: 5px;
 					display: inline-block;
-					height: 22px;
+					height: 10px;
+					margin: 8px 4px;
 					position: relative;
 					width: 40px;
 				}
 				.indicator {
-					background: #b2b2b2;
-					border-radius: 5px;
-					height: 16px;
-					left: 2px;
+					background: #fff;
+					border: 1px solid #d7d7d7;
+					border-radius: 50%;
+					height: 22px;
+					left: -4px;
 					position: absolute;
-					top: 2px;
-					width: 16px;
+					right: auto;
+					top: -7px;
+					width: 22px;
 				}
 				.inner {
 					display: flex;
@@ -64,21 +67,14 @@ export default class Switch extends HTMLElement {
 					cursor: pointer;
 					border-color: #9a9a9a;
 				}
-				label:hover .indicator {
-					background: #9a9a9a;
-				}
-				label:has(input:checked) .wrapper {
-					background-color: #0075ff;
-				}
-				label:has(input:checked):hover .wrapper {
-					background-color: #005cc8;
-				}
 				label:has(input:checked) .indicator {
-					background-color: white;
-					left: calc(100% - 2px - 16px);
+					background-color: #d46027;
+					border: none;
+					left: auto;
+					right: -4px;
 				}
 				label:has(input:checked):hover .indicator {
-					background-color: #efefef;
+					background-color: #fc6e28;
 				}
 				::slotted(*[slot='off-label']:not(:empty)) {
 					display: inline-block;

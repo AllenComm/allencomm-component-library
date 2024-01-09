@@ -3,7 +3,7 @@ export default class Button extends HTMLElement {
 
 	constructor() {
 		super();
-		this.attachShadow({ mode: 'open' });
+		this.attachShadow({ mode: 'open', delegatesFocus: true });
 		this.shadowRoot.innerHTML = `
 			<style>
 				* {
@@ -11,12 +11,7 @@ export default class Button extends HTMLElement {
 				}
 				:host {
 					display: inline-block;
-				}
-				:host(:focus-visible) {
-					border-radius: 3px;
-					outline-offset: 2px;
-					outline-width: 1px;
-					outline-style: solid;
+					pointer-events: none;
 				}
 				button {
 					align-items: flex-start;
@@ -29,6 +24,7 @@ export default class Button extends HTMLElement {
 					justify-content: center;
 					min-width: 140px;
 					padding: 10px;
+					pointer-events: auto;
 					transition: background-color .2s ease;
 				}
 				button[disabled] {
@@ -40,12 +36,23 @@ export default class Button extends HTMLElement {
 				button:hover {
 					background-color: #fc6e28;
 				}
+				button:focus-visible {
+					border-radius: 3px;
+					outline-offset: 2px;
+					outline-width: 2px;
+					outline-style: solid;
+				}
 			</style>
-			<button tabindex='-1'>
+			<button tabindex=0>
 				<slot></slot>
 			</button>
 		`;
-		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this.addEventListener('focus', (e) => this.preventHostInteraction(e));
+		this.addEventListener('click', (e) => this.preventHostInteraction(e));
+		this.addEventListener('mousedown', (e) => this.preventHostInteraction(e));
+		this.#button.addEventListener('click', (e) => this.handleClick(e));
+		this.#button.addEventListener('keydown', (e) => this.handleKeyDown(e));
+		this.#button.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 	}
 
@@ -57,14 +64,12 @@ export default class Button extends HTMLElement {
 		this._disabled = bool;
 		if (bool) {
 			this.#button.setAttribute('disabled', bool);
+			this.#button.setAttribute('tabindex', -1);
 			this.setAttribute('aria-disabled', bool);
-			this.setAttribute('aria-hidden', bool);
-			this.setAttribute('tabindex', -1);
 		} else {
 			this.#button.removeAttribute('disabled');
+			this.#button.setAttribute('tabindex', 0);
 			this.removeAttribute('aria-disabled');
-			this.removeAttribute('aria-hidden');
-			this.setAttribute('tabindex', 0);
 		}
 	}
 
@@ -84,6 +89,27 @@ export default class Button extends HTMLElement {
 		if (this.getAttribute('style') != null) {
 			this.#button.setAttribute('style', this.getAttribute('style'));
 		}
+	}
+
+	handleClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (this.disabled) return;
+		const clickEvent = new Event('click', { 'bubbles': false, 'cancelable': true, 'composed': true });
+		this.dispatchEvent(clickEvent);
+	}
+
+	handleKeyDown(e) {
+		if (this.disabled) return;
+		if (e.key === 'Enter' || e.key === 'Space') {
+			this.handleClick();
+		}
+	}
+
+	preventHostInteraction(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		return;
 	}
 }
 

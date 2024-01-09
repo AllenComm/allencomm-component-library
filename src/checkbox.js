@@ -37,13 +37,15 @@ export default class Checkbox extends HTMLElement {
 				}
 				.inner {
 					display: flex;
-					flex: 1;
-					justify-content: flex-end;
+					justify-content: center;
 				}
 				input {
+					height: 0;
 					margin: 0;
+					opacity: 0;
+					width: 0;
 				}
-				input, label {
+				input, label, span.icon {
 					cursor: pointer;
 				}
 				input.error {
@@ -53,9 +55,29 @@ export default class Checkbox extends HTMLElement {
 				label {
 					align-items: center;
 					display: flex;
-					flex-wrap: wrap;
 					gap: 0 10px;
 					width: 100%;
+				}
+				span.icon {
+					background-color: #fff;
+					border: 1px solid #d7d7d7;
+					border-radius: 2px;
+					height: 22px;
+					width: 22px;
+					transition: background-color .05s ease, border-color .05s ease;
+				}
+				span.icon svg {
+					display: inline-block;
+					opacity: 0;
+					transition: opacity .1s ease;
+				}
+				span.icon[checked='true'] {
+					background-color: #d46027;
+					border-color: #d46027;
+					transition: background-color .1s ease, border-color .25s ease;
+				}
+				span.icon[checked='true'] svg {
+					opacity: 1;
 				}
 				::slotted(*[slot='off-label']:not(:empty)) {
 					display: inline-block;
@@ -71,13 +93,16 @@ export default class Checkbox extends HTMLElement {
 				}
 			</style>
 			<label tabindex='-1'>
-				<slot name='on-label'></slot>
-				<slot name='off-label'></slot>
-				<slot></slot>
 				<div class='inner'>
 					<div id='helper' class='hidden'></div>
 					<input tabindex='-1' type='checkbox'></input>
+					<span class='icon'>
+						<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path fill="#fff" d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+					</span>
 				</div>
+				<slot name='on-label'></slot>
+				<slot name='off-label'></slot>
+				<slot></slot>
 			</label>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -92,6 +117,8 @@ export default class Checkbox extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
+			this.#icon.removeEventListener('click', this.handleChange);
+			this.#icon.setAttribute('disabled', bool);
 			this.#input.setAttribute('disabled', bool);
 			this.#input.removeEventListener('click', this.handleChange);
 			this.#input.removeEventListener('change', this.handleChange);
@@ -100,6 +127,8 @@ export default class Checkbox extends HTMLElement {
 			this.setAttribute('aria-hidden', bool);
 			this.setAttribute('tabindex', -1);
 		} else {
+			this.#icon.addEventListener('click', this.handleChange);
+			this.#icon.removeAttribute('disabled');
 			this.#input.removeAttribute('disabled');
 			this.#input.addEventListener('click', this.handleChange);
 			this.#input.addEventListener('change', this.handleChange);
@@ -132,9 +161,12 @@ export default class Checkbox extends HTMLElement {
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
+	get #icon() { return this.shadowRoot.querySelector('span.icon'); }
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'checked') {
 			const bool = newVal === 'true';
+			this.#icon.checked = bool;
 			this.#input.checked = bool;
 			this.setAttribute('aria-checked', bool);
 		} else if (attr === 'disabled') {
@@ -150,6 +182,7 @@ export default class Checkbox extends HTMLElement {
 		const checked = this.getAttribute('checked') || false;
 		const error = this.getAttribute('error');
 		const helpertext = this.getAttribute('helpertext');
+		this.#icon.checked = checked;
 		this.#input.checked = checked;
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
@@ -161,7 +194,8 @@ export default class Checkbox extends HTMLElement {
 		this.setAttribute('aria-checked', checked);
 	}
 
-	handleChange = () => {
+	handleChange = (e) => {
+		this.#icon.setAttribute('checked', this.#input.checked);
 		this.setAttribute('aria-checked', this.#input.checked);
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}

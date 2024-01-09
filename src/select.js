@@ -20,7 +20,7 @@ export default class Select extends HTMLElement {
 				}
 				:host(:focus-within) .inner {
 					border-radius: 3px;
-					outline: 1px solid #000;
+					outline: 2px solid #000;
 				}
 				:host([expanded='true']) .list {
 					visibility: visible;
@@ -37,7 +37,7 @@ export default class Select extends HTMLElement {
 				.arrow, slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;
-					height: 24px;
+					height: 36px;
 					position: absolute;
 					right: 0;
 					top: 0;
@@ -50,13 +50,14 @@ export default class Select extends HTMLElement {
 				.arrow div, ::slotted(*[slot='expand-btn']) {
 					display: flex !important;
 					height: 100%;
-					max-height: 24px !important;
+					max-height: 36px !important;
 					max-width: 24px !important;
 					place-content: center;
 					place-items: center;
 					width: 100%;
 				}
 				.component {
+					align-items: center;
 					display: flex;
 					gap: 10px;
 					width: 100%;
@@ -71,12 +72,14 @@ export default class Select extends HTMLElement {
 				}
 				.inner {
 					background-color: #fff;
-					border: 1px solid #000;
-					border-radius: 3px;
+					border-color: #d7d7d7;
+					border-radius: 5px;
+					border-style: solid;
+					border-width: 1px;
 					cursor: pointer;
-					min-height: 26px;
+					height: 36px;
 					outline: none;
-					padding: 1px 2px;
+					padding: 6px 8px;
 				}
 				.inner.error {
 					border-color: rgb(240, 45, 50);
@@ -131,6 +134,7 @@ export default class Select extends HTMLElement {
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
 		this._disabled = false;
 		this._expanded = false;
+		this._initialized = false;
 		this._options = [];
 		this._selected = -1;
 		this._slotExpand = null;
@@ -228,7 +232,7 @@ export default class Select extends HTMLElement {
 				this.#inner.innerText = a.innerHTML;
 				this.#expanded = false;
 				this.focus();
-				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+				if (this._initialized) this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 				a.setAttribute('aria-selected', true);
 			} else {
 				a.setAttribute('aria-selected', false);
@@ -282,14 +286,10 @@ export default class Select extends HTMLElement {
 					this.options.push(a);
 					a.setAttribute('aria-selected', false);
 					a.setAttribute('slot', 'options');
-					if (!a.id) {
-						a.id = `option-${optionId + 1}`;
-					}
+					if (!a.id) a.id = `option-${optionId + 1}`;
 					optionIndex = optionIndex + 1;
 					optionId = optionId + 1;
-					setTimeout(() => {
-						a.setAttribute('tabindex', -1)
-					});
+					setTimeout(() => a.setAttribute('tabindex', -1));
 				} else if (a.slot === 'expand-btn') {
 					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
 					this.#slotExpand = a;
@@ -313,6 +313,7 @@ export default class Select extends HTMLElement {
 				this.selected = i;
 			}
 		});
+		if (!this._initialized) this._initialized = true;
 	}
 
 	connectedCallback() {

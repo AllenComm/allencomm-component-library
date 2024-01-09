@@ -11,9 +11,18 @@ export default class Tab extends HTMLElement {
 					display: block;
 					width: 100%;
 				}
+				:host([aria-selected='true']) button {
+					background-color: #d460271a;
+				}
+				:host([variant='alternate'][aria-selected='true']) button {
+					background-color: #d46027;
+					border-radius: 3px;
+					color: #fff;
+				}
 				button {
 					background: none;
 					border: none;
+					color: #d46027;
 					cursor: pointer;
 					display: flex;
 					padding: 10px;

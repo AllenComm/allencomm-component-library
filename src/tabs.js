@@ -30,16 +30,19 @@ export default class Tabs extends HTMLElement {
 					width: calc(100% - 2px);
 				}
 				.list {
+					border-bottom-color: #666;
+					border-bottom-width: 1px;
+					border-bottom-style: solid;
 					display: grid;
 					grid-auto-flow: row;
-					grid-template-rows: auto 2px;
+					grid-template-rows: auto 4px;
 					justify-items: center;
 				}
 				.indicator {
-					background-color: #0075ff;
-					height: 2px;
+					background-color: #d46027;
+					height: 4px;
 					transform: translateX(0);
-					width: 98%;
+					width: 100%;
 				}
 				slot[name="panels"] {
 					display: grid;
@@ -90,6 +93,9 @@ export default class Tabs extends HTMLElement {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					const tabSelected = a.getAttribute('selected') || false;
+					if (isAlternate) {
+						a.setAttribute('variant', 'alternate');
+					}
 					this.#tabs.push(a);
 					a.addEventListener('click', this.handleChange);
 					a.setAttribute('slot', 'tabs');

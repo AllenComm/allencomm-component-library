@@ -16,6 +16,7 @@ export default class TextField extends HTMLElement {
 				}
 				:host([search='true']) input {
 					border-radius: 20px;
+					padding-left: 10px;
 					padding-right: 30px;
 				}
 				:host(:not([search='true'])) .icon {
@@ -37,10 +38,12 @@ export default class TextField extends HTMLElement {
 					justify-content: flex-end;
 				}
 				input {
-					border-radius: 3px;
+					border-color: #d7d7d7;
+					border-radius: 5px;
+					border-style: solid;
 					border-width: 1px;
 					flex: 1;
-					padding: 5px;
+					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {
@@ -65,7 +68,7 @@ export default class TextField extends HTMLElement {
 				}
 				.icon, slot[name='icon'] {
 					display: flex;
-					height: 30px;
+					height: 36px;
 					position: absolute;
 					place-content: center;
 					place-items: center;
