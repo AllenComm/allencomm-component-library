@@ -93,7 +93,7 @@ export default class Table extends HTMLElement {
 					cursor: pointer;
 					opacity: 0;
 					position: absolute;
-					right: 5px;
+					right: 8px;
 					top: 50%;
 					transform: translateY(-50%);
 					transition: opacity .2s ease;
@@ -109,7 +109,7 @@ export default class Table extends HTMLElement {
 					opacity: 0;
 					padding: 0;
 					position: absolute;
-					right: -3px;
+					right: 0;
 					top: 0;
 					transition: all .2s ease;
 					width: 5px;
@@ -170,7 +170,6 @@ export default class Table extends HTMLElement {
 				}
 				.header .cell {
 					cursor: pointer;
-					overflow: hidden;
 					position: relative;
 					text-overflow: clip;
 					user-select: none;
@@ -183,7 +182,6 @@ export default class Table extends HTMLElement {
 				}
 				.header:hover .cell:not(:first-child) {
 					border-color: rgba(0, 0, 0, .1);
-					overflow: visible;
 				}
 				.header .cell.sort-ascending > span:after {
 					content: '\\1F815';
