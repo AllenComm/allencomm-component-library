@@ -16,7 +16,7 @@ export default class Option extends HTMLElement {
 					display: flex;
 					height: 36px;
 					padding: 8px;
-					transition: all .1s ease;
+					transition: background-color .1s ease, color .1s ease;
 				}
 				:host([variant='alternate']) {
 					background-color: #eee;

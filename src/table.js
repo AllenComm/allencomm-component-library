@@ -682,8 +682,7 @@ export default class Table extends HTMLElement {
 		return { min, max };
 	}
 
-	getElementPositionRelativeToOtherElement = (elementRect, otherElement) => {
-		const otherElementRect = otherElement.getBoundingClientRect();
+	getElementPositionRelativeToOtherElement = (elementRect, otherElementRect) => {
 		const positionTop = elementRect.top - otherElementRect.top;
 		const positionLeft = elementRect.left - otherElementRect.left;
 		return { top: positionTop, left: positionLeft };
@@ -1128,11 +1127,16 @@ export default class Table extends HTMLElement {
 
 	updateMenuPosition = (rect) => {
 		const { width, height } = rect;
-		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, this.shadowRoot.querySelector('.table'));
+		const tableRect = this.shadowRoot.querySelector('.table').getBoundingClientRect();
+		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, tableRect);
 
-		this.#menu.style.left = `${left + width}px`;
 		this.#menu.style.top = `${top + height}px`;
-		this.#menu.style.transform = 'translateX(-100%)';
+		if ((left + width) < tableRect.left) {
+			this.#menu.style.left = `${tableRect.left}px`;
+		} else {
+			this.#menu.style.left = `${left + width}px`;
+			this.#menu.style.transform = 'translateX(-100%)';
+		}
 
 		const x = this.#menu.getBoundingClientRect().left;
 		this.#menu.style.transform = x < 0 ? `translateX(calc(-100% - ${x}px))` : 'translateX(-100%)';

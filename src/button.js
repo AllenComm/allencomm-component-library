@@ -102,7 +102,7 @@ export default class Button extends HTMLElement {
 	handleKeyDown(e) {
 		if (this.disabled) return;
 		if (e.key === 'Enter' || e.key === 'Space') {
-			this.handleClick();
+			this.handleClick(e);
 		}
 	}
 
