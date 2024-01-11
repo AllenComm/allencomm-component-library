@@ -11,7 +11,10 @@
 			.id-btn {
 				color: pink;
 			}
-			ac-table {
+			ac-table#small {
+				height: 120px;
+			}
+			ac-table#big {
 				height: 500px;
 			}
 		</style>
@@ -25,7 +28,10 @@
 				<ac-password placeholder='Password'></ac-password>
 			</section>
 			<section>
-				<ac-table allow-selection="true"></ac-table>
+				<ac-table id="small" allow-selection="true"></ac-table>
+			</section>
+			<section>
+				<ac-table id="big" allow-selection="true"></ac-table>
 			</section>
 		</main>
 		<script>
@@ -57,8 +63,10 @@
 					{ "name": "Longitude", "property": "longitude", "type": "number" },
 				];
 
-				document.querySelector('ac-table').columns = columns;
-				document.querySelector('ac-table').rows = jsonData;
+				document.querySelector('#big').columns = columns;
+				document.querySelector('#small').columns = columns;
+				document.querySelector('#big').rows = jsonData;
+				document.querySelector('#small').rows = jsonData.slice(0,1);
 			};
 			document.addEventListener("DOMContentLoaded", function() { init(); });
 		</script>

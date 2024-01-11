@@ -1176,7 +1176,7 @@ export default class Table extends HTMLElement {
 		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, tableRect);
 
 		this.#menu.style.top = `${top + height}px`;
-		if (left < tableRect.left || menuRect.left < 0) {
+		if ((left + width) < menuRect.width) {
 			this.#menu.style.left = '0px';
 			this.#menu.style.transform = '';
 		} else {
