@@ -688,6 +688,31 @@ export default class Table extends HTMLElement {
 		return { top: positionTop, left: positionLeft };
 	}
 
+	getStringFromObject = (a) => {
+		let obj = a;
+		if (Object.prototype.toString.call(a) === '[object Array]') {
+			obj = a[0];
+		}
+		const findKey = (a, key) => {
+			if (typeof a === 'object' && a !== null && a?.[key]) {
+				return a[key];
+			} else {
+				for (const b in a) {
+					if (typeof a[b] === 'object' && a[b] !== null) {
+						return findKey(a[b], key);
+					}
+				}
+			}
+			return null;
+		};
+		let b = findKey(obj, 'name');
+		if (b === null) b = findKey(obj, 'lastName');
+		if (b === null) b = findKey(obj, 'firstName');
+		if (b === null) b = findKey(obj, 'url');
+		if (b === null) b = findKey(obj, 'date');
+		return b;
+	}
+
 	getRowHeight = () => {
 		const density = this.getAttribute('density') ?? 'compact';
 		switch (density) {
@@ -877,10 +902,15 @@ export default class Table extends HTMLElement {
 		const compare = (a, b) => {
 			for (let i = 0; i < colDetails.length; i++) {
 				const { type, property, sort, sortFunction } = colDetails[i];
-				const aa = a[property];
-				const bb = b[property];
-				if (aa == null) return -1;
-				if (bb == null) return 1;
+				let aa = a[property];
+				let bb = b[property];
+				if (aa == null && bb == null) {
+					continue;
+				} else if (aa == null) {
+					return 1;
+				} else if (bb == null) {
+					return -1;
+				}
 
 				let result = 0;
 				if (typeof sortFunction === 'function') {
@@ -889,7 +919,21 @@ export default class Table extends HTMLElement {
 					result = aa - bb;
 				} else if (type === 'string') {
 					if (typeof aa === 'string' && typeof bb === 'string') {
-						result = aa.localeCompare(bb);
+						if (Date.parse(aa) != NaN && Date.parse(bb) != NaN) {
+							result = Date.parse(aa) - Date.parse(bb);
+						} else {
+							result = aa.localeCompare(bb);
+						}
+					} else {
+						const aaa = this.getStringFromObject(aa);
+						const bbb = this.getStringFromObject(bb);
+						if (typeof aaa === 'string' && typeof bbb === 'string') {
+							if (Date.parse(aaa) != NaN && Date.parse(bbb) != NaN) {
+								result = Date.parse(aaa) - Date.parse(bbb);
+							} else {
+								result = aaa.localeCompare(bbb);
+							}
+						}
 					}
 				} else if (type === 'boolean') {
 					result = aa === bb ? 0 : (aa ? -1 : 1);
@@ -1126,20 +1170,26 @@ export default class Table extends HTMLElement {
 	}
 
 	updateMenuPosition = (rect) => {
+		console.log('\nupdateMenuPosition\n\n');
 		const { width, height } = rect;
 		const tableRect = this.shadowRoot.querySelector('.table').getBoundingClientRect();
 		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, tableRect);
 
 		this.#menu.style.top = `${top + height}px`;
-		if ((left + width) < tableRect.left) {
+		if ((left * 2) < tableRect.left) {
+			console.log('left too left!');
 			this.#menu.style.left = `${tableRect.left}px`;
 		} else {
+			console.log('normal');
 			this.#menu.style.left = `${left + width}px`;
-			this.#menu.style.transform = 'translateX(-100%)';
 		}
+		this.#menu.style.transform = 'translateX(-100%)';
 
 		const x = this.#menu.getBoundingClientRect().left;
-		this.#menu.style.transform = x < 0 ? `translateX(calc(-100% - ${x}px))` : 'translateX(-100%)';
+		this.#menu.style.transform = x < 0 ? `translateX(calc(-100% - ${x * 1.5}px))` : 'translateX(-100%)';
+		//TODO Fix filter menu being too large!
+		console.log(x);
+		console.log(width);
 	}
 
 	updateRows = () => {
