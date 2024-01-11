@@ -793,10 +793,10 @@ export default class Table extends HTMLElement {
 		this.onMenuCloseClick();
 		const rect = e.target.getBoundingClientRect();
 		this.#prevHeaderBtnRect = rect;
-		this.updateMenuPosition(rect);
 		this.#menu.classList.remove('manage');
 		this.#menu.classList.remove('filter');
 		this.#menu.classList.add('visible');
+		this.updateMenuPosition(rect);
 	}
 
 	onResize = () => {
@@ -919,7 +919,7 @@ export default class Table extends HTMLElement {
 					result = aa - bb;
 				} else if (type === 'string') {
 					if (typeof aa === 'string' && typeof bb === 'string') {
-						if (Date.parse(aa) != NaN && Date.parse(bb) != NaN) {
+						if (!isNaN(Date.parse(aa)) && !isNaN(Date.parse(bb))) {
 							result = Date.parse(aa) - Date.parse(bb);
 						} else {
 							result = aa.localeCompare(bb);
@@ -928,7 +928,7 @@ export default class Table extends HTMLElement {
 						const aaa = this.getStringFromObject(aa);
 						const bbb = this.getStringFromObject(bb);
 						if (typeof aaa === 'string' && typeof bbb === 'string') {
-							if (Date.parse(aaa) != NaN && Date.parse(bbb) != NaN) {
+							if (!isNaN(Date.parse(aaa)) && !isNaN(Date.parse(bbb))) {
 								result = Date.parse(aaa) - Date.parse(bbb);
 							} else {
 								result = aaa.localeCompare(bbb);
@@ -1170,26 +1170,19 @@ export default class Table extends HTMLElement {
 	}
 
 	updateMenuPosition = (rect) => {
-		console.log('\nupdateMenuPosition\n\n');
 		const { width, height } = rect;
 		const tableRect = this.shadowRoot.querySelector('.table').getBoundingClientRect();
+		const menuRect = this.#menu.getBoundingClientRect();
 		const { left, top } = this.getElementPositionRelativeToOtherElement(rect, tableRect);
 
 		this.#menu.style.top = `${top + height}px`;
-		if ((left * 2) < tableRect.left) {
-			console.log('left too left!');
-			this.#menu.style.left = `${tableRect.left}px`;
+		if (left < tableRect.left || menuRect.left < 0) {
+			this.#menu.style.left = '0px';
+			this.#menu.style.transform = '';
 		} else {
-			console.log('normal');
 			this.#menu.style.left = `${left + width}px`;
+			this.#menu.style.transform = 'translateX(-100%)';
 		}
-		this.#menu.style.transform = 'translateX(-100%)';
-
-		const x = this.#menu.getBoundingClientRect().left;
-		this.#menu.style.transform = x < 0 ? `translateX(calc(-100% - ${x * 1.5}px))` : 'translateX(-100%)';
-		//TODO Fix filter menu being too large!
-		console.log(x);
-		console.log(width);
 	}
 
 	updateRows = () => {
