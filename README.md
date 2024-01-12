@@ -165,13 +165,14 @@ Attribute notes:
 | `error`      | *See note 2*                                                                  |
 | `helpertext` | *See note 3*                                                                  |
 
-| Combobox      | Attributes                                  |
-|---------------|---------------------------------------------|
-| `allow-input` | **Boolean**; Allows new options to be input |
-| `disabled`    | *See note 1*                                |
-| `error`       | *See note 2*                                |
-| `helpertext`  | *See note 3*                                |
-| `selected`    | *See note 4*                                |
+| Combobox       | Attributes                                  |
+|----------------|---------------------------------------------|
+| `allow-input`  | **Boolean**; Allows new options to be input |
+| `autocomplete` | **String**; `list`, `inline`, `both`        |
+| `disabled`     | *See note 1*                                |
+| `error`        | *See note 2*                                |
+| `helpertext`   | *See note 3*                                |
+| `selected`     | *See note 4*                                |
 
 | Draggable-List | Attributes |
 |----------------|------------|
