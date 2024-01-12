@@ -708,6 +708,7 @@ export default class Table extends HTMLElement {
 		let b = findKey(obj, 'name');
 		if (b === null) b = findKey(obj, 'lastName');
 		if (b === null) b = findKey(obj, 'firstName');
+		if (b === null) b = findKey(obj, 'middleName');
 		if (b === null) b = findKey(obj, 'url');
 		if (b === null) b = findKey(obj, 'date');
 		return b;
@@ -881,8 +882,12 @@ export default class Table extends HTMLElement {
 		};
 
 		const fitleredRows = rows.filter(row => {
-			const results = this.filters.map(({ column, operator, value }) => {
-				const result = operators[operator](row[column], value);
+			const results = this.filters.map(({ column, type, operator, value }) => {
+				let rowValue = row[column];
+				if (type === 'string' && typeof rowValue !== 'string') {
+					rowValue = this.getStringFromObject(rowValue);
+				}
+				const result = operators[operator](rowValue, value);
 				return result;
 			});
 			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
@@ -987,22 +992,22 @@ export default class Table extends HTMLElement {
 	}
 
 	resizeColumnEnd = (e, el, index) => {
-		e.stopPropagation();
-		e.preventDefault();
 		if (this.#resizingColumn !== null) {
+			e.stopPropagation();
+			e.preventDefault();
 			if (this.#resizingColumn.classList.contains('resizing')) {
 				this.#resizingColumn.className = this.#resizingColumn.className.replaceAll(' resizing', '');
 			}
 			this.#resizingColumn = null;
+			this.#header.querySelectorAll('.resizing')?.forEach((a, i) => a.className = a.className.replaceAll(' resizing', ''));
+			this.fireChangeEvent();
 		}
-		this.#header.querySelectorAll('.resizing')?.forEach((a, i) => a.className = a.className.replaceAll(' resizing', ''));
-		this.fireChangeEvent();
 	}
 
 	resizeColumnMove = (e, el, index) => {
-		e.stopPropagation();
-		e.preventDefault();
 		if (this.#resizingColumn === el) {
+			e.stopPropagation();
+			e.preventDefault();
 			const diff = e.x - this.#mouseDown;
 			const type = [...el.style.width.matchAll(/([0-9\.]+)(.+)/g)]?.[0]?.[2] || 'px';
 			let oldWidth = parseInt(el.style.width);
@@ -1021,9 +1026,9 @@ export default class Table extends HTMLElement {
 	}
 
 	resizeColumnStart = (e, el, index) => {
-		e.stopPropagation();
-		e.preventDefault();
 		if (e.button === 0) {
+			e.stopPropagation();
+			e.preventDefault();
 			this.#resizingColumn = el;
 			this.#mouseDown = e.x;
 			if (!el.classList.contains(' resizing')) {
@@ -1081,7 +1086,7 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
-			filters.push({ column: this.currentColumn.property, operator: 'not_empty', value: '' });
+			filters.push({ column: this.currentColumn.property, type: this.currentColumn.type, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
 			this.fireChangeEvent();
@@ -1102,7 +1107,7 @@ export default class Table extends HTMLElement {
 				const container = e.target.closest('.filter');
 				const prop = container.querySelector('.filter-column');
 				const col = this.columns.find(a => a.property === prop.value);
-				const filter = { column: prop.value, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''};
+				const filter = { column: prop.value, type: col.type, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''};
 				const filters = [...this.filters];
 				filters[index] = filter;
 				this.page = 0;
