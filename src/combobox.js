@@ -144,6 +144,7 @@ export default class Combobox extends HTMLElement {
 			</div>
 		`;
 		this.shadowRoot.addEventListener('mousedown', (e) => e.stopPropagation());
+		this._allowInput = false;
 		this._disabled = false;
 		this._expanded = false;
 		this._error = false;
@@ -153,6 +154,9 @@ export default class Combobox extends HTMLElement {
 		this._slotClear = null;
 		this._slotExpand = null;
 	}
+
+	get allowInput() { return this._allowInput; }
+	set allowInput(newVal) { this._allowInput = newVal; }
 
 	get #btnArrow() {
 		if (this.#slotExpand !== null) {
@@ -235,7 +239,7 @@ export default class Combobox extends HTMLElement {
 	}
 
 	get #focused() { return this._focused; }
-	set #focused(newVal) { this._focused = newVal }
+	set #focused(newVal) { this._focused = newVal; }
 
 	get #helperDiv() { return this.shadowRoot.querySelector('#helper'); }
 
@@ -300,6 +304,7 @@ export default class Combobox extends HTMLElement {
 			return [...a.children].filter((b) => b.tagName.toLowerCase() === 'ac-option').length;
 		});
 		const currentTabsIndex = combos.findIndex((a) => a === this);
+		const allowInput = this.getAttribute('allow-input');
 		const error = this.getAttribute('error');
 		const helpertext = this.getAttribute('helpertext');
 		const offset = comboCounts.map((a, i) => {
@@ -311,6 +316,7 @@ export default class Combobox extends HTMLElement {
 		let optionIndex = 0;
 		let optionId = optionIndex + offset;
 
+		if (allowInput) this.allowInput = allowInput;
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.childNodes.length > 0) {
@@ -587,6 +593,24 @@ export default class Combobox extends HTMLElement {
 		if (target?.value?.length > 0) {
 			if (target.nodeName.toLowerCase() === 'ac-combobox') {
 				int = this.#options.findIndex((a) => a.innerText.toLowerCase() === this.#input.value.toLowerCase());
+				if (int == -1 && this.allowInput) {
+					this.#input.value = target.value;
+					const config = {
+						ariaHidden: false,
+						ariaSelected: true,
+						hidden: false,
+						id: `option-${this.#options.length}`,
+						slot: 'options',
+						tabindex: -1
+					};
+					int = this.#options.length;
+					const elem = document.createElement('ac-option', config);
+					const text = document.createTextNode(target.value);
+					elem.appendChild(text);
+					elem.setAttribute('selected', true);
+					this.appendChild(elem);
+					this.#options.push(elem);
+				}
 			} else if (target.nodeName.toLowerCase() === 'ac-option') {
 				int = this.#options.findIndex((a) => a === target);
 			} else if (this.#visibleOptions?.[0]) {
