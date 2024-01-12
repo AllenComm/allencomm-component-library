@@ -46,9 +46,9 @@ Unnamed = Slots which allow any child to be placed inside
 | `card-front-btn` | *Optional*; Button on top of front face of card, switches face                         |
 | `card-back-btn`  | *Optional*; Button on top of back face of card, switches face                          |
 
-| Checkbox    | Slots                                        |
-|-------------|----------------------------------------------|
-| Unnamed     | \*                                           |
+| Checkbox    | Slots                                       |
+|-------------|---------------------------------------------|
+| Unnamed     | \*                                          |
 | `on-label`  | *Optional*; Only shown when checkbox is on  |
 | `off-label` | *Optional*; Only shown when checkbox is off |
 
@@ -146,9 +146,9 @@ Attribute notes:
 3. `helpertext`: **String**; Text to show when `error` is true
 4. `selected`: **String**; Initial selection, can be an `id` of child, or the child can have `selected` set to `true`
 
-| Accordion  | Attributes                                                                                                      |
-|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `selected` | *See note 4*|
+| Accordion  | Attributes   |
+|------------|--------------|
+| `selected` | *See note 4* |
 
 | Button     | Attributes   |
 |------------|--------------|
@@ -165,12 +165,13 @@ Attribute notes:
 | `error`      | *See note 2*                                                                  |
 | `helpertext` | *See note 3*                                                                  |
 
-| Combobox     | Attributes   |
-|--------------|--------------|
-| `disabled`   | *See note 1* |
-| `error`      | *See note 2* |
-| `helpertext` | *See note 3* |
-| `selected`   | *See note 4* |
+| Combobox      | Attributes                                  |
+|---------------|---------------------------------------------|
+| `allow-input` | **Boolean**; Allows new options to be input |
+| `disabled`    | *See note 1*                                |
+| `error`       | *See note 2*                                |
+| `helpertext`  | *See note 3*                                |
+| `selected`    | *See note 4*                                |
 
 | Draggable-List | Attributes |
 |----------------|------------|
