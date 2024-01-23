@@ -245,12 +245,10 @@ export default class Select extends HTMLElement {
 	get value() { return this.options[this.selected].value; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
-		console.log('SELECT ATTR CHANGE', attr, newVal)
 		if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
 		} else if (attr === 'selected') {
-			console.log('SELECTED CHANGE', newVal)
 			const ids = this.options.map((a) => a.id);
 			if (ids.indexOf(newVal) > -1) {
 				this.selected = ids.indexOf(newVal);
