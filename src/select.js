@@ -283,13 +283,15 @@ export default class Select extends HTMLElement {
 		if (this.childNodes.length > 0) {
 			this.childNodes.forEach((a) => {
 				if (a.nodeName.toLowerCase() === 'ac-option') {
-					this.options.push(a);
-					a.setAttribute('aria-selected', false);
-					a.setAttribute('slot', 'options');
-					if (!a.id) a.id = `option-${optionId + 1}`;
-					optionIndex = optionIndex + 1;
-					optionId = optionId + 1;
-					setTimeout(() => a.setAttribute('tabindex', -1));
+					if (this.options.indexOf(a) <= -1) {
+						this.options.push(a);
+						a.setAttribute('aria-selected', false);
+						a.setAttribute('slot', 'options');
+						if (!a.id) a.id = `option-${optionId + 1}`;
+						optionIndex = optionIndex + 1;
+						optionId = optionId + 1;
+						setTimeout(() => a.setAttribute('tabindex', -1));
+					}
 				} else if (a.slot === 'expand-btn') {
 					this.shadowRoot.querySelector('.arrow').classList.add('hidden');
 					this.#slotExpand = a;

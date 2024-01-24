@@ -66,10 +66,14 @@ export default class Button extends HTMLElement {
 			this.#button.setAttribute('disabled', bool);
 			this.#button.setAttribute('tabindex', -1);
 			this.setAttribute('aria-disabled', bool);
+			if (this.getAttribute('disabled') === null) {
+				this.setAttribute('disabled', bool);
+			}
 		} else {
 			this.#button.removeAttribute('disabled');
 			this.#button.setAttribute('tabindex', 0);
 			this.removeAttribute('aria-disabled');
+			this.removeAttribute('disabled');
 		}
 	}
 
@@ -81,7 +85,7 @@ export default class Button extends HTMLElement {
 	}
 
 	connectedCallback() {
-		if (this.getAttribute('disabled') === 'true') {
+		if (this.getAttribute('disabled') === 'true' || this.getAttribute('disabled') === true) {
 			this.disabled = true;
 		} else {
 			this.disabled = false;
