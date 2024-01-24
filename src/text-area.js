@@ -67,7 +67,7 @@ export default class TextArea extends HTMLElement {
 	set value(newVal) {
 		this.#textarea.value = newVal;
 		this.setAttribute('aria-valueNow', newVal);
-		this.resize();
+		setTimeout(() => this.resize());
 	}
 
 	get disabled() { return this._disabled; }

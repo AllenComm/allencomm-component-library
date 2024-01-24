@@ -581,6 +581,11 @@ export default class Combobox extends HTMLElement {
 				}
 				this.handleSubmit(e);
 				break;
+			case 'Tab':
+				if (this.allowInput && this.#input.value.length > 0 && this.#options.findIndex((a) => a.value === this.#input.value) <= -1) {
+					this.handleSubmit(e);
+				}
+				break;
 			default:
 				this.#expanded = false;
 				break;
