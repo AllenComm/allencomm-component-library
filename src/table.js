@@ -1,5 +1,5 @@
 export default class Table extends HTMLElement {
-	static observedAttributes = ['columns', 'filters', 'page', 'rows'];
+	static observedAttributes = ['columns', 'filters', 'page', 'page-size', 'rows'];
 	#RESERVED_SELECTED = '~~SELECTED~~';
 
 	#allowSelection = false;
@@ -22,7 +22,6 @@ export default class Table extends HTMLElement {
 	#manage = null;
 	#menu = null;
 	#mouseDown = false;
-	#multiFilterOperator = 'AND';
 	#prevHeaderBtnRect = null;
 	#resizingColumn = null;
 	#rowsUnfiltered = null;
@@ -395,6 +394,7 @@ export default class Table extends HTMLElement {
 					<select class='filter-operator string'>
 						<option value='contains'>contains</option>
 						<option value='equals'>equals</option>
+						<option value='not_equals'>is not equal</option>
 						<option value='starts_with'>starts with</option>
 						<option value='ends_with'>ends with</option>
 						<option value='empty'>is empty</option>
@@ -415,10 +415,11 @@ export default class Table extends HTMLElement {
 		this.DES = 'descending';
 		this.NONE = 'none';
 		this._columns = null;
+		this._filters = null;
+		this._multiFilterOperator = 'AND';
 		this._page = 0;
 		this._pageSize = 100;
 		this._rows = null;
-		this._filters = null;
 	}
 
 	get columns() { return this._columns; }
@@ -429,11 +430,18 @@ export default class Table extends HTMLElement {
 
 	get filters() { return this._filters || []; }
 	set filters(newVal) {
+		const oldVal = this._filters;
 		this._filters = newVal;
+		if (newVal?.length > 0 && newVal.length != oldVal?.length) {
+			this.page = 0;
+		}
 		if (this.#rowsUnfiltered) {
 			this.rows = this.#rowsUnfiltered;
 		}
 	}
+
+	get multiFilterOperator() { return this._multiFilterOperator; }
+	set multiFilterOperator(newVal) { this._multiFilterOperator = newVal; }
 
 	get page() { return this._page; }
 	set page(newVal) {
@@ -482,6 +490,9 @@ export default class Table extends HTMLElement {
 			case 'page':
 				this.page = newVal;
 				break;
+			case 'page-size':
+				this.pageSize = newVal;
+				break;
 			case 'rows':
 				this.rows = JSON.parse(newVal);
 				break;
@@ -499,10 +510,10 @@ export default class Table extends HTMLElement {
 		}
 		const pageSize = Number(this.getAttribute('page-size'));
 		if (pageSize != null && !isNaN(pageSize)) {
-			this.pageSize = pageSize || this._pageSize;
+			setTimeout(() => { this.pageSize = pageSize > 0 ? pageSize : this._pageSize; });
 		}
+		this.multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
 		this.#allowSelection = this.getAttribute('allow-selection') === 'true';
-		this.#multiFilterOperator = this.getAttribute('multi-filter-operator')?.toUpperCase() === 'OR' ? 'OR' : 'AND';
 
 		this.#body = this.shadowRoot.querySelector('#body');
 		this.#scrollContent = this.shadowRoot.querySelector('#scroll-content');
@@ -662,7 +673,9 @@ export default class Table extends HTMLElement {
 		document.body.removeChild(link);
 	}
 
-	fireChangeEvent = () => this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	fireChangeEvent = () => {
+		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	};
 
 	forceRender = () => {
 		if (!this.#initialized || !this._rows || !this._columns) return;
@@ -743,7 +756,7 @@ export default class Table extends HTMLElement {
 	}
 
 	onClickInside = (e) => {
-		if (e.target.id != 'page-size') {
+		if (e.target.id != 'page-size' && e.target.tagName.toLowerCase() !== 'input') {
 			this.shadowRoot.querySelector('.table').focus();
 		}
 	}
@@ -873,6 +886,7 @@ export default class Table extends HTMLElement {
 			'not_empty': (a) => `${a}`.length > 0,
 			'contains': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) >= 0,
 			'equals': (a, b) => a.toLowerCase() === b.toLowerCase(),
+			'not_equals': (a, b) => a.toLowerCase() !== b.toLowerCase(),
 			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
 			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
 			'AND': (arr) => arr.every(a => a),
@@ -890,7 +904,7 @@ export default class Table extends HTMLElement {
 				const result = operators[operator](rowValue, value);
 				return result;
 			});
-			return results.length > 0 ? operators[this.#multiFilterOperator](results) : row;
+			return results.length > 0 ? operators[this.multiFilterOperator](results) : row;
 		});
 		return fitleredRows;
 	}
@@ -1123,7 +1137,7 @@ export default class Table extends HTMLElement {
 			});
 
 			filterProperty.value = property;
-			filterMulti.value = this.#multiFilterOperator;
+			filterMulti.value = this.multiFilterOperator;
 			filterOperator.value = operator;
 			if (filterInput) {
 				filterInput.value = value;
@@ -1131,7 +1145,7 @@ export default class Table extends HTMLElement {
 			container.setAttribute('data-type', column.type);
 
 			filterMulti.addEventListener('change', (e) => {
-				this.#multiFilterOperator = e.target.value;
+				this.multiFilterOperator = e.target.value;
 				onFilterUpdate(e);
 			});
 			filterProperty.addEventListener('change', onFilterUpdate);
