@@ -747,12 +747,6 @@ export default class Table extends HTMLElement {
 		if (b === null) b = findKey(obj, 'middleName');
 		if (b === null) b = findKey(obj, 'url');
 		if (b === null) b = findKey(obj, 'date');
-		if (b === null) {
-			console.log('!error!');
-			console.log(prop);
-			console.dir(a, obj);
-			console.log('---');
-		}
 		return b;
 	}
 
