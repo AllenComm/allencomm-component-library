@@ -393,8 +393,9 @@ export default class Table extends HTMLElement {
 					</select>
 					<select class='filter-operator string'>
 						<option value='contains'>contains</option>
+						<option value='not_contain'>does not contain</option>
 						<option value='equals'>equals</option>
-						<option value='not_equals'>is not equal</option>
+						<option value='not_equal'>is not equal</option>
 						<option value='starts_with'>starts with</option>
 						<option value='ends_with'>ends with</option>
 						<option value='empty'>is empty</option>
@@ -632,6 +633,8 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('row');
 		element.id = isHeader ? 'row-header' : `row-${index}`;
+		const rowIndex = row.index !== undefined && typeof row.index === 'number' ? row.index : index;
+		element.setAttribute('row-index', rowIndex);
 
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
@@ -643,7 +646,7 @@ export default class Table extends HTMLElement {
 			inner.checked = row[this.#RESERVED_SELECTED];
 			element.ariaSelected = row[this.#RESERVED_SELECTED];
 
-			const handleClick = isHeader ? this.onSelectAllRows : (e) => this.onSelectRow(e, index);
+			const handleClick = isHeader ? this.onSelectAllRows : (e) => this.onSelectRow(e, rowIndex);
 			inner.addEventListener('click', handleClick);
 
 			selector.append(inner);
@@ -866,6 +869,7 @@ export default class Table extends HTMLElement {
 			const selections = createRange(this.#anchor > index ? index : this.#anchor, this.#anchor > index ? this.#anchor : index);
 			selections.forEach(i => this._rows[i][this.#RESERVED_SELECTED] = true);
 		} else {
+			const visibleRows = [...this.#scrollContent.children];
 			const row = this._rows[index];
 			this.#anchor = index;
 			row[this.#RESERVED_SELECTED] = !row[this.#RESERVED_SELECTED];
@@ -885,8 +889,9 @@ export default class Table extends HTMLElement {
 			'empty': (a) => `${a}`.length === 0,
 			'not_empty': (a) => `${a}`.length > 0,
 			'contains': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) >= 0,
+			'not_contain': (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) <= -1,
 			'equals': (a, b) => a.toLowerCase() === b.toLowerCase(),
-			'not_equals': (a, b) => a.toLowerCase() !== b.toLowerCase(),
+			'not_equal': (a, b) => a.toLowerCase() !== b.toLowerCase(),
 			'starts_with': (a, b) => a.toLowerCase().startsWith(b.toLowerCase()),
 			'ends_with': (a, b) => a.toLowerCase().endsWith(b.toLowerCase()),
 			'AND': (arr) => arr.every(a => a),
