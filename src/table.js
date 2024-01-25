@@ -37,7 +37,7 @@ export default class Table extends HTMLElement {
 					box-sizing: border-box;
 				}
 				:host {
-					display: block;
+					display: grid;
 					width: 100%;
 				}
 				:host([density='cozy']) .cell,
@@ -395,7 +395,7 @@ export default class Table extends HTMLElement {
 						<option value='contains'>contains</option>
 						<option value='not_contain'>does not contain</option>
 						<option value='equals'>equals</option>
-						<option value='not_equal'>is not equal</option>
+						<option value='not_equal'>does not equal</option>
 						<option value='starts_with'>starts with</option>
 						<option value='ends_with'>ends with</option>
 						<option value='empty'>is empty</option>
@@ -568,7 +568,12 @@ export default class Table extends HTMLElement {
 		} else {
 			element.style.width = `${column.width || '100px'}`;
 		}
-		element.title = data;
+		const fancyData = this.getStringFromObject(data, column.property);
+		if (fancyData != null) {
+			element.title = fancyData;
+		} else if (data != null) {
+			element.title = data;
+		}
 		element.setAttribute('id', `cell-${cellIndex}`);
 
 		const render = column.render;
@@ -704,10 +709,14 @@ export default class Table extends HTMLElement {
 		return { top: positionTop, left: positionLeft };
 	}
 
-	getStringFromObject = (a) => {
+	getStringFromObject = (a, prop) => {
+		if (a === null || a === undefined || typeof a !== 'object') return null;
 		let obj = a;
 		if (Object.prototype.toString.call(a) === '[object Array]') {
 			obj = a[0];
+			if (a[0] === undefined) {
+				return null;
+			}
 		}
 		const findKey = (a, key) => {
 			if (typeof a === 'object' && a !== null && a?.[key]) {
@@ -721,12 +730,29 @@ export default class Table extends HTMLElement {
 			}
 			return null;
 		};
-		let b = findKey(obj, 'name');
-		if (b === null) b = findKey(obj, 'lastName');
-		if (b === null) b = findKey(obj, 'firstName');
+		let b = null;
+		if (prop.length > 0) {
+			b = findKey(obj, prop);
+			if (b != null) {
+				return b;
+			}
+		}
+
+		if (b === null) b = findKey(obj, 'name');
+		const lastName = findKey(obj, 'lastName');
+		const firstName = findKey(obj, 'firstName');
+		if (b === null && firstName != null && lastName != null) b = lastName + ', ' + firstName;
+		if (b === null) b = lastName;
+		if (b === null) b = firstName;
 		if (b === null) b = findKey(obj, 'middleName');
 		if (b === null) b = findKey(obj, 'url');
 		if (b === null) b = findKey(obj, 'date');
+		if (b === null) {
+			console.log('!error!');
+			console.log(prop);
+			console.dir(a, obj);
+			console.log('---');
+		}
 		return b;
 	}
 
@@ -904,7 +930,7 @@ export default class Table extends HTMLElement {
 			const results = this.filters.map(({ column, type, operator, value }) => {
 				let rowValue = row[column];
 				if (type === 'string' && typeof rowValue !== 'string') {
-					rowValue = this.getStringFromObject(rowValue);
+					rowValue = this.getStringFromObject(rowValue, column.property);
 				}
 				const result = operators[operator](rowValue, value);
 				return result;
@@ -949,8 +975,8 @@ export default class Table extends HTMLElement {
 							result = aa.localeCompare(bb);
 						}
 					} else {
-						const aaa = this.getStringFromObject(aa);
-						const bbb = this.getStringFromObject(bb);
+						const aaa = this.getStringFromObject(aa, property);
+						const bbb = this.getStringFromObject(bb, property);
 						if (typeof aaa === 'string' && typeof bbb === 'string') {
 							if (!isNaN(Date.parse(aaa)) && !isNaN(Date.parse(bbb))) {
 								result = Date.parse(aaa) - Date.parse(bbb);
