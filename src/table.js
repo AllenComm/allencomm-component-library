@@ -79,24 +79,32 @@ export default class Table extends HTMLElement {
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}
+				.cell-filter-btn,
+				.cell-menu-btn {
+					background-color: #dddddd;
+					border: none;
+					border-radius: 3px;
+					cursor: pointer;
+					height: 20px;
+					position: absolute;
+					top: 50%;
+					transform: translateY(-50%);
+					transition: opacity .2s ease;
+					width: 16px;
+					z-index: 2;
+				}
 				.cell-filter-btn {
 					flex-shrink: 0;
 					margin-left: 5px;
 					padding: 0;
-					width: 16px;
 				}
 				.cell-filter-btn > img {
 					width: 100%;
 				}
 				.cell-menu-btn {
-					cursor: pointer;
 					opacity: 0;
-					position: absolute;
+					padding: 0 6px 2px;
 					right: 8px;
-					top: 50%;
-					transform: translateY(-50%);
-					transition: opacity .2s ease;
-					z-index: 2;
 				}
 				.cell-resize-btn {
 					border: none;
@@ -215,8 +223,69 @@ export default class Table extends HTMLElement {
 				#menu.visible.manage #manage,
 				#menu.visible.filter #filters {
 					display: flex;
+					gap: 1px;
 					opacity: 1;
 					pointer-events: all;
+				}
+				#menu #filters .filter {
+					gap: 1px;
+				}
+				#menu #filters button,
+				#menu #options button {
+					align-items: flex-start;
+					background-color: #dddddd;
+					border-radius: 3px;
+					border: none;
+					color: #000000;
+					cursor: pointer;
+					display: flex;
+					justify-content: center;
+					min-width: 120px;
+					padding: 4px;
+					pointer-events: auto;
+					transition: background-color .2s ease;
+				}
+				#menu #filters button[disabled],
+				#menu #options button[disabled] {
+					background-color: #eeeeee;
+					color: #eeeeee;
+					cursor: default;
+					pointer-events: none;
+				}
+				#menu #filters button:hover,
+				#menu #options button:hover {
+					background-color: #cccccc;
+				}
+				#menu #filters button:focus-visible,
+				#menu #options button:focus-visible {
+					border-radius: 3px;
+					outline-offset: 2px;
+					outline-width: 2px;
+					outline-style: solid;
+				}
+				#menu #filters button.filter-remove-btn {
+					min-width: 30px;
+				}
+				#menu #filters input,
+				#menu #filters select {
+					background-color: #ffffff;
+					border: 1px solid #cccccc;
+					border-radius: 3px;
+					color: #000000;
+				}
+				#menu #manage {
+					background-color: #dddddd;
+					border: 1px solid #dddddd;
+					border-radius: 3px;
+				}
+				#menu #manage > div {
+					background-color: #ffffff;
+					border-radius: 3px;
+					display: flex;
+					gap: 5px;
+				}
+				#menu #manage > div label {
+					padding: 0 4px;
 				}
 				.pages {
 					display: flex;
@@ -425,7 +494,14 @@ export default class Table extends HTMLElement {
 
 	get columns() { return this._columns; }
 	set columns(newVal) {
+		const oldVal = this._columns;
 		this._columns = newVal;
+		if (newVal?.length && oldVal?.length !== newVal.length) {
+			const row = this.getRowHeight();
+			const len = newVal.length;
+			const total = (len * 21) + (len - 1) + (row * 2);
+			this.shadowRoot.host.style.minHeight = `${total}px`;
+		}
 		this.forceRender();
 	}
 
@@ -568,10 +644,7 @@ export default class Table extends HTMLElement {
 		} else {
 			element.style.width = `${column.width || '100px'}`;
 		}
-		const fancyData = this.getStringFromObject(data, column.property);
-		if (fancyData != null) {
-			element.title = fancyData;
-		} else if (data != null) {
+		if (data != null) {
 			element.title = data;
 		}
 		element.setAttribute('id', `cell-${cellIndex}`);
@@ -658,7 +731,7 @@ export default class Table extends HTMLElement {
 			element.append(selector);
 		}
 
-		const rowData = isHeader ? Object.values(row) : this.columns.map((a) => row[a?.property] ?? null);
+		const rowData = isHeader ? Object.values(row) : this.columns.map((a) => this.getDataFromProperty(row, a.property));
 		const rowElements = rowData.map((data, i) => isHeader ? this.buildCellHeader(data, i, this.columns[i]) : this.buildCell(data, i, index, this.columns[i], row));
 		rowElements.filter(Boolean).forEach(el => element.append(el));
 
@@ -668,7 +741,7 @@ export default class Table extends HTMLElement {
 	exportToCsv = () => {
 		const replacer = (key, value) => value === null ? '' : value;
 		const columns = this.columns.map(col => col.name);
-		const sortedRows = this.rows.map(row => this.columns.map(col => row[col.property]));
+		const sortedRows = this.rows.map(row => this.columns.map(col => this.getDataFromProperty(row, col.property) ? this.getDataFromProperty(row, col.property) : ' ' ));
 		const rows = sortedRows.map(row => Object.entries(row).map(([key, value]) => key === this.#RESERVED_SELECTED ? null : typeof value === 'string' ? JSON.stringify(value, replacer) : value ).filter(a => a !== null));
 		const data = [columns, ...rows];
 		const csvContent = "data:text/csv;charset=utf-8," + data.map(row => row.join(",")).join("\n");
@@ -709,45 +782,13 @@ export default class Table extends HTMLElement {
 		return { top: positionTop, left: positionLeft };
 	}
 
-	getStringFromObject = (a, prop) => {
-		if (a === null || a === undefined || typeof a !== 'object') return null;
-		let obj = a;
-		if (Object.prototype.toString.call(a) === '[object Array]') {
-			obj = a[0];
-			if (a[0] === undefined) {
-				return null;
-			}
+	getDataFromProperty = (row, prop) => {
+		if (typeof prop === 'function') {
+			return prop(row) ?? null;
+		} else if (row[prop]) {
+			return row[prop];
 		}
-		const findKey = (a, key) => {
-			if (typeof a === 'object' && a !== null && a?.[key]) {
-				return a[key];
-			} else {
-				for (const b in a) {
-					if (typeof a[b] === 'object' && a[b] !== null) {
-						return findKey(a[b], key);
-					}
-				}
-			}
-			return null;
-		};
-		let b = null;
-		if (prop.length > 0) {
-			b = findKey(obj, prop);
-			if (b != null) {
-				return b;
-			}
-		}
-
-		if (b === null) b = findKey(obj, 'name');
-		const lastName = findKey(obj, 'lastName');
-		const firstName = findKey(obj, 'firstName');
-		if (b === null && firstName != null && lastName != null) b = lastName + ', ' + firstName;
-		if (b === null) b = lastName;
-		if (b === null) b = firstName;
-		if (b === null) b = findKey(obj, 'middleName');
-		if (b === null) b = findKey(obj, 'url');
-		if (b === null) b = findKey(obj, 'date');
-		return b;
+		return null;
 	}
 
 	getRowHeight = () => {
@@ -779,9 +820,10 @@ export default class Table extends HTMLElement {
 	}
 
 	onClickInside = (e) => {
-		if (e.target.id != 'page-size' && e.target.tagName.toLowerCase() !== 'input') {
-			this.shadowRoot.querySelector('.table').focus();
-		}
+		//TODO: Remove? User should dictate scroll
+		// if (e.target.id != 'page-size' && e.target.tagName.toLowerCase() !== 'input') {
+		// 	this.shadowRoot.querySelector('.table').focus();
+		// }
 	}
 
 	onClickOutside = (e) => {
@@ -923,8 +965,9 @@ export default class Table extends HTMLElement {
 		const fitleredRows = rows.filter(row => {
 			const results = this.filters.map(({ column, type, operator, value }) => {
 				let rowValue = row[column];
-				if (type === 'string' && typeof rowValue !== 'string') {
-					rowValue = this.getStringFromObject(rowValue, column.property);
+				console.log(rowValue);
+				if (typeof column.property === 'function') {
+					rowValue = this.getDataFromProperty(rowValue, column.property);
 				}
 				const result = operators[operator](rowValue, value);
 				return result;
@@ -946,8 +989,8 @@ export default class Table extends HTMLElement {
 		const compare = (a, b) => {
 			for (let i = 0; i < colDetails.length; i++) {
 				const { type, property, sort, sortFunction } = colDetails[i];
-				let aa = a[property];
-				let bb = b[property];
+				let aa = this.getDataFromProperty(a, property);
+				let bb = this.getDataFromProperty(b, property);
 				if (aa == null && bb == null) {
 					continue;
 				} else if (aa == null) {
@@ -958,29 +1001,15 @@ export default class Table extends HTMLElement {
 
 				let result = 0;
 				if (typeof sortFunction === 'function') {
-					result = sortFunction(aa, bb);
+					result = sortFunction(a, b);
 				} else if (type === 'number') {
 					result = aa - bb;
 				} else if (type === 'string') {
-					if (typeof aa === 'string' && typeof bb === 'string') {
-						if (!isNaN(Date.parse(aa)) && !isNaN(Date.parse(bb))) {
-							result = Date.parse(aa) - Date.parse(bb);
-						} else {
-							result = aa.localeCompare(bb);
-						}
-					} else {
-						const aaa = this.getStringFromObject(aa, property);
-						const bbb = this.getStringFromObject(bb, property);
-						if (typeof aaa === 'string' && typeof bbb === 'string') {
-							if (!isNaN(Date.parse(aaa)) && !isNaN(Date.parse(bbb))) {
-								result = Date.parse(aaa) - Date.parse(bbb);
-							} else {
-								result = aaa.localeCompare(bbb);
-							}
-						}
-					}
+					result = aa.localeCompare(bb);
 				} else if (type === 'boolean') {
 					result = aa === bb ? 0 : (aa ? -1 : 1);
+				} else if (type === 'date') {
+					result = Date.parse(aa) - Date.parse(bb);
 				}
 
 				if (result !== 0) {
@@ -1016,6 +1045,8 @@ export default class Table extends HTMLElement {
 
 	sortColumn = (dir) => {
 		if (this.currentColumn) {
+			//TODO: col.property
+			console.log(this.currentColumn.property);
 			const headerCell = this.#header.querySelector(`.row > .cell[data-property="${this.currentColumn.property}"]`);
 			const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
 
@@ -1125,6 +1156,7 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
+			//TODO: Current prop
 			filters.push({ column: this.currentColumn.property, type: this.currentColumn.type, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
@@ -1157,6 +1189,7 @@ export default class Table extends HTMLElement {
 			this._columns.forEach(col => {
 				const option = document.createElement('option');
 				option.textContent = col.name;
+				//TODO: value cannot be a function
 				option.value = col.property;
 				filterProperty.appendChild(option);
 			});
@@ -1198,9 +1231,10 @@ export default class Table extends HTMLElement {
 
 		this.columns.forEach((col, index) => {
 			const wrapper = document.createElement('div');
+			const property = typeof col.property === 'function' ? col.name.toLowerCase() : col.property;
 			wrapper.innerHTML = `
-				<input id='vis-${col.property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
-				<label for='vis-${col.property}'>${col.name}</label>
+				<input id='vis-${property}' type='checkbox' ${col.hidden ? '' : 'checked'} ${!col.hidden && disableLastInput ? 'disabled' : ''}>
+				<label for='vis-${property}'>${col.name}</label>
 			`;
 			wrapper.querySelector('input').addEventListener('change', (e) => {
 				const columns = [ ...this.columns ];
