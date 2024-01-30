@@ -620,7 +620,6 @@ export default class Table extends HTMLElement {
 		this.shadowRoot.querySelector('#sort-desc-btn').addEventListener('click', () => this.sortColumn(this.DES));
 		this.shadowRoot.querySelector('#filter-btn').addEventListener('click', this.onMenuFilterClick);
 		this.#scrollableContainer.addEventListener('scroll', this.onScroll);
-		this.shadowRoot.addEventListener('click', this.onClickInside);
 		document.addEventListener('click', this.onClickOutside);
 		document.addEventListener('keydown', this.onKeyDown);
 		window.addEventListener('resize', this.onResize);
@@ -670,7 +669,8 @@ export default class Table extends HTMLElement {
 		const resizing = this.#resizingColumn?.id === `cell-${index}`;
 		content.textContent = name;
 		element.className = `cell sort-${sort || 'none'} ${resizing ? 'resizing' : ''}`;
-		element.setAttribute('data-property', column.property);
+		const property = typeof column.property === 'function' ? column.name.toLowerCase() : column.property;
+		element.setAttribute('data-property', property);
 		if (window.screen.width <= 425) {
 			element.style.width = `${column.width ? parseFloat(column.width) + 30 : '100'}px`;
 		} else {
@@ -819,13 +819,6 @@ export default class Table extends HTMLElement {
 		return rect.top >= containerRect.top - 70 && rect.bottom <= containerRect.bottom + 70;
 	}
 
-	onClickInside = (e) => {
-		//TODO: Remove? User should dictate scroll
-		// if (e.target.id != 'page-size' && e.target.tagName.toLowerCase() !== 'input') {
-		// 	this.shadowRoot.querySelector('.table').focus();
-		// }
-	}
-
 	onClickOutside = (e) => {
 		const checkClick = (el) => {
 			const isPopupVisible = el.classList.contains('visible');
@@ -964,10 +957,15 @@ export default class Table extends HTMLElement {
 
 		const fitleredRows = rows.filter(row => {
 			const results = this.filters.map(({ column, type, operator, value }) => {
-				let rowValue = row[column];
-				console.log(rowValue);
-				if (typeof column.property === 'function') {
-					rowValue = this.getDataFromProperty(rowValue, column.property);
+				const columnProperty = this.columns.find((a) => {
+					if (typeof a.property === 'function') {
+						return a.property.toString() === column;
+					}
+					return a.property === column;
+				})?.property;
+				let rowValue = this.getDataFromProperty(row, columnProperty);
+				if (rowValue === null) {
+					return null;
 				}
 				const result = operators[operator](rowValue, value);
 				return result;
@@ -1045,9 +1043,8 @@ export default class Table extends HTMLElement {
 
 	sortColumn = (dir) => {
 		if (this.currentColumn) {
-			//TODO: col.property
-			console.log(this.currentColumn.property);
-			const headerCell = this.#header.querySelector(`.row > .cell[data-property="${this.currentColumn.property}"]`);
+			const property = typeof this.currentColumn.property === 'function' ? this.currentColumn.name.toLowerCase() : this.currentColumn.property;
+			const headerCell = this.#header.querySelector(`.row > .cell[data-property="${property}"]`);
 			const cells = this.#header.querySelectorAll('.row > .cell:not(.selectable)');
 
 			this.#anchor = null;
@@ -1156,7 +1153,6 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
-			//TODO: Current prop
 			filters.push({ column: this.currentColumn.property, type: this.currentColumn.type, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
@@ -1168,7 +1164,17 @@ export default class Table extends HTMLElement {
 			const template = this.shadowRoot.querySelector('#filter-template');
 			const clone = template.content.cloneNode(true);
 			const container = clone.querySelector('.filter');
-			const column = this.columns.find(a => a.property === property);
+			let stringProperty = property;
+			if (typeof property === 'function') {
+				stringProperty = property.toString();
+			}
+			const column = this.columns.find((a) => {
+				let thisProp = a.property;
+				if (typeof a.property === 'function') {
+					thisProp = a.property.toString();
+				}
+				return thisProp === stringProperty;
+			});
 			const filterMulti = clone.querySelector('.filter-and-or');
 			const filterProperty = clone.querySelector('.filter-column');
 			const filterOperator = clone.querySelector(`.filter-operator.${column.type}`);
@@ -1177,7 +1183,12 @@ export default class Table extends HTMLElement {
 			const onFilterUpdate = (e) => {
 				const container = e.target.closest('.filter');
 				const prop = container.querySelector('.filter-column');
-				const col = this.columns.find(a => a.property === prop.value);
+				const col = this.columns.find((a) => {
+					if (typeof a.property === 'function') {
+						return a.property.toString() === prop.value;
+					}
+					return a.property === prop.value;
+				});
 				const filter = { column: prop.value, type: col.type, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''};
 				const filters = [...this.filters];
 				filters[index] = filter;
@@ -1189,12 +1200,15 @@ export default class Table extends HTMLElement {
 			this._columns.forEach(col => {
 				const option = document.createElement('option');
 				option.textContent = col.name;
-				//TODO: value cannot be a function
-				option.value = col.property;
+				if (typeof col.property === 'function') {
+					option.value = col.property.toString();
+				} else {
+					option.value = col.property;
+				}
 				filterProperty.appendChild(option);
 			});
 
-			filterProperty.value = property;
+			filterProperty.value = stringProperty;
 			filterMulti.value = this.multiFilterOperator;
 			filterOperator.value = operator;
 			if (filterInput) {
