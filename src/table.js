@@ -140,10 +140,16 @@ export default class Table extends HTMLElement {
 				}
 				.filter[data-type="string"] .number,
 				.filter[data-type="string"] .boolean,
+				.filter[data-type="string"] .date,
 				.filter[data-type="boolean"] .number,
 				.filter[data-type="boolean"] .string,
+				.filter[data-type="boolean"] .date,
 				.filter[data-type="number"] .string,
-				.filter[data-type="number"] .boolean {
+				.filter[data-type="number"] .boolean,
+				.filter[data-type="number"] .date,
+				.filter[data-type="date"] .number,
+				.filter[data-type="date"] .string,
+				.filter[data-type="date"] .boolean {
 					display: none;
 				}
 				#filters .filter:first-child .filter-and-or {
@@ -476,8 +482,19 @@ export default class Table extends HTMLElement {
 						<option value='empty'>is empty</option>
 						<option value='not_empty'>is not empty</option>
 					</select>
+					<select class='filter-operator date'>
+						<option value='contains'>contains</option>
+						<option value='not_contain'>does not contain</option>
+						<option value='equals'>equals</option>
+						<option value='not_equal'>does not equal</option>
+						<option value='starts_with'>starts with</option>
+						<option value='ends_with'>ends with</option>
+						<option value='empty'>is empty</option>
+						<option value='not_empty'>is not empty</option>
+					</select>
 					<input class='filter-input number' type='number'></input>
 					<input class='filter-input string' type='text'></input>
+					<input class='filter-input date' type='text'></input>
 				</filter>
 			</template>
 		`;
@@ -559,21 +576,21 @@ export default class Table extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (!this.#initialized) return;
 
-		switch(attr) {
+		switch (attr) {
 			case 'columns':
-				this.columns = JSON.parse(newVal);
+				this.columns = JSON.parse(newVal) ?? [];
 				break;
 			case 'filters':
-				this.filters = JSON.parse(newVal);
+				this.filters = JSON.parse(newVal) ?? [];
 				break;
 			case 'page':
-				this.page = newVal;
+				this.page = newVal ?? 0;
 				break;
 			case 'page-size':
-				this.pageSize = newVal;
+				this.pageSize = newVal ?? 0;
 				break;
 			case 'rows':
-				this.rows = JSON.parse(newVal);
+				this.rows = JSON.parse(newVal) ?? [];
 				break;
 		}
 	}
@@ -1211,7 +1228,12 @@ export default class Table extends HTMLElement {
 					}
 					return a.property === prop.value;
 				});
-				const filter = { column: prop.value, type: col.type, operator: container.querySelector(`.filter-operator.${col.type}`).value, value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''};
+				const filter = {
+					column: prop.value,
+					type: col.type,
+					operator: container.querySelector(`.filter-operator.${col.type}`)?.value ?? '',
+					value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''
+				};
 				const filters = [...this.filters];
 				filters[index] = filter;
 				this.page = 0;
