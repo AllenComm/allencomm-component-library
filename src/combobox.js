@@ -45,6 +45,7 @@ export default class Combobox extends HTMLElement {
 					font-size: 14px;
 					height: 36px;
 					outline: none;
+					padding: 6px 8px;
 					position: relative;
 					width: 100%;
 					z-index: 1;

@@ -179,19 +179,25 @@ export default class TextField extends HTMLElement {
 	}
 
 	connectedCallback() {
+		const autocomplete = this.getAttribute('autocomplete');
 		const error = this.getAttribute('error');
 		const helpertext = this.getAttribute('helpertext');
 		const maxlength = this.getAttribute('maxlength');
 		const minlength = this.getAttribute('minlength');
+		const name = this.getAttribute('name');
 		const placeholder = this.getAttribute('placeholder');
+		const required = this.hasAttribute('required');
 		const search = this.getAttribute('search');
 		const size = this.getAttribute('size');
 		const value = this.getAttribute('value');
+		if (autocomplete) this.input.setAttribute('autocomplete', autocomplete);
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (maxlength) this.input.setAttribute('maxlength', maxlength);
 		if (minlength) this.input.setAttribute('minlength', minlength);
+		if (name) this.input.setAttribute('name', name);
 		if (placeholder) this.input.setAttribute('placeholder', placeholder);
+		if (required) this.input.setAttribute('required', '');
 		if (search != null && search === 'true') this.setAttribute('search', 'true');
 		if (size) this.input.setAttribute('size', size);
 		if (value != null) {

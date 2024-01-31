@@ -92,7 +92,7 @@ export default class Password extends HTMLElement {
 			<label tabindex='-1'>
 				<slot></slot>
 				<div class='inner'>
-					<input type='password' autocomplete='current-password' id='current-password' name='password'/>
+					<input type='password' autocomplete='current-password' id='current-password' name='current-password' required/>
 					<div class='icon toggle-show'>
 						<button aria-hidden='true' tabindex='-1'>
 							<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
