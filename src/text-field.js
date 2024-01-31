@@ -44,14 +44,14 @@ export default class TextField extends HTMLElement {
 					border-width: 1px;
 					flex: 1;
 					font-family: sans-serif;
-					font-size: 16px;
+					font-size: 14px;
 					padding: 8px;
 					width: 100%;
 				}
 				input:focus-visible {
-					border-color: #000;
 					border-style: solid;
-					outline: 1px solid #000;
+					outline: 2px solid #000;
+					outline-offset: 2px;
 					z-index: 1;
 				}
 				input.error {

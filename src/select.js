@@ -12,6 +12,7 @@ export default class Select extends HTMLElement {
 				:host {
 					cursor: pointer;
 					display: block;
+					font-size: 14px;
 					outline: none;
 					width: 100%;
 				}
@@ -21,6 +22,7 @@ export default class Select extends HTMLElement {
 				:host(:focus-within) .inner {
 					border-radius: 3px;
 					outline: 2px solid #000;
+					outline-offset: 2px;
 				}
 				:host([expanded='true']) .list {
 					visibility: visible;

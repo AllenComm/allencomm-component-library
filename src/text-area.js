@@ -38,14 +38,14 @@ export default class TextArea extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					font-family: sans-serif;
-					font-size: 16px;
+					font-size: 14px;
 					padding: 8px;
 					width: 100%;
 				}
 				textarea:focus-visible {
-					border-color: #000;
 					border-style: solid;
-					outline: 1px solid #000;
+					outline: 2px solid #000;
+					outline-offset: 2px;
 					z-index: 1;
 				}
 				textarea.error {

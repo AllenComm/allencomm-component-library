@@ -18,10 +18,10 @@ export default class Checkbox extends HTMLElement {
 					border-radius: 3px;
 					content: '';
 					display: block;
-					height: 13px;
+					height: 22px;
 					outline: 2px solid #000;
 					outline-offset: 2px;
-					width: 13px;
+					width: 22px;
 					z-index: 1;
 				}
 				:host([disabled='true']) input, :host([disabled='true']) label {
@@ -42,7 +42,6 @@ export default class Checkbox extends HTMLElement {
 				input {
 					height: 0;
 					margin: 0;
-					opacity: 0;
 					width: 0;
 				}
 				input, label, span.icon {

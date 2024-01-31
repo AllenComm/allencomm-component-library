@@ -69,9 +69,9 @@ export default class Password extends HTMLElement {
 					width: 100%;
 				}
 				input:focus-visible {
-					border-color: #000;
 					border-style: solid;
-					outline: 1px solid #000;
+					outline: 2px solid #000;
+					outline-offset: 2px;
 					z-index: 1;
 				}
 				input.error {
