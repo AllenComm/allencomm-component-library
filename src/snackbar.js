@@ -279,6 +279,7 @@ export default class Snackbar extends HTMLElement {
 
 	get open() { return this._open; }
 	set open(newVal) {
+		console.log('open', newVal);
 		const bool = newVal === 'true' || newVal === true;
 		this._open = bool;
 		if (bool) {
@@ -294,6 +295,7 @@ export default class Snackbar extends HTMLElement {
 			}
 			this.#body.setAttribute('open', false);
 		}
+		console.log(this._timer);
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {

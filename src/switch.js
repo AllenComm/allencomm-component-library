@@ -152,6 +152,7 @@ export default class Switch extends HTMLElement {
 		this.#input.addEventListener('change', this.handleChange);
 		this.setAttribute('aria-checked', checked);
 		this.setAttribute('tabindex', 0);
+		this.setAttribute('title', checked ? 'ON' : 'OFF');
 		this.addEventListener('keydown', this.handleKeydown);
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
@@ -159,6 +160,7 @@ export default class Switch extends HTMLElement {
 
 	handleChange = (e) => {
 		this.setAttribute('aria-checked', this.#input.checked);
+		this.setAttribute('title', this.#input.checked ? 'ON' : 'OFF');
 		if (e) {
 			this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 		}

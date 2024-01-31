@@ -37,6 +37,8 @@ export default class TextArea extends HTMLElement {
 					border-radius: 5px;
 					border-style: solid;
 					border-width: 1px;
+					font-family: sans-serif;
+					font-size: 16px;
 					padding: 8px;
 					width: 100%;
 				}

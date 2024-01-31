@@ -43,6 +43,8 @@ export default class TextField extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					flex: 1;
+					font-family: sans-serif;
+					font-size: 16px;
 					padding: 8px;
 					width: 100%;
 				}

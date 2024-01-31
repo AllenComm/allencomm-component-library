@@ -490,6 +490,7 @@ export default class Table extends HTMLElement {
 		this._page = 0;
 		this._pageSize = 100;
 		this._rows = null;
+		this._uniqueColumn = null;
 	}
 
 	get columns() { return this._columns; }
@@ -501,6 +502,7 @@ export default class Table extends HTMLElement {
 			const len = newVal.length;
 			const total = (len * 21) + (len - 1) + (row * 2);
 			this.shadowRoot.host.style.minHeight = `${total}px`;
+			this._uniqueColumn = this.getUniqueColumnProperty(newVal);
 		}
 		this.forceRender();
 	}
@@ -711,8 +713,7 @@ export default class Table extends HTMLElement {
 		const element = document.createElement('div');
 		element.classList.add('row');
 		element.id = isHeader ? 'row-header' : `row-${index}`;
-		const rowIndex = row.index !== undefined && typeof row.index === 'number' ? row.index : index;
-		element.setAttribute('row-index', rowIndex);
+		const rowIndex = this._rows.findIndex((a) => this.getDataFromProperty(a, this._uniqueColumn) == this.getDataFromProperty(row, this._uniqueColumn));
 
 		if (this.#allowSelection) {
 			const selector = document.createElement('span');
@@ -813,6 +814,25 @@ export default class Table extends HTMLElement {
 		return 0;
 	}
 
+	getUniqueColumnProperty = (columns) => {
+		const ids = ['id', 'itemnumber', 'guid', 'name', 'number'];
+		let property = null;
+		for (let i = 0; i < columns.length; i++) {
+			const a = columns[i];
+			for (let j = 0; j < ids.length; j++) {
+				const b = ids[j];
+				if (a.name.toLowerCase().includes(b)) {
+					property = a.property;
+					break;
+				}
+			}
+			if (property != null) {
+				break;
+			}
+		}
+		return property;
+	}
+
 	isRowInView = (el) => {
 		const rect = el.getBoundingClientRect();
 		const containerRect = this.#scrollableContainer.getBoundingClientRect();
@@ -894,6 +914,7 @@ export default class Table extends HTMLElement {
 
 	onRowsUpdate = (rows) => {
 		this._rows = this.rowsFilter(this.rowsSort(rows));
+		this.page = 0;
 		this.forceRender();
 	}
 
@@ -924,7 +945,6 @@ export default class Table extends HTMLElement {
 			const selections = createRange(this.#anchor > index ? index : this.#anchor, this.#anchor > index ? this.#anchor : index);
 			selections.forEach(i => this._rows[i][this.#RESERVED_SELECTED] = true);
 		} else {
-			const visibleRows = [...this.#scrollContent.children];
 			const row = this._rows[index];
 			this.#anchor = index;
 			row[this.#RESERVED_SELECTED] = !row[this.#RESERVED_SELECTED];
@@ -989,25 +1009,27 @@ export default class Table extends HTMLElement {
 				const { type, property, sort, sortFunction } = colDetails[i];
 				let aa = this.getDataFromProperty(a, property);
 				let bb = this.getDataFromProperty(b, property);
-				if (aa == null && bb == null) {
-					continue;
-				} else if (aa == null) {
-					return 1;
-				} else if (bb == null) {
-					return -1;
-				}
-
 				let result = 0;
-				if (typeof sortFunction === 'function') {
+				if (typeof sortFunction != 'function') {
+					if (aa == null && bb == null) {
+						continue;
+					} else if (aa == null) {
+						return 1;
+					} else if (bb == null) {
+						return -1;
+					}
+
+					if (type === 'number') {
+						result = aa - bb;
+					} else if (type === 'string') {
+						result = aa.localeCompare(bb);
+					} else if (type === 'boolean') {
+						result = aa === bb ? 0 : (aa ? -1 : 1);
+					} else if (type === 'date') {
+						result = Date.parse(aa) - Date.parse(bb);
+					}
+				} else {
 					result = sortFunction(a, b);
-				} else if (type === 'number') {
-					result = aa - bb;
-				} else if (type === 'string') {
-					result = aa.localeCompare(bb);
-				} else if (type === 'boolean') {
-					result = aa === bb ? 0 : (aa ? -1 : 1);
-				} else if (type === 'date') {
-					result = Date.parse(aa) - Date.parse(bb);
 				}
 
 				if (result !== 0) {
