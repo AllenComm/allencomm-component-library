@@ -5,6 +5,7 @@ import Button from './src/button.js';
 import Card from './src/card.js';
 import Checkbox from './src/checkbox.js';
 import Combobox from './src/combobox.js';
+import DatePicker from './src/date-picker.js';
 import DraggableList from './src/draggable-list.js';
 import Divider from './src/divider.js';
 import Files from './src/files.js';
@@ -33,6 +34,7 @@ export {
 	Card,
 	Checkbox,
 	Combobox,
+	DatePicker,
 	DraggableList,
 	Divider,
 	Files,
