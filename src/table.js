@@ -1007,7 +1007,7 @@ export default class Table extends HTMLElement {
 				const result = operators[operator](rowValue, value);
 				return result;
 			});
-			return results.length > 0 ? operators[this.multiFilterOperator](results) : row;
+			return results.length > 0 && results.some((result) => result != null) ? operators[this.multiFilterOperator](results) : row;
 		});
 		return fitleredRows;
 	}
@@ -1200,6 +1200,10 @@ export default class Table extends HTMLElement {
 		this.#filters.appendChild(addBtn);
 
 		const addFilter = (property, operator, value, index) => {
+			if (property === null || property === undefined) {
+				console.error("Filter has undefined property.");
+				return null;
+			}
 			const template = this.shadowRoot.querySelector('#filter-template');
 			const clone = template.content.cloneNode(true);
 			const container = clone.querySelector('.filter');
@@ -1278,7 +1282,11 @@ export default class Table extends HTMLElement {
 			this.#filters.insertBefore(clone, addBtn);
 		};
 
-		this.filters.forEach((filter, index) => addFilter(filter.column, filter.operator, filter.value, index));
+		this.filters.forEach((filter, index) => {
+			if (filter.column && filter.type && filter.operator) {
+				addFilter(filter.column, filter.operator, filter.value, index)
+			}
+		});
 	}
 
 	updateMenuManage = () => {
