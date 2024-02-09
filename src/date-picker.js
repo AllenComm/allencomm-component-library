@@ -88,10 +88,7 @@ export default class DatePicker extends HTMLElement {
 	set error(newVal) {
 		const bool = newVal === 'true' || newVal === true;
 		this._error = bool;
-		console.log('error changed to:', newVal, 'which is:', bool);
 		if (bool) {
-			console.log('showing helper', this.#helperDiv.innerText);
-			console.dir(this.#helperDiv);
 			if (this.#helperDiv.innerText.length > 0) {
 				this.#helperDiv.removeAttribute('aria-hidden');
 				this.#helperDiv.classList.remove('hidden');
