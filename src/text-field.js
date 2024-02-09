@@ -44,7 +44,7 @@ export default class TextField extends HTMLElement {
 					border-width: 1px;
 					flex: 1;
 					font-family: sans-serif;
-					font-size: 14px;
+					font-size: 16px;
 					padding: 8px;
 					width: 100%;
 				}

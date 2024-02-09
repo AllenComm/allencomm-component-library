@@ -11,7 +11,7 @@ export default class Number extends HTMLElement {
 				}
 				:host {
 					display: block;
-					font-size: 14px;
+					font-size: 16px;
 					outline: none;
 					width: 100%;
 				}

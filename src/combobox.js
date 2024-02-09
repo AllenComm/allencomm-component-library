@@ -42,7 +42,7 @@ export default class Combobox extends HTMLElement {
 					border-style: solid;
 					border-width: 1px;
 					display: block;
-					font-size: 14px;
+					font-size: 16px;
 					height: 36px;
 					outline: none;
 					padding: 6px 8px;
