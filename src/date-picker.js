@@ -70,6 +70,7 @@ export default class DatePicker extends HTMLElement {
 		const bool = newVal === 'true' || newVal === true;
 		this._disabled = bool;
 		if (bool) {
+			this.#input.removeEventListener('change', this.handleChange);
 			this.#input.setAttribute('disabled', bool);
 			this.#input.setAttribute('tabindex', -1);
 			this.setAttribute('aria-disabled', bool);
@@ -77,6 +78,7 @@ export default class DatePicker extends HTMLElement {
 				this.setAttribute('disabled', bool);
 			}
 		} else {
+			this.#input.addEventListener('change', this.handleChange);
 			this.#input.removeAttribute('disabled');
 			this.#input.setAttribute('tabindex', 0);
 			this.removeAttribute('aria-disabled');
@@ -108,6 +110,12 @@ export default class DatePicker extends HTMLElement {
 
 	get #input() { return this.shadowRoot.querySelector('input'); }
 
+	get value() { return this.#input.value; }
+	set value(newVal) {
+		this.#input.value = newVal;
+		this.setAttribute('aria-valueNow', newVal);
+	}
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.value = newVal;
@@ -130,12 +138,20 @@ export default class DatePicker extends HTMLElement {
 		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (max) this.#input.setAttribute('max', max);
 		if (min) this.#input.setAttribute('min', min);
-		if (value) this.#input.setAttribute('value', value);
+		if (value != null) {
+			this.value = value;
+		}
 		if (this.getAttribute('disabled') === 'true' || this.getAttribute('disabled') === true) {
 			this.disabled = true;
 		} else {
 			this.disabled = false;
 		}
+	}
+
+	handleChange = (e) => {
+		const target = e.target;
+		this.value = target.value;
+		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
 	}
 }
 
