@@ -551,7 +551,12 @@ export default class Table extends HTMLElement {
 	get pageSize() { return this._pageSize; }
 	set pageSize(newVal) {
 		if (newVal === this._pageSize) return;
-		this._pageSize = newVal;
+		try {
+			this._pageSize = Number(newVal);
+		} catch (err) {
+			console.error('Setting pageSize to newVal (' + newVal + ') encountered an error:', err);
+			return;
+		}
 		[...this.#footerPageSize?.options || []].forEach((a) => {
 			if (Number(a.value) === this._pageSize) {
 				this.#footerPageSize.setAttribute('selected', a.id);
@@ -699,7 +704,7 @@ export default class Table extends HTMLElement {
 		element.appendChild(content);
 		element.addEventListener('click', () => this.toggleSort(column));
 
-		const hasFilter = this.filters && this.filters.find(a => a.column === column.property);
+		const hasFilter = this.filters && this.filters.find(a => `${a.column}` === `${column.property}`);
 		if (hasFilter) {
 			const filterBtn = document.createElement('button');
 			filterBtn.className = 'cell-filter-btn';

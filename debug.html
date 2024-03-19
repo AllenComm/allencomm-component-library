@@ -23,12 +23,12 @@
 	<body>
 		<header><h1>AllenComm Component Library</h1></header>
 		<main>
-			<section>
-				<ac-date-picker></ac-date-picker>
-				<ac-date-picker disabled="true"></ac-date-picker>
-				<ac-date-picker id="error-picker" helpertext="Error!"></ac-date-picker>
-				<ac-button>Error</ac-button>
-			</section>
+			<!-- <section> -->
+			<!-- 	<ac-date-picker></ac-date-picker> -->
+			<!-- 	<ac-date-picker disabled="true"></ac-date-picker> -->
+			<!-- 	<ac-date-picker id="error-picker" helpertext="Error!"></ac-date-picker> -->
+			<!-- 	<ac-button>Error</ac-button> -->
+			<!-- </section> -->
 		<!-- 	<section> -->
 		<!-- 		<ac-combobox autocomplete='both' allow-input="true" helpertext="This is the helper text" style="margin-top: 50px;"> -->
 		<!-- 			<ac-option></ac-option> -->
@@ -120,55 +120,59 @@
 		<!-- 	<section> -->
 		<!-- 		<ac-table id="small" allow-selection="true"></ac-table> -->
 		<!-- 	</section> -->
-		<!-- 	<section> -->
-		<!-- 		<ac-table id="big" allow-selection="true"></ac-table> -->
-		<!-- 	</section> -->
-		<!-- </main> -->
-		<!-- <script> -->
-		<!-- 	const handleIdClick = (e, data) => { -->
-		<!-- 		e.preventDefault(); -->
-		<!-- 		e.stopPropagation(); -->
-		<!-- 		console.log(e, data); -->
-		<!-- 	}; -->
-		<!-- 	const init = async () => { -->
-		<!-- 		const dummyData = await fetch('./generated.json'); -->
-		<!-- 		const jsonData = await dummyData.json(); -->
-		<!-- 		const columns = [ -->
-		<!-- 			{ "name": "Index", "property": "index", "type": "number", "width": "60px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data.index})'>${data.index}</a>` }, -->
-		<!-- 			{ "name": "ID", "property": "_id", "type": "string", "width": "220px" }, -->
-		<!-- 			{ "name": "Name", "property": "name", "type": "string" }, -->
-		<!-- 			{ "name": "Age", "property": "age", "type": "number", "width": "40px" }, -->
-		<!-- 			{ "name": "About", "property": "about", "type": "string" }, -->
-		<!-- 			{ "name": "GUID", "property": "guid", "type": "string", "width": "300px" }, -->
-		<!-- 			{ "name": "Is Active?", "property": "isActive", "type": "boolean" }, -->
-		<!-- 			{ "name": "Balance", "property": "balance", "type": "string" }, -->
-		<!-- 			{ "name": "Eye Color", "property": "eyeColor", "type": "string" }, -->
-		<!-- 			{ "name": "Gender", "property": "gender", "type": "string" }, -->
-		<!-- 			{ "name": "Company", "property": "company", "type": "string" }, -->
-		<!-- 			{ "name": "Email", "property": "email", "type": "string" }, -->
-		<!-- 			{ "name": "Phone", "property": "phone", "type": "string" }, -->
-		<!-- 			{ "name": "Address", "property": "address", "type": "string" }, -->
-		<!-- 			{ "name": "Registered", "property": "registered", "type": "string" }, -->
-		<!-- 			{ "name": "Latitude", "property": "latitude", "type": "number" }, -->
-		<!-- 			{ "name": "Longitude", "property": "longitude", "type": "number" }, -->
-		<!-- 		]; -->
-		<!---->
-		<!-- 		document.querySelector('#big').columns = columns; -->
-		<!-- 		document.querySelector('#small').columns = columns; -->
-		<!-- 		document.querySelector('#big').rows = jsonData; -->
-		<!-- 		document.querySelector('#small').rows = jsonData.slice(0,1); -->
-		<!-- 	}; -->
-		<!-- 	document.addEventListener("DOMContentLoaded", function() { init(); }); -->
-		<!-- </script> -->
+			<section>
+				<ac-table id="big" allow-selection="true"></ac-table>
+			</section>
+		</main>
 		<script>
-			document.querySelector('ac-button').addEventListener('click', () => {
-				const picker = document.querySelector('#error-picker');
-				if (picker.getAttribute('error') === 'true' || picker.getAttribute('error') === true) {
-					picker.setAttribute('error', false);
-				} else {
-					picker.setAttribute('error', true);
-				}
-			});
+			const handleIdClick = (e, data) => {
+				e.preventDefault();
+				e.stopPropagation();
+				console.log(e, data);
+			};
+			const init = async () => {
+				const dummyData = await fetch('./generated.json');
+				const jsonData = await dummyData.json();
+				const columns = [
+					{ "name": "Index", "property": "index", "type": "number", "width": "60px", "sort": "descending", "hidden": false, render: (data) => `<a href="null" onclick='handleIdClick(event, ${data.index})'>${data.index}</a>` },
+					{ "name": "ID", "property": "_id", "type": "string", "width": "220px" },
+					{ "name": "Name", "property": "name", "type": "string" },
+					{ "name": "Age", "property": "age", "type": "number", "width": "40px" },
+					{ "name": "About", "property": "about", "type": "string" },
+					{ "name": "GUID", "property": "guid", "type": "string", "width": "300px" },
+					{ "name": "Is Active?", "property": "isActive", "type": "boolean" },
+					{ "name": "Balance", "property": "balance", "type": "string" },
+					{ "name": "Eye Color", "property": "eyeColor", "type": "string" },
+					{ "name": "Gender", "property": "gender", "type": "string" },
+					{ "name": "Company", "property": "company", "type": "string" },
+					{ "name": "Email", "property": "email", "type": "string" },
+					{ "name": "Phone", "property": "phone", "type": "string" },
+					{ "name": "Address", "property": "address", "type": "string" },
+					{ "name": "Registered", "property": "registered", "type": "string" },
+					{ "name": "Latitude", "property": "latitude", "type": "number" },
+					{ "name": "Longitude", "property": "longitude", "type": "number" },
+				];
+				const filters = [
+					{ "column": "_id", "operator": "not_empty", "type": "string", "value": "" }
+				];
+
+				document.querySelector('#big').columns = columns;
+				document.querySelector('#big').filters = filters;
+				//document.querySelector('#small').columns = columns;
+				document.querySelector('#big').rows = jsonData;
+				//document.querySelector('#small').rows = jsonData.slice(0,1);
+			};
+			document.addEventListener("DOMContentLoaded", function() { init(); });
 		</script>
+		<!-- <script> -->
+		<!-- 	document.querySelector('ac-button').addEventListener('click', () => { -->
+		<!-- 		const picker = document.querySelector('#error-picker'); -->
+		<!-- 		if (picker.getAttribute('error') === 'true' || picker.getAttribute('error') === true) { -->
+		<!-- 			picker.setAttribute('error', false); -->
+		<!-- 		} else { -->
+		<!-- 			picker.setAttribute('error', true); -->
+		<!-- 		} -->
+		<!-- 	}); -->
+		<!-- </script> -->
 	</body>
 </html>
