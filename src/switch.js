@@ -76,14 +76,17 @@ export default class Switch extends HTMLElement {
 				label:has(input:checked):hover .indicator {
 					background-color: #fc6e28;
 				}
+				slot {
+					user-select: none;
+				}
+				::slotted(*[slot='off-label']) {
+					display: none;
+				}
 				::slotted(*[slot='off-label']:not(:empty)) {
 					display: inline-block;
 				}
 				::slotted(*[slot='on-label']) {
 					display: none;
-				}
-				slot {
-					user-select: none;
 				}
 				label:has(input:checked) ::slotted(*[slot='off-label']) {
 					display: none;
