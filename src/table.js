@@ -527,10 +527,12 @@ export default class Table extends HTMLElement {
 	get filters() { return this._filters || []; }
 	set filters(newVal) {
 		const oldVal = this._filters;
-		this._filters = newVal;
+		let updatedVal = newVal;
 		if (newVal?.length > 0 && newVal.length != oldVal?.length) {
+			updatedVal = updatedVal.filter((a) => !!a.column);
 			this.page = 0;
 		}
+		this._filters = updatedVal;
 		if (this.#rowsUnfiltered) {
 			this.rows = this.#rowsUnfiltered;
 		}
@@ -936,7 +938,6 @@ export default class Table extends HTMLElement {
 
 	onRowsUpdate = (rows) => {
 		this._rows = this.rowsFilter(this.rowsSort(rows));
-		this.page = 0;
 		this.forceRender();
 	}
 
@@ -1068,15 +1069,19 @@ export default class Table extends HTMLElement {
 
 	setNextPage = () => {
 		if (this.page + 1 < this.getTotalPages()) {
+			const el = this.shadowRoot.querySelector('.table-scrollable');
+			const oldScroll = el.scrollLeft;
 			this.page = this.page + 1;
-			this.shadowRoot.querySelector('.table-scrollable').scrollTo(0, 0);
+			el.scrollTo(oldScroll, 0);
 		}
 	}
 
 	setPrevPage = () => {
 		if (this.page - 1 >= 0) {
+			const el = this.shadowRoot.querySelector('.table-scrollable');
+			const oldScroll = el.scrollLeft;
 			this.page = this.page - 1;
-			this.shadowRoot.querySelector('.table-scrollable').scrollTo(0, 0);
+			el.scrollTo(oldScroll, 0);
 		}
 	}
 
@@ -1197,7 +1202,8 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
-			filters.push({ column: this.currentColumn.property, type: this.currentColumn.type, operator: 'not_empty', value: '' });
+			const col = typeof(this.currentColumn.property) === 'function' ? this.currentColumn.property.toString() : this.currentColumn.property;
+			filters.push({ column: col, type: this.currentColumn.type, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
 			this.fireChangeEvent();
