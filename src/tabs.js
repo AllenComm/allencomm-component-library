@@ -70,7 +70,7 @@ export default class Tabs extends HTMLElement {
 	set #selected(i) { this._selected = i; }
 	set #tabs(arr) { this._tabs = arr; }
 
-	connectedCallback() {
+	init() {
 		const initialSelected = this.getAttribute('selected');
 		const isAlternate = this.getAttribute('variant') === 'alternate';
 		const tabs = [...document.querySelectorAll('ac-tabs')];
@@ -89,28 +89,30 @@ export default class Tabs extends HTMLElement {
 		let tabId = tabIndex + offset;
 		let panelId = panelIndex + offset;
 
-		if (this.childNodes.length > 0) {
-			this.childNodes.forEach((a) => {
+		if (this.childNodes.length > 0 && this.childNodes.length != this.#tabs.length) {
+			this.childNodes.forEach((a, i) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
-					const tabSelected = a.getAttribute('selected') || false;
-					if (isAlternate) {
-						a.setAttribute('variant', 'alternate');
-					}
-					this.#tabs.push(a);
-					a.addEventListener('click', this.handleChange);
-					a.setAttribute('slot', 'tabs');
-					a.setAttribute('aria-selected', false);
-					a.style.setProperty('grid-column', `${tabIndex + 1} / auto`);
-					a.style.setProperty('grid-row', '1');
-					if (isAlternate) a.style.setProperty('z-index', '2');
 					if (!a.id) a.id = `tab-${tabId + 1}`;
-					if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
-						this.#selected = tabIndex;
-						a.setAttribute('aria-selected', true);
-						this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
+					if (this.#tabs.find((b) => b.id === a.id) == undefined) {
+						const tabSelected = a.getAttribute('selected') || false;
+						a.addEventListener('click', this.handleChange);
+						a.setAttribute('slot', 'tabs');
+						a.setAttribute('aria-selected', false);
+						a.style.setProperty('grid-column', `${tabIndex + 1} / auto`);
+						a.style.setProperty('grid-row', '1');
+						if (isAlternate) {
+							a.style.setProperty('z-index', '2');
+							a.setAttribute('variant', 'alternate');
+						}
+						if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
+							this.#selected = tabIndex;
+							a.setAttribute('aria-selected', true);
+							this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
+						}
+						this.#tabs.push(a);
 					}
-					tabIndex = tabIndex + 1;
 					tabId = tabId + 1;
+					tabIndex = tabIndex + 1;
 				} else if (a.nodeName.toLowerCase() === 'ac-tab-panel') {
 					this.#panels.push(a);
 					a.setAttribute('slot', 'panels');
@@ -131,6 +133,12 @@ export default class Tabs extends HTMLElement {
 		this.addEventListener('keydown', this.handleKeydown);
 	}
 
+	connectedCallback() {
+		const observer = new MutationObserver(this.handleChildChange);
+		const target = this.shadowRoot.host;
+		observer.observe(target, { attributes: false, childList: true, subtree: true });
+	}
+
 	handleChange = (e) => {
 		e.stopPropagation();
 		const target = e.currentTarget;
@@ -147,6 +155,12 @@ export default class Tabs extends HTMLElement {
 		});
 		this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 		this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
+	}
+
+	handleChildChange = (mutationList, observer) => {
+		if (mutationList.some(a => a.type === 'childList')) {
+			this.init();
+		}
 	}
 
 	handleKeydown = (e) => {
