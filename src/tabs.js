@@ -136,7 +136,8 @@ export default class Tabs extends HTMLElement {
 	connectedCallback() {
 		const observer = new MutationObserver(this.handleChildChange);
 		const target = this.shadowRoot.host;
-		observer.observe(target, { attributes: false, childList: true, subtree: true });
+		observer.observe(target, { attributes: false, childList: true, subtree: false });
+		this.init();
 	}
 
 	handleChange = (e) => {
