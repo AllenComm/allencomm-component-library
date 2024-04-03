@@ -367,6 +367,7 @@ export default class Combobox extends HTMLElement {
 
 	handleBtnClearClick = () => {
 		this.selected = -1;
+		this.handleSubmit();
 	};
 
 	handleChildBlur = (e) => {

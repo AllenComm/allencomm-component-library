@@ -114,16 +114,18 @@ export default class Tabs extends HTMLElement {
 					tabId = tabId + 1;
 					tabIndex = tabIndex + 1;
 				} else if (a.nodeName.toLowerCase() === 'ac-tab-panel') {
-					this.#panels.push(a);
-					a.setAttribute('slot', 'panels');
-					a.setAttribute('hidden', true);
 					if (!a.id) a.id = `panel-${panelId + 1}`;
-					if (this.#tabs[panelIndex]) {
-						this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
-						a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);
-					}
-					if (this.selected === panelIndex) {
-						a.setAttribute('hidden', false);
+					if (this.#panels.find((b) => b.id === a.id) == undefined) {
+						this.#panels.push(a);
+						a.setAttribute('slot', 'panels');
+						a.setAttribute('hidden', true);
+						if (this.#tabs[panelIndex]) {
+							this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
+							a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);
+						}
+						if (this.selected === panelIndex) {
+							a.setAttribute('hidden', false);
+						}
 					}
 					panelIndex = panelIndex + 1;
 					panelId = panelId + 1;
