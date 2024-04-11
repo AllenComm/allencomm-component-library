@@ -48,6 +48,9 @@ export default class TextArea extends HTMLElement {
 					outline-offset: 2px;
 					z-index: 1;
 				}
+				textarea[auto-height="true"] {
+					overflow: hidden;
+				}
 				textarea.error {
 					border-color: rgb(240, 45, 50);
 					border-style: solid;
