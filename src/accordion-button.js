@@ -15,6 +15,7 @@ export default class AccordionButton extends HTMLElement {
 					width: 100%;
 				}
 				button {
+					align-items: center;
 					background: none;
 					border: none;
 					cursor: pointer;
@@ -36,6 +37,11 @@ export default class AccordionButton extends HTMLElement {
 					align-content: center;
 					display: inline-block;
 				}
+				button span {
+					display: flex;
+				}
+				button span[hidden="true"] {
+					display: none;
 				button span svg {
 					height: 100%;
 				}
