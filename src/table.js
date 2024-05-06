@@ -845,7 +845,7 @@ export default class Table extends HTMLElement {
 			const a = columns[i];
 			for (let j = 0; j < ids.length; j++) {
 				const b = ids[j];
-				if (a.name.toLowerCase().includes(b) || a.property.toLowerCase().includes(b)) {
+				if (a?.name?.toLowerCase().includes(b) || (typeof a.property === 'string' && a.property.toLowerCase().includes(b))) {
 					property = a.property;
 					break;
 				}
