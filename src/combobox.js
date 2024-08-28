@@ -268,7 +268,10 @@ export default class Combobox extends HTMLElement {
 			if (newVal > -1 && i === newVal) {
 				this.#input.value = a.innerHTML;
 				this.#expanded = false;
-				this.#input.focus();
+
+				if(!this.allowInput) {
+					this.#input.focus();
+				}
 				this.dispatchEvent(new Event('change', { 'bubbles': false, 'cancelable': true, 'composed': true }));
 				a.setAttribute('aria-selected', true);
 			} else {
@@ -451,17 +454,39 @@ export default class Combobox extends HTMLElement {
 		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
 			this.#options.forEach((a) => a.setAttribute('hidden', false));
-			if (this.selected <= -1) {
-				if (!this.#options.some((a) => a.innerText === this.#input.value)) {
-					this.#input.value = '';
+			if(this.allowInput) {
+				const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
+				if (index > -1) {
+					this.selected = index;
 				} else {
-					const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
-					if (this.#options[index].value.length > 0) {
-						this.selected = index;
-					}
+					const config = {
+						ariaHidden: false,
+						ariaSelected: true,
+						hidden: false,
+						id: `option-${this.#options.length}`,
+						slot: 'options',
+						tabindex: -1
+					};
+					const elem = document.createElement('ac-option', config);
+					const text = document.createTextNode(this.#input.value);
+					elem.appendChild(text);
+					elem.setAttribute('selected', true);
+					this.appendChild(elem);
+					this.#options.push(elem);
 				}
-			} else if (this.#input.value !== this.#options[this.selected]?.innerText) {
-				this.#input.value = this.#options[this.selected]?.innerText || '';
+			} else {
+				if (this.selected <= -1) {
+					if (!this.#options.some((a) => a.innerText === this.#input.value)) {
+						this.#input.value = '';
+					} else {
+						const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
+						if (this.#options[index].value.length > 0) {
+							this.selected = index;
+						}
+					}
+				} else if (this.#input.value !== this.#options[this.selected]?.innerText) {
+					this.#input.value = this.#options[this.selected]?.innerText || '';
+				}
 			}
 		}
 	}
