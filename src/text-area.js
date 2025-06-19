@@ -72,6 +72,7 @@ export default class TextArea extends HTMLElement {
 		this.#textarea.value = newVal;
 		this.setAttribute('aria-valueNow', newVal);
 		setTimeout(() => this.resize());
+		console.log('set value');
 	}
 
 	get disabled() { return this._disabled; }
@@ -118,6 +119,7 @@ export default class TextArea extends HTMLElement {
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (attr === 'value') {
 			this.value = newVal;
+			console.log('textarea value has changed');
 		} else if (attr === 'disabled') {
 			const bool = newVal === 'true' || newVal === true;
 			this.disabled = bool;
@@ -170,6 +172,7 @@ export default class TextArea extends HTMLElement {
 		const target = e.target;
 		this.value = target.value;
 		this.dispatchEvent(new Event('change', { 'bubbles': true, 'cancelable': true, 'composed': true }));
+		console.log('handleChange');
 	}
 
 	resize = () => {
@@ -180,6 +183,7 @@ export default class TextArea extends HTMLElement {
 			const border = parseInt(styles.borderBottomWidth) + parseInt(styles.borderTopWidth);
 			target.style.height = target.scrollHeight + border + 'px';
 		}
+		console.log('resize');
 	}
 }
 
