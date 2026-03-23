@@ -164,6 +164,7 @@ export default class TextArea extends HTMLElement {
 		} else {
 			this.disabled = false;
 		}
+		window.addEventListener('resize', this.resize);
 	}
 
 	handleChange = (e) => {
