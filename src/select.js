@@ -36,6 +36,9 @@ export default class Select extends HTMLElement {
 					cursor: default;
 					fill: #b0b0b0;
 				}
+				:host(:hover:not([disabled='true'])) .inner {
+					border-color: #d46027;
+				}
 				.arrow, slot[name='expand-btn'] {
 					cursor: pointer;
 					display: block;

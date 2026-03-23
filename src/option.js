@@ -14,16 +14,22 @@ export default class Option extends HTMLElement {
 					border-radius: 2px;
 					cursor: pointer;
 					display: flex;
-					height: 36px;
+					min-height: 36px;
 					padding: 8px;
 					transition: background-color .1s ease, color .1s ease;
 				}
 				:host([variant='alternate']) {
 					background-color: #eee;
 				}
+				:host(:hover) {
+					background-color: #f0f0f0;
+				}
 				:host([aria-selected='true']) {
 					background-color: #d46027;
 					color: #fff;
+				}
+				:host([aria-selected='true']:hover) {
+					background-color: #fc6e28;
 				}
 				:host([hidden='true']) {
 					display: none;

@@ -1,5 +1,5 @@
 export default class Button extends HTMLElement {
-	static observedAttributes = ['disabled'];
+	static observedAttributes = ['disabled', 'variant'];
 
 	constructor() {
 		super();
@@ -35,6 +35,20 @@ export default class Button extends HTMLElement {
 				}
 				button:hover {
 					background-color: #fc6e28;
+				}
+				:host([variant='alternate']) button {
+					background-color: transparent;
+					border: 2px solid #d46027;
+					color: #d46027;
+				}
+				:host([variant='alternate']) button:hover {
+					background-color: #d46027;
+					color: #ffffff;
+				}
+				:host([variant='alternate']) button[disabled] {
+					background-color: transparent;
+					border-color: #d7d7d7;
+					color: #d7d7d7;
 				}
 				button:focus-visible {
 					border-radius: 3px;
