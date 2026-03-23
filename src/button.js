@@ -29,6 +29,7 @@ export default class Button extends HTMLElement {
 				}
 				button[disabled] {
 					background-color: #eeeeee;
+					border-color: #b0b0b0;
 					color: #d7d7d7;
 					cursor: default;
 					pointer-events: none;
@@ -38,7 +39,7 @@ export default class Button extends HTMLElement {
 				}
 				:host([variant='alternate']) button {
 					background-color: #ffffff;
-					border-color: #d7d7d7;
+					border-color: #d46027;
 					color: #d46027;
 				}
 				:host([variant='alternate']) button:hover {
