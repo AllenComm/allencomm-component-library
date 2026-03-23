@@ -17,7 +17,7 @@ export default class Button extends HTMLElement {
 					align-items: flex-start;
 					background-color: #d46027;
 					border-radius: 5px;
-					border: none;
+					border: 2px solid #d46027;
 					color: #ffffff;
 					cursor: pointer;
 					display: flex;
@@ -37,13 +37,13 @@ export default class Button extends HTMLElement {
 					background-color: #fc6e28;
 				}
 				:host([variant='alternate']) button {
-					background-color: transparent;
-					border: 2px solid #d46027;
+					background-color: #ffffff;
+					border-color: #d7d7d7;
 					color: #d46027;
 				}
 				:host([variant='alternate']) button:hover {
-					background-color: #d46027;
-					color: #ffffff;
+					background-color: #f0f0f0;
+					color: #d46027;
 				}
 				:host([variant='alternate']) button[disabled] {
 					background-color: transparent;
