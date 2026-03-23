@@ -13,8 +13,6 @@ export default class Option extends HTMLElement {
 					align-items: center;
 					border-radius: 2px;
 					cursor: pointer;
-					display: flex;
-					min-height: 36px;
 					padding: 8px;
 					transition: background-color .1s ease, color .1s ease;
 				}
