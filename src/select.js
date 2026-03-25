@@ -84,7 +84,7 @@ export default class Select extends HTMLElement {
 					cursor: pointer;
 					height: 36px;
 					outline: none;
-					padding: 6px 8px;
+					padding: 6px 24px 6px 8px;
 				}
 				.inner.error {
 					border-color: rgb(240, 45, 50);
