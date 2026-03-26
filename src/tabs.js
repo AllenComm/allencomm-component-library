@@ -71,7 +71,6 @@ export default class Tabs extends HTMLElement {
 	set #tabs(arr) { this._tabs = arr; }
 
 	init() {
-		const initialSelected = this.getAttribute('selected');
 		const isAlternate = this.getAttribute('variant') === 'alternate';
 		const tabs = [...document.querySelectorAll('ac-tabs')];
 		const tabCounts = tabs.map((a) => {
@@ -90,23 +89,30 @@ export default class Tabs extends HTMLElement {
 		let panelId = panelIndex + offset;
 
 		if (this.childNodes.length > 0 && this.childNodes.length != this.#tabs.length) {
+			let initialSelected = Array.from(this.childNodes).filter((a) => a.nodeName.toLowerCase() === 'ac-tab').findIndex((a) => a.getAttribute('selected') === 'true');
+			initialSelected = initialSelected === -1 ? 0 : initialSelected;
 			this.childNodes.forEach((a, i) => {
 				if (a.nodeName.toLowerCase() === 'ac-tab') {
 					if (!a.id) a.id = `tab-${tabId + 1}`;
+
+					if(i !== initialSelected) {
+						a.setAttribute('aria-selected', false);
+					} else {
+						a.setAttribute('aria-selected', true);
+					}
+
 					if (this.#tabs.find((b) => b.id === a.id) == undefined) {
-						const tabSelected = a.getAttribute('selected') || false;
 						a.addEventListener('click', this.handleChange);
 						a.setAttribute('slot', 'tabs');
-						a.setAttribute('aria-selected', false);
 						a.style.setProperty('grid-column', `${tabIndex + 1} / auto`);
 						a.style.setProperty('grid-row', '1');
 						if (isAlternate) {
 							a.style.setProperty('z-index', '2');
 							a.setAttribute('variant', 'alternate');
 						}
-						if (initialSelected === a.id || tabSelected || (!initialSelected && !tabSelected && tabIndex === 0)) {
+
+						if (i === initialSelected) {
 							this.#selected = tabIndex;
-							a.setAttribute('aria-selected', true);
 							this.#indicator.setAttribute('style', `grid-column: ${this.selected + 1}`);
 						}
 						this.#tabs.push(a);
@@ -117,16 +123,19 @@ export default class Tabs extends HTMLElement {
 					if (!a.id) a.id = `panel-${panelId + 1}`;
 					if (this.#panels.find((b) => b.id === a.id) == undefined) {
 						this.#panels.push(a);
-						a.setAttribute('slot', 'panels');
-						a.setAttribute('hidden', true);
-						if (this.#tabs[panelIndex]) {
-							this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
-							a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);
-						}
-						if (this.selected === panelIndex) {
-							a.setAttribute('hidden', false);
-						}
+					} else {
+						this.#panels[panelIndex] = a;
 					}
+					a.setAttribute('slot', 'panels');
+					a.setAttribute('hidden', true);
+					if (this.#tabs[panelIndex]) {
+						this.#tabs[panelIndex].setAttribute('aria-controls', a.id);
+						a.setAttribute('aria-labelledby', this.#tabs[panelIndex].id);
+					}
+					if (initialSelected === panelIndex) {
+						a.setAttribute('hidden', false);
+					}
+
 					panelIndex = panelIndex + 1;
 					panelId = panelId + 1;
 				}

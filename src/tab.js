@@ -33,6 +33,24 @@ export default class Tab extends HTMLElement {
 			</style>
 			<button tabindex='0'><slot></slot></button>
 		`;
+
+		this.#button.addEventListener('click', (e) => this.handleClick(e));
+	}
+
+	get #button() { return this.shadowRoot.querySelector('button'); }
+
+	handleClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		const clickEvent = new Event('click', { 'bubbles': false, 'cancelable': true, 'composed': true });
+		this.dispatchEvent(clickEvent);
+	}
+
+	handleKeyDown(e) {
+		if (this.disabled) return;
+		if (e.key === 'Enter' || e.key === 'Space') {
+			this.handleClick(e);
+		}
 	}
 }
 

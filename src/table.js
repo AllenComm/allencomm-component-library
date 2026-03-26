@@ -578,7 +578,7 @@ export default class Table extends HTMLElement {
 		this.onRowsUpdate(newVal);
 	}
 
-	get selected() { return this._rows?.filter(a => a[this.#RESERVED_SELECTED] ) || []; }
+	get selected() { return this._rows?.filter(a => a[this.#RESERVED_SELECTED]) || []; }
 
 	attributeChangedCallback(attr, oldVal, newVal) {
 		if (!this.#initialized) return;
@@ -675,8 +675,11 @@ export default class Table extends HTMLElement {
 		element.setAttribute('id', `cell-${cellIndex}`);
 
 		const render = column.render;
-		element.innerHTML = render ? `<slot name="${rowIndex}-${cellIndex}"></slot>` : data;
-
+		if (typeof render === 'function') {
+			element.innerHTML = `<slot name="${rowIndex}-${cellIndex}"></slot>`;
+		} else {
+			element.textContent = data;
+		}
 		if (render) {
 			const el = document.createElement('span');
 			el.innerHTML = render(rowData);
@@ -764,16 +767,32 @@ export default class Table extends HTMLElement {
 	}
 
 	exportToCsv = () => {
-		const replacer = (key, value) => value === null ? '' : value;
 		const columns = this.columns.map(col => col.name);
-		const sortedRows = this.rows.map(row => this.columns.map(col => this.getDataFromProperty(row, col.property) ? this.getDataFromProperty(row, col.property) : ' ' ));
-		const rows = sortedRows.map(row => Object.entries(row).map(([key, value]) => key === this.#RESERVED_SELECTED ? null : typeof value === 'string' ? JSON.stringify(value, replacer) : value ).filter(a => a !== null));
-		const data = [columns, ...rows];
-		const csvContent = "data:text/csv;charset=utf-8," + data.map(row => row.join(",")).join("\n");
+		const sortedRows = this.rows.map(row =>
+			this.columns.map(col => {
+				const value = this.getDataFromProperty(row, col.property);
+				return value !== null && value !== undefined ? value : ' ';
+			})
+		);
+
+		const escapeCsvValue = (value) => {
+			if (typeof value === 'string') {
+				if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+					return `"${value.replace(/"/g, '""')}"`;
+				}
+			}
+			return value;
+		};
+		const data = [columns, ...sortedRows];
+		const csvContent = data
+			.map(row => row.map(escapeCsvValue).join(","))
+			.join("\n");
+
 		const link = document.createElement('a');
-		link.href = encodeURI(csvContent);
+		link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
 		link.target = '_blank';
 		link.download = 'export.csv';
+		
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
@@ -924,7 +943,7 @@ export default class Table extends HTMLElement {
 				if (j == 0) {
 					return;
 				}
-				const col = this._columns[j-1];
+				const col = this._columns[j - 1];
 				let newStyle = `${col.width || '100px'}`;
 				if (isMobile) {
 					newStyle = `${col.width ? parseFloat(col.width) + 30 : '100'}px`;
@@ -964,7 +983,7 @@ export default class Table extends HTMLElement {
 
 	onSelectRow = (e, index) => {
 		if (e.shiftKey) {
-			const createRange = (start, end) => Array.from({length: end - start + 1}, (v, k) => k + start);
+			const createRange = (start, end) => Array.from({ length: end - start + 1 }, (v, k) => k + start);
 			const selections = createRange(this.#anchor > index ? index : this.#anchor, this.#anchor > index ? this.#anchor : index);
 			selections.forEach(i => this._rows[i][this.#RESERVED_SELECTED] = true);
 		} else {
@@ -1008,7 +1027,7 @@ export default class Table extends HTMLElement {
 				})?.property;
 				let rowValue = this.getDataFromProperty(row, columnProperty);
 				if (rowValue === null) {
-					return null;
+					rowValue = '';
 				}
 				const result = operators[operator](rowValue, value);
 				return result;
@@ -1202,7 +1221,7 @@ export default class Table extends HTMLElement {
 		addBtn.textContent = '+ Add Filter';
 		addBtn.addEventListener('click', () => {
 			const filters = [...this.filters];
-			const col = typeof(this.currentColumn.property) === 'function' ? this.currentColumn.property.toString() : this.currentColumn.property;
+			const col = typeof (this.currentColumn.property) === 'function' ? this.currentColumn.property.toString() : this.currentColumn.property;
 			filters.push({ column: col, type: this.currentColumn.type, operator: 'not_empty', value: '' });
 			this.filters = filters;
 			this.updateMenuPosition(this.#prevHeaderBtnRect);
@@ -1247,7 +1266,7 @@ export default class Table extends HTMLElement {
 					column: prop.value,
 					type: col.type,
 					operator: container.querySelector(`.filter-operator.${col.type}`)?.value ?? '',
-					value: container.querySelector(`.filter-input.${col.type}`)?.value  ?? ''
+					value: container.querySelector(`.filter-input.${col.type}`)?.value ?? ''
 				};
 				const filters = [...this.filters];
 				filters[index] = filter;
@@ -1314,7 +1333,7 @@ export default class Table extends HTMLElement {
 				<label for='vis-${property}'>${col.name}</label>
 			`;
 			wrapper.querySelector('input').addEventListener('change', (e) => {
-				const columns = [ ...this.columns ];
+				const columns = [...this.columns];
 				columns[index].hidden = !e.target.checked;
 				this.columns = columns;
 				this.fireChangeEvent();

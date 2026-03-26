@@ -142,7 +142,7 @@ export default class Snackbar extends HTMLElement {
 				}
 				@keyframes slideDownIn {
 					from {
-						transform: translateY(-100vh);
+						transform: translateY(-100dvh);
 					} to {
 						transform: translateY(0);
 					}
@@ -151,7 +151,7 @@ export default class Snackbar extends HTMLElement {
 					from {
 						transform: translateY(0);
 					} to {
-						transform: translateY(-100vh);
+						transform: translateY(-100dvh);
 					}
 				}
 				@keyframes slideLeftIn {
@@ -184,7 +184,7 @@ export default class Snackbar extends HTMLElement {
 				}
 				@keyframes slideUpIn {
 					from {
-						transform: translateY(100vh);
+						transform: translateY(100dvh);
 					} to {
 						transform: translateY(0);
 					}
@@ -193,7 +193,7 @@ export default class Snackbar extends HTMLElement {
 					from {
 						transform: translateY(0);
 					} to {
-						transform: translateY(100vh);
+						transform: translateY(100dvh);
 					}
 				}
 			</style>
