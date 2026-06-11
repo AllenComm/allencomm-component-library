@@ -258,10 +258,10 @@ export default class Combobox extends HTMLElement {
 		}
 		this._selected = newVal;
 		if (newVal > -1) {
-			this.#btnClear.setAttribute('hidden', false);
+			this.#btnClear.removeAttribute('hidden');
 		} else {
 			this.#input.value = '';
-			this.#options.forEach((a) => a.setAttribute('hidden', false));
+			this.#options.forEach((a) => a.removeAttribute('hidden'));
 			this.#btnClear.setAttribute('hidden', true);
 		}
 		this.#options.forEach((a, i) => {
@@ -320,7 +320,7 @@ export default class Combobox extends HTMLElement {
 		let optionIndex = 0;
 		let optionId = optionIndex + offset;
 
-		if (allowInput) this.allowInput = allowInput;
+		if (allowInput) this.allowInput = allowInput === 'true' || allowInput === true;
 		if (error) this.error = error;
 		if (helpertext) this.#helperDiv.innerText = helpertext;
 		if (this.childNodes.length > 0) {
@@ -453,7 +453,7 @@ export default class Combobox extends HTMLElement {
 	handleFocusOut = (e) => {
 		if (!e.srcElement.contains(e.relatedTarget)) {
 			this.#expanded = false;
-			this.#options.forEach((a) => a.setAttribute('hidden', false));
+			this.#options.forEach((a) => a.removeAttribute('hidden'));
 			if(this.allowInput) {
 				const index = this.#options.findIndex((a) => a.innerText === this.#input.value);
 				if (index > -1) {
@@ -539,7 +539,7 @@ export default class Combobox extends HTMLElement {
 				if (filteredIndexes.indexOf(i) == -1) {
 					a.setAttribute('hidden', true);
 				} else {
-					a.setAttribute('hidden', false);
+					a.removeAttribute('hidden');
 				}
 			});
 		};
